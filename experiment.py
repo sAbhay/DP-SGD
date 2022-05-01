@@ -19,9 +19,9 @@ def train_sgd(model, train_loader, sgd, loss_function, epochs, loss_reduction='m
                 epoch_loss += loss.item()
             loss.backward()
             sgd.step()
-    if loss_reduction == 'mean':
-        epoch_loss *= 1 / len(train_loader)
-    accuracy = accuracy.item() / len(train_loader)
+        accuracy = accuracy.item() / len(train_loader.dataset)
+        if loss_reduction == 'mean':
+            epoch_loss *= 1 / len(train_loader.dataset)
     return epoch_loss, accuracy
 
 
@@ -42,8 +42,8 @@ def train_dpsgd(model, train_loader, dpsgd, loss_function, epochs, loss_reductio
                 dpsgd.per_sample_gradient_clip()
             dpsgd.step()
         if loss_reduction == 'mean':
-            epoch_loss /= len(train_loader)
-        accuracy = accuracy / len(train_loader)
+            epoch_loss /= len(train_loader.dataset)
+        accuracy = accuracy / len(train_loader.dataset)
     return epoch_loss, accuracy
 
 
@@ -59,8 +59,8 @@ def evaluate(model, test_loader, loss_function, loss_reduction='mean'):
         else:
             test_loss += loss.item()
     if loss_reduction == 'mean':
-        test_loss /= len(test_loader)
-    accuracy = accuracy.item() / len(test_loader)
+        test_loss /= len(test_loader.dataset)
+    accuracy = accuracy.item() / len(test_loader.dataset)
     return test_loss, accuracy
 
 

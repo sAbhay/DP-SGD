@@ -10,6 +10,7 @@ from dp_sgd_optimizer import DPSGD
 
 d = 128
 N = 1024
+h = 128
 batch_size = 32
 epochs = 10
 grad_norm_bound = 1
@@ -28,7 +29,11 @@ optimizers = {
 train_funcs = {"SGD": experiment.train_sgd, "DPSGD": experiment.train_dpsgd}
 
 model = nn.Sequential(
-    nn.Linear(d, 1),
+    nn.Linear(d, h),
+    nn.Sigmoid(),
+    nn.Linear(h, h),
+    nn.Sigmoid(),
+    nn.Linear(h, 1),
     nn.Sigmoid()
 )
 
