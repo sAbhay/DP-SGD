@@ -21,7 +21,7 @@ def train_sgd(model, train_loader, sgd, loss_function, epochs, loss_reduction='m
             sgd.step()
     if loss_reduction == 'mean':
         epoch_loss *= 1 / len(train_loader)
-    accuracy /= len(train_loader)
+    accuracy = accuracy.item() / len(train_loader)
     return epoch_loss, accuracy
 
 
@@ -43,12 +43,12 @@ def train_dpsgd(model, train_loader, dpsgd, loss_function, epochs, loss_reductio
             dpsgd.step()
         if loss_reduction == 'mean':
             epoch_loss /= len(train_loader)
-        accuracy /= len(train_loader)
+        accuracy = accuracy / len(train_loader)
     return epoch_loss, accuracy
 
 
 def evaluate(model, test_loader, loss_function, loss_reduction='mean'):
-    test_loss = ValueError()
+    test_loss = 0
     accuracy = 0
     for X_batch, y_batch in test_loader:
         y_pred = model(X_batch)
@@ -60,15 +60,16 @@ def evaluate(model, test_loader, loss_function, loss_reduction='mean'):
             test_loss += loss.item()
     if loss_reduction == 'mean':
         test_loss /= len(test_loader)
-    accuracy /= len(test_loader)
+    accuracy = accuracy.item() / len(test_loader)
     return test_loss, accuracy
 
 
-def run_experiment(master_model, train, optimizer, train_loader, test_loader, X, Y, loss_function, epochs, loss_reduction='mean'):
+def run_experiment(master_model, train, optimizer_func, optimizer_params, train_loader, test_loader, X, Y, loss_function, epochs, loss_reduction='mean'):
     model = copy.deepcopy(master_model)
     assert (loss_function(model(X), Y) - loss_function(master_model(X), Y) == 0)
 
-    train_loss, train_accuracy = train(train_loader, train_loader, optimizer, loss_function, epochs)
+    optimizer = optimizer_func(params=model.parameters(), **optimizer_params)
+    train_loss, train_accuracy = train(model, train_loader, optimizer, loss_function, epochs)
     test_loss, test_accuracy = evaluate(model, test_loader, loss_function, loss_reduction=loss_reduction)
 
     return (train_loss, train_accuracy), (test_loss, test_accuracy)
@@ -76,10 +77,13 @@ def run_experiment(master_model, train, optimizer, train_loader, test_loader, X,
 
 def run_experiments(master_model, train_funcs, optimizers, train_loader, test_loader, X, Y, loss_functions, epochs):
     results = {}
-    for (optimizer_name, optimizer) in optimizers:
-        for (loss_name, loss_function) in loss_functions[optimizer_name]:
-            (train_loss, train_accuracy), (test_loss, test_accuracy) = run_experiment(master_model, train_funcs[optimizer_name], optimizer, train_loader, test_loader, X, Y, loss_function, epochs)
+    i = 0
+    for optimizer_name, (optimizer_func, optimizer_params) in optimizers.items():
+        for loss_name, loss_function in loss_functions.items():
+            (train_loss, train_accuracy), (test_loss, test_accuracy) = run_experiment(master_model, train_funcs[optimizer_name], optimizer_func, optimizer_params, train_loader, test_loader, X, Y, loss_function, epochs)
             results[(optimizer_name, loss_name, epochs)] = {"train_loss": train_loss, "test_loss": test_loss, "train_accuracy": train_accuracy, "test_accuracy": test_accuracy}
+            i += 1
+            print(i, optimizer_name, loss_name)
     return results
 
 
