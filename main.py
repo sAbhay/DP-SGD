@@ -7,6 +7,9 @@ import experiment
 from dp_sgd_optimizer import DPSGD
 import loss
 
+import pandas as pd
+import matplotlib.pyplot as plt
+
 d = 128
 N = 1024
 h = 128
@@ -43,7 +46,17 @@ def init_weights(m):
 model.apply(init_weights)
 
 results = experiment.run_experiments(model, train_funcs, optimizers, train_loader, test_loader, X, Y, loss_functions, epochs)
+grad_l2s = {}
+for key, result in results.items():
+    if result["grad_l2s"] is not None:
+        grad_l2s[key] = result["grad_l2s"]
+        result["grad_l2s"] = []
 print(results)
+
+for k, norms in grad_l2s.items():
+    df = pd.DataFrame(norms[-1], columns=['accurate', 'norm'])
+    ax = df.plot.hist(column=['norm'], by='accurate', sharey=True, sharex=True)
+    plt.show()
 
 # print("Gap:", dpsgd_loss - sgd_loss, loss_name, "DP-SGD Loss:", dpsgd_loss, "SGD Loss:", sgd_loss,
 #           "As percent of DPSGD Loss:", (dpsgd_loss - sgd_loss) / dpsgd_loss)

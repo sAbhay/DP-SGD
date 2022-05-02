@@ -17,12 +17,21 @@ class DPSGD(SGD):
             group['clipped_grads'] = [torch.zeros_like(param) if param.requires_grad else None for param in group['params']]
 
     def per_sample_gradient_clip(self):
+        gradient_l2_norm = 0
         for group in self.param_groups:
             for i, param in enumerate(group['params']):
                 if param.requires_grad:
-                    grad = param.grad.data
-                    clipped_grad = grad / max(1., grad.norm(2) / self.grad_norm_bound)
+                    gradient_l2_norm += param.grad.data.norm(2) ** 2
+
+        gradient_l2_norm = torch.sqrt(gradient_l2_norm)
+        clip_div = max(1., gradient_l2_norm / self.grad_norm_bound)
+        for group in self.param_groups:
+            for i, param in enumerate(group['params']):
+                if param.requires_grad:
+                    clipped_grad = param.grad.data / clip_div
                     group['clipped_grads'][i].add_(clipped_grad)
+        return gradient_l2_norm
+
 
     def zero_grad(self, set_to_none: Optional[bool]=...) -> None:
         for group in self.param_groups:
