@@ -1,5 +1,3 @@
-import copy
-
 import torch.optim
 
 import data
@@ -7,12 +5,13 @@ from torch import nn
 
 import experiment
 from dp_sgd_optimizer import DPSGD
+import loss
 
 d = 128
 N = 1024
 h = 128
 batch_size = 32
-epochs = 10
+epochs = 5
 grad_norm_bound = 1
 noise_scale = 0.5
 lr = 1e-1
@@ -20,7 +19,7 @@ lr = 1e-1
 X, Y = data.generate_perfect_data(d, N)
 train_loader, test_loader = data.load_tensor_to_dataloader(X, Y, batch_size=batch_size)
 
-loss_functions = {"BCE": nn.BCELoss(), "Hinge": nn.HingeEmbeddingLoss()}
+loss_functions = {"BCE": nn.BCEWithLogitsLoss()}
 optimizers = {
     "SGD": (torch.optim.SGD, {"lr": lr}),
     "DPSGD": (DPSGD, {"lr": lr, "noise_scale": noise_scale, "group_size": batch_size,
@@ -33,9 +32,15 @@ model = nn.Sequential(
     nn.Sigmoid(),
     nn.Linear(h, h),
     nn.Sigmoid(),
-    nn.Linear(h, 1),
-    nn.Sigmoid()
+    nn.Linear(h, 1)
 )
+
+def init_weights(m):
+    if isinstance(m, nn.Linear):
+        nn.init.xavier_uniform_(m.weight)
+        m.bias.data.fill_(0.01)
+
+model.apply(init_weights)
 
 results = experiment.run_experiments(model, train_funcs, optimizers, train_loader, test_loader, X, Y, loss_functions, epochs)
 print(results)

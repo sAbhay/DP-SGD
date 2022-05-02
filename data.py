@@ -16,6 +16,18 @@ def generate_perfect_data(d, N):
     return X, Y
 
 
+def generate_perfect_data_2(d, N):
+    X = torch.rand(N, d)
+    Y = torch.round(torch.sigmoid(torch.sum(X, dim=1))).reshape(-1, 1)
+    return X, Y
+
+
+def generate_noisy_data(d, N, delta=0.01):
+    X, Y = generate_perfect_data_2(d, N)
+    X += torch.rand(N, d) * delta
+    return X, Y
+
+
 def split_data_into_datasets(X, Y, split=0.8):
     train_size = int(split * X.shape[0])
     train_dataset = torch.utils.data.TensorDataset(X[:train_size], Y[:train_size])

@@ -10,9 +10,9 @@ def train_sgd(model, train_loader, sgd, loss_function, epochs, loss_reduction='m
         accuracy = 0
         for X_batch, y_batch in train_loader:
             sgd.zero_grad()
-            y_pred = model(X_batch)
-            accuracy += torch.sum(torch.round(y_pred) == torch.round(y_batch))
-            loss = loss_function(y_pred, y_batch)
+            logits = model(X_batch)
+            accuracy += torch.sum(torch.round(torch.sigmoid(logits)) == torch.round(y_batch))
+            loss = loss_function(logits, y_batch)
             if loss_reduction == 'mean':
                 epoch_loss += loss.item() * X_batch.shape[0]
             else:
@@ -34,9 +34,9 @@ def train_dpsgd(model, train_loader, dpsgd, loss_function, epochs, loss_reductio
         for X_batch, y_batch in train_loader:
             dpsgd.zero_grad()
             for x, y in torch.utils.data.DataLoader(torch.utils.data.TensorDataset(X_batch, y_batch)):
-                y_pred = model(x)
-                accuracy += int(torch.round(y_pred) == torch.round(y))
-                loss = loss_function(y_pred, y)
+                logits = model(x)
+                accuracy += int(torch.round(torch.sigmoid(logits)) == torch.round(y))
+                loss = loss_function(logits, y)
                 epoch_loss += loss.item()
                 loss.backward()
                 dpsgd.per_sample_gradient_clip()
@@ -51,9 +51,9 @@ def evaluate(model, test_loader, loss_function, loss_reduction='mean'):
     test_loss = 0
     accuracy = 0
     for X_batch, y_batch in test_loader:
-        y_pred = model(X_batch)
-        loss = loss_function(y_pred, y_batch)
-        accuracy += torch.sum(torch.round(y_pred) == torch.round(y_batch))
+        logits = model(X_batch)
+        loss = loss_function(logits, y_batch)
+        accuracy += torch.sum(torch.round(torch.sigmoid(logits)) == torch.round(y_batch))
         if loss_reduction == 'mean':
             test_loss += loss.item() * X_batch.shape[0]
         else:
