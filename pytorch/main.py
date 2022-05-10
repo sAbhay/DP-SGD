@@ -10,16 +10,16 @@ import loss
 import pandas as pd
 import matplotlib.pyplot as plt
 
-d = 128
-N = 1024
-h = 128
+d = 512
+N = 32
+h = d
 batch_size = 32
-epochs = 5
+epochs = 20
 grad_norm_bound = 1
 noise_scale = 0.5
-lr = 1e-1
+lr = 5e-2
 
-X, Y = data.generate_perfect_data(d, N)
+X, Y = data.generate_noisy_data(d, N, delta=0.01)
 train_loader, test_loader = data.load_tensor_to_dataloader(X, Y, batch_size=batch_size)
 
 loss_functions = {"BCE": nn.BCEWithLogitsLoss()}
@@ -35,13 +35,20 @@ model = nn.Sequential(
     nn.Sigmoid(),
     nn.Linear(h, h),
     nn.Sigmoid(),
+    nn.Linear(h, h),
+    nn.Sigmoid(),
+    nn.Linear(h, h),
+    nn.Sigmoid(),
+    nn.Linear(h, h),
+    nn.Sigmoid(),
     nn.Linear(h, 1)
 )
 
 def init_weights(m):
     if isinstance(m, nn.Linear):
-        nn.init.xavier_uniform_(m.weight)
-        m.bias.data.fill_(0.01)
+        with torch.no_grad():
+            nn.init.xavier_uniform_(m.weight)
+            m.bias.fill_(0.)
 
 model.apply(init_weights)
 

@@ -17,14 +17,15 @@ def generate_perfect_data(d, N):
 
 
 def generate_perfect_data_2(d, N):
-    X = torch.rand(N, d)
+    X = torch.rand(N, d) - torch.rand(N, d)
     Y = torch.round(torch.sigmoid(torch.sum(X, dim=1))).reshape(-1, 1)
     return X, Y
 
 
-def generate_noisy_data(d, N, delta=0.01):
+def generate_noisy_data(d, N, delta=1):
     X, Y = generate_perfect_data_2(d, N)
     X += torch.rand(N, d) * delta
+    print(torch.sum(Y == 1) / len(Y))
     return X, Y
 
 

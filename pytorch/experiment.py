@@ -11,17 +11,18 @@ def train_sgd(model, train_loader, sgd, loss_function, epochs, loss_reduction='m
         for X_batch, y_batch in train_loader:
             sgd.zero_grad()
             logits = model(X_batch)
-            accuracy += torch.sum(torch.round(torch.sigmoid(logits)) == torch.round(y_batch))
             loss = loss_function(logits, y_batch)
+            loss.backward()
+            sgd.step()
             if loss_reduction == 'mean':
                 epoch_loss += loss.item() * X_batch.shape[0]
             else:
                 epoch_loss += loss.item()
-            loss.backward()
-            sgd.step()
+            accuracy += torch.sum(torch.round(torch.sigmoid(logits)) == torch.round(y_batch))
         accuracy = accuracy.item() / len(train_loader.dataset)
         if loss_reduction == 'mean':
             epoch_loss *= 1 / len(train_loader.dataset)
+        print(e, epoch_loss, accuracy)
     return epoch_loss, accuracy, None
 
 
@@ -48,6 +49,7 @@ def train_dpsgd(model, train_loader, dpsgd, loss_function, epochs, loss_reductio
         if loss_reduction == 'mean':
             epoch_loss /= len(train_loader.dataset)
         accuracy = accuracy / len(train_loader.dataset)
+        print(e, epoch_loss, accuracy)
     return epoch_loss, accuracy, grad_l2s
 
 
@@ -75,6 +77,9 @@ def run_experiment(master_model, train, optimizer_func, optimizer_params, train_
     optimizer = optimizer_func(params=model.parameters(), **optimizer_params)
     train_loss, train_accuracy, grad_l2s = train(model, train_loader, optimizer, loss_function, epochs)
     test_loss, test_accuracy = evaluate(model, test_loader, loss_function, loss_reduction=loss_reduction)
+
+    print(torch.sum(torch.round(torch.sigmoid(model(X))) == Y) / len(Y))
+    print(torch.sum(torch.round(torch.sigmoid(master_model(X))) == Y) / len(Y))
 
     return (train_loss, train_accuracy), (test_loss, test_accuracy), grad_l2s
 
