@@ -90,6 +90,8 @@ import numpy.random as npr
 from tensorflow_privacy.privacy.analysis.rdp_accountant import compute_rdp
 from tensorflow_privacy.privacy.analysis.rdp_accountant import get_privacy_spent
 
+import pickle
+
 FLAGS = flags.FLAGS
 
 flags.DEFINE_boolean(
@@ -223,22 +225,27 @@ def main(_):
   opt_state = opt_init(init_params)
   itercount = itertools.count()
 
+  grad_norms = []
   steps_per_epoch = 60000 // FLAGS.batch_size
   print('\nStarting training...')
   for epoch in range(1, FLAGS.epochs + 1):
     start_time = time.time()
+    epoch_grad_norms = []
     for _ in range(num_batches):
       if FLAGS.dpsgd:
         next_batch = next(batches)
         opt_state, total_grad_norm = private_update(key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True))
         acc, correct = accuracy(get_params(opt_state), shape_as_image(*next_batch))
-        if total_grad_norm is not None:
-            print('Grad norm', len(total_grad_norm), 'Correct', len(correct))
+        # print('Grad norm', len(total_grad_norm), 'Correct', len(correct))
+        epoch_grad_norms += zip(total_grad_norm, correct)
       else:
         opt_state = update(
             key, next(itercount), opt_state, shape_as_image(*next(batches)))
     epoch_time = time.time() - start_time
     print('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
+    grad_norms.append(epoch_grad_norms)
+    with open('grad_norms.pkl', 'wb') as f:
+        pickle.dump(grad_norms)
 
     # evaluate test accuracy
     params = get_params(opt_state)
