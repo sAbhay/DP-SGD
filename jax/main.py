@@ -64,6 +64,9 @@ Example invocations:
    --learning_rate=.25 \
 """
 
+import sys
+sys.setenv("XLA_FLAGS=--xla_gpu_strict_conv_algorithm_picker=false")
+
 import itertools
 import time
 import warnings
