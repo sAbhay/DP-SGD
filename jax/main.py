@@ -245,7 +245,7 @@ def main(_):
     print('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
     grad_norms.append(epoch_grad_norms)
     with open('grad_norms.pkl', 'wb') as f:
-        pickle.dump(grad_norms)
+        pickle.dump(grad_norms, f)
 
     # evaluate test accuracy
     params = get_params(opt_state)
