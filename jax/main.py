@@ -217,7 +217,7 @@ def main(_):
                  FLAGS.noise_multiplier, FLAGS.batch_size)
     return opt_update(
         i, private_grads
-        , opt_state), nonempty_grads
+        , opt_state), total_grad_norm
 
   _, init_params = init_random_params(key, (-1, 28, 28, 1))
   opt_state = opt_init(init_params)
@@ -229,7 +229,7 @@ def main(_):
     start_time = time.time()
     for _ in range(num_batches):
       if FLAGS.dpsgd:
-        opt_state, nonempty_grads = \
+        opt_state, total_grad_norm = \
             private_update(
                 key, next(itercount), opt_state,
                 shape_as_image(*next(batches), dummy_dim=True))
@@ -238,8 +238,8 @@ def main(_):
             key, next(itercount), opt_state, shape_as_image(*next(batches)))
     epoch_time = time.time() - start_time
     print('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
-    if nonempty_grads is not None:
-        print('Non-empty grads shape', nonempty_grads[0].shape, len(nonempty_grads), FLAGS.batch_size, len(next(batches)[0]))
+    if total_grad_norm is not None:
+        print('Grad norm', len(total_grad_norm))
 
     # evaluate test accuracy
     params = get_params(opt_state)
