@@ -238,6 +238,8 @@ def main(_):
             key, next(itercount), opt_state, shape_as_image(*next(batches)))
     epoch_time = time.time() - start_time
     print('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
+    if nonempty_grads is not None:
+        print('Non-empty grads shape', nonempty_grads[0].shape, len(nonempty_grads), FLAGS.batch_size, len(next(batches)[0]))
 
     # evaluate test accuracy
     params = get_params(opt_state)
