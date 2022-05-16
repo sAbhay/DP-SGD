@@ -146,13 +146,13 @@ def clipped_grad(params, l2_norm_clip, single_example_batch):
       [jnp.linalg.norm(neg.ravel()) for neg in nonempty_grads])
   divisor = jnp.maximum(total_grad_norm / l2_norm_clip, 1.)
   normalized_nonempty_grads = [g / divisor for g in nonempty_grads]
-  return tree_unflatten(tree_def, normalized_nonempty_grads), nonempty_grads
+  return tree_unflatten(tree_def, normalized_nonempty_grads), total_grad_norm
 
 
 def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
                  batch_size):
   """Return differentially private gradients for params, evaluated on batch."""
-  clipped_grads, nonempty_grads = vmap(clipped_grad, (None, None, 0))(params, l2_norm_clip, batch)
+  clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0))(params, l2_norm_clip, batch)
   clipped_grads_flat, grads_treedef = tree_flatten(clipped_grads)
   aggregated_clipped_grads = [g.sum(0) for g in clipped_grads_flat]
   rngs = random.split(rng, len(aggregated_clipped_grads))
@@ -161,7 +161,7 @@ def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
       for r, g in zip(rngs, aggregated_clipped_grads)]
   normalized_noised_aggregated_clipped_grads = [
       g / batch_size for g in noised_aggregated_clipped_grads]
-  return tree_unflatten(grads_treedef, normalized_noised_aggregated_clipped_grads), nonempty_grads
+  return tree_unflatten(grads_treedef, normalized_noised_aggregated_clipped_grads), total_grad_norm
 
 
 def shape_as_image(images, labels, dummy_dim=False):
@@ -213,7 +213,7 @@ def main(_):
   def private_update(rng, i, opt_state, batch):
     params = get_params(opt_state)
     rng = random.fold_in(rng, i)  # get new key for new random numbers
-    private_grads, nonempty_grads = private_grad(params, batch, rng, FLAGS.l2_norm_clip,
+    private_grads, total_grad_norm = private_grad(params, batch, rng, FLAGS.l2_norm_clip,
                  FLAGS.noise_multiplier, FLAGS.batch_size)
     return opt_update(
         i, private_grads
