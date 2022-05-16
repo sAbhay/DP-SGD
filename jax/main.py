@@ -82,6 +82,7 @@ from jax.example_libraries import optimizers
 from jax.example_libraries import stax
 from jax.tree_util import tree_flatten, tree_unflatten
 import jax.numpy as jnp
+from jax import config as jconfig
 import datasets
 import numpy.random as npr
 
@@ -120,6 +121,8 @@ init_random_params, predict = stax.serial(
     stax.Dense(10),
 )
 
+
+jconfig.update('jax_platform_name', 'cpu')
 
 def loss(params, batch):
   inputs, targets = batch
