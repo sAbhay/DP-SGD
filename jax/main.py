@@ -135,7 +135,7 @@ def accuracy(params, batch):
   inputs, targets = batch
   target_class = jnp.argmax(targets, axis=1)
   predicted_class = jnp.argmax(predict(params, inputs), axis=1)
-  return jnp.mean(predicted_class == target_class)
+  return jnp.mean(predicted_class == target_class), predicted_class == target_class
 
 
 def clipped_grad(params, l2_norm_clip, single_example_batch):
@@ -229,21 +229,20 @@ def main(_):
     start_time = time.time()
     for _ in range(num_batches):
       if FLAGS.dpsgd:
-        opt_state, total_grad_norm = \
-            private_update(
-                key, next(itercount), opt_state,
-                shape_as_image(*next(batches), dummy_dim=True))
+        next_batch = next(batches)
+        opt_state, total_grad_norm = private_update(key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True))
+        acc, correct = accuracy(get_params(opt_state), shape_as_image(*next_batch))
+        if total_grad_norm is not None:
+            print('Grad norm', len(total_grad_norm), 'Correct', len(correct))
       else:
         opt_state = update(
             key, next(itercount), opt_state, shape_as_image(*next(batches)))
     epoch_time = time.time() - start_time
     print('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
-    if total_grad_norm is not None:
-        print('Grad norm', len(total_grad_norm))
 
     # evaluate test accuracy
     params = get_params(opt_state)
-    test_acc = accuracy(params, shape_as_image(test_images, test_labels))
+    test_acc, _ = accuracy(params, shape_as_image(test_images, test_labels))
     test_loss = loss(params, shape_as_image(test_images, test_labels))
     print('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
         test_loss, 100 * test_acc))
