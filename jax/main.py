@@ -79,7 +79,7 @@ from jax.example_libraries import optimizers
 from jax.example_libraries import stax
 from jax.tree_util import tree_flatten, tree_unflatten
 import jax.numpy as jnp
-from jax.examples import datasets
+import datasets
 import numpy.random as npr
 
 # https://github.com/tensorflow/privacy
