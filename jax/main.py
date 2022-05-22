@@ -139,13 +139,7 @@ def hinge_loss(params, batch):
   logits = stax.logsoftmax(logits)
 
 
-loss = None
-if FLAGS.loss == 'cross-entropy':
-    loss = ce_loss
-elif FLAGS.loss == 'hinge':
-    loss = hinge_loss
-else:
-    loss = ce_loss
+loss = ce_loss
 
 def accuracy(params, batch):
   inputs, targets = batch
@@ -226,6 +220,13 @@ def main(_):
         yield train_images[batch_idx], train_labels[batch_idx]
 
   batches = data_stream()
+
+  if FLAGS.loss == 'cross-entropy':
+      loss = ce_loss
+  elif FLAGS.loss == 'hinge':
+      loss = hinge_loss
+  else:
+      loss = ce_loss
 
   opt_init, opt_update, get_params = optimizers.sgd(FLAGS.learning_rate)
 
