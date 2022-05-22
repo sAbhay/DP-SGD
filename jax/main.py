@@ -108,6 +108,7 @@ flags.DEFINE_integer(
     'microbatches', None, 'Number of microbatches '
     '(must evenly divide batch_size)')
 flags.DEFINE_string('model_dir', None, 'Model directory')
+flags.DEFINE_string('loss', 'cross-entropy', 'Loss function')
 
 
 init_random_params, predict = stax.serial(
@@ -126,12 +127,25 @@ init_random_params, predict = stax.serial(
 
 jconfig.update('jax_platform_name', 'cpu')
 
-def loss(params, batch):
+def ce_loss(params, batch):
   inputs, targets = batch
   logits = predict(params, inputs)
   logits = stax.logsoftmax(logits)  # log normalize
   return -jnp.mean(jnp.sum(logits * targets, axis=1))  # cross entropy loss
 
+def hinge_loss(params, batch):
+  inputs, targets = batch
+  logits = predict(params, inputs)
+  logits = stax.logsoftmax(logits)
+
+
+loss = None
+if FLAGS.loss == 'cross-entropy':
+    loss = ce_loss
+elif FLAGS.loss == 'hinge':
+    loss = hinge_loss
+else:
+    loss = ce_loss
 
 def accuracy(params, batch):
   inputs, targets = batch
@@ -181,6 +195,15 @@ def compute_epsilon(steps, num_examples=60000, target_delta=1e-5):
   return eps
 
 
+def get_grad_norm(params, single_example_batch):
+  """Evaluate gradient for a single-example batch and clip its grad norm."""
+  grads = grad(loss)(params, single_example_batch)
+  nonempty_grads, tree_def = tree_flatten(grads)
+  total_grad_norm = jnp.linalg.norm(
+      [jnp.linalg.norm(neg.ravel()) for neg in nonempty_grads])
+  return grads, total_grad_norm
+
+
 def main(_):
 
   if FLAGS.microbatches:
@@ -209,7 +232,8 @@ def main(_):
   @jit
   def update(_, i, opt_state, batch):
     params = get_params(opt_state)
-    return opt_update(i, grad(loss)(params, batch), opt_state)
+    grads, total_grad_norm = vmap(get_grad_norm, (None, None))(params, batch)
+    return opt_update(i, grads, opt_state), total_grad_norm
 
   @jit
   def private_update(rng, i, opt_state, batch):
@@ -232,19 +256,19 @@ def main(_):
     start_time = time.time()
     epoch_grad_norms = []
     for _ in range(num_batches):
+      next_batch = next(batches)
       if FLAGS.dpsgd:
-        next_batch = next(batches)
         opt_state, total_grad_norm = private_update(key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True))
-        acc, correct = accuracy(get_params(opt_state), shape_as_image(*next_batch))
-        # print('Grad norm', len(total_grad_norm), 'Correct', len(correct))
-        epoch_grad_norms += zip(total_grad_norm, correct)
       else:
-        opt_state = update(
-            key, next(itercount), opt_state, shape_as_image(*next(batches)))
+        opt_state, total_grad_norm = update(
+            key, next(itercount), opt_state, shape_as_image(*next_batch))
+      acc, correct = accuracy(get_params(opt_state), shape_as_image(*next_batch))
+      # print('Grad norm', len(total_grad_norm), 'Correct', len(correct))
+      epoch_grad_norms += zip(total_grad_norm, correct)
     epoch_time = time.time() - start_time
     print('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
     grad_norms.append(epoch_grad_norms)
-    with open('grad_norms.pkl', 'wb') as f:
+    with open(f'grad_norms_{"dpsgd" if FLAGS.dpsgd else "sgd"}.pkl', 'wb') as f:
         pickle.dump(grad_norms, f)
 
     # evaluate test accuracy
