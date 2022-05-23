@@ -262,7 +262,7 @@ def main(_):
         opt_state, total_grad_norm = private_update(key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True))
       else:
         opt_state, total_grad_norm = update(
-            key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True))
+            key, next(itercount), opt_state, shape_as_image(*next_batch))
       acc, correct = accuracy(get_params(opt_state), shape_as_image(*next_batch))
       # print('Grad norm', len(total_grad_norm), 'Correct', len(correct))
       epoch_grad_norms += zip(total_grad_norm, correct)
