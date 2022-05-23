@@ -174,6 +174,13 @@ def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
   return tree_unflatten(grads_treedef, normalized_noised_aggregated_clipped_grads), total_grad_norm
 
 
+def non_private_grad(params, batch, batch_size):
+    grads, total_grad_norm = vmap(grads_with_norm, (None, None, 0))(params, None, batch)
+    grads_flat, grads_treedef = tree_flatten(grads)
+    aggregated_grads = [g.sum(0) / batch_size for g in grads_flat]
+    return tree_unflatten(grads_treedef, aggregated_grads), total_grad_norm
+
+
 def shape_as_image(images, labels, dummy_dim=False):
   target_shape = (-1, 1, 28, 28, 1) if dummy_dim else (-1, 28, 28, 1)
   return jnp.reshape(images, target_shape), labels
@@ -233,7 +240,7 @@ def main(_):
   @jit
   def update(_, i, opt_state, batch):
     params = get_params(opt_state)
-    grads, total_grad_norm = vmap(grads_with_norm, (None, None, 0))(params, None, batch)
+    grads, total_grad_norm = non_private_grad(params, batch, FLAGS.batch_size)
     return opt_update(i, grads, opt_state), total_grad_norm
 
   @jit
@@ -262,7 +269,7 @@ def main(_):
         opt_state, total_grad_norm = private_update(key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True))
       else:
         opt_state, total_grad_norm = update(
-            key, next(itercount), opt_state, shape_as_image(*next_batch))
+            key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True))
       acc, correct = accuracy(get_params(opt_state), shape_as_image(*next_batch))
       # print('Grad norm', len(total_grad_norm), 'Correct', len(correct))
       epoch_grad_norms += zip(total_grad_norm, correct)
