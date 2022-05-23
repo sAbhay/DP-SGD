@@ -189,13 +189,13 @@ def compute_epsilon(steps, num_examples=60000, target_delta=1e-5):
   return eps
 
 
-def get_grad_norm(params, single_example_batch):
+def grads_with_norm(params, single_example_batch):
   """Evaluate gradient for a single-example batch and clip its grad norm."""
   grads = grad(loss)(params, single_example_batch)
   nonempty_grads, tree_def = tree_flatten(grads)
   total_grad_norm = jnp.linalg.norm(
       [jnp.linalg.norm(neg.ravel()) for neg in nonempty_grads])
-  return grads, total_grad_norm
+  return tree_unflatten(tree_def, nonempty_grads), total_grad_norm
 
 
 def main(_):
@@ -233,7 +233,7 @@ def main(_):
   @jit
   def update(_, i, opt_state, batch):
     params = get_params(opt_state)
-    grads, total_grad_norm = vmap(get_grad_norm, (None, None))(params, batch)
+    grads, total_grad_norm = vmap(grads_with_norm, (None, None, 0))(params, batch)
     return opt_update(i, grads, opt_state), total_grad_norm
 
   @jit
