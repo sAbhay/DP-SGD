@@ -14,5 +14,5 @@ for i, norm in enumerate(norms):
 
 df = pd.DataFrame(norms, columns=['epoch', 'norm', 'accurate'])
 # print(len(df[df['epoch']==0]), len(df[(df['epoch']==0) & (df['accurate']==0)]), len(df[(df['epoch']==0) & (df['accurate']==1)]), len(df[df['epoch']==10]))
-ax = df.hist(column=['norm'], by=['epoch', 'accurate'], sharey=True, sharex=True)
+ax = df.hist(column=['norm'], by=['epoch'], sharey=True, sharex=True)
 plt.show()
