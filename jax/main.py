@@ -90,7 +90,7 @@ import numpy.random as npr
 from tensorflow_privacy.privacy.analysis.rdp_accountant import compute_rdp
 from tensorflow_privacy.privacy.analysis.rdp_accountant import get_privacy_spent
 
-import pickle
+import _pickle as cPickle
 
 FLAGS = flags.FLAGS
 
@@ -290,9 +290,9 @@ def main(_):
     print('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
     grad_norms.append(epoch_grad_norms)
     with open(f'grad_norms_{"dpsgd" if FLAGS.dpsgd else "sgd"}.pkl', 'wb') as f:
-        pickle.dump(grad_norms, f)
+        cPickle.dump(grad_norms, f)
     with open(f'param_norms_{"dpsgd" if FLAGS.dpsgd else "sgd"}.pkl', 'wb') as f:
-        pickle.dump(param_norms, f)
+        cPickle.dump(param_norms, f)
 
     # evaluate test accuracy
     params = get_params(opt_state)
