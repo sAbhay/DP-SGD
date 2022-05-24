@@ -3,21 +3,36 @@ import pickle
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-epoch_norms = []
-with open('grad_norms_sgd.pkl', 'rb') as f:
+
+with open('grad_norms_dpsgd.pkl', 'rb') as f:
     epoch_norms = pickle.load(f)
 
 norms = []
 for epoch in range(len(epoch_norms)):
     norms += [(epoch,)+v for v in epoch_norms[epoch]]
 for i, norm in enumerate(norms):
-    norms[i] = (norm[0], norm[1].item(), norm[2].item(), *norm[3])
+    norms[i] = (norm[0], norm[1].item(), norm[2].item(), *norms[3])
+
+with open('param_norms_dpsgd.pkl', 'rb') as f:
+    param_norms = pickle.load(f)
+for i, param_norm in enumerate(param_norms):
+    param_norms[i] = (i, param_norm)
 
 cols = ['epoch', 'norm', 'accurate']
 logit_cols = [f'{i}_logit' for i in range(0, 10)]
-df = pd.DataFrame(norms, columns=cols+logit_cols)
-df['logits_stddev'] = df[logit_cols].std(axis=1)
+columns = cols + logit_cols
+sample_df = pd.DataFrame(norms, columns=columns)
+sample_df['logits_stddev'] = sample_df[logit_cols].std(axis=1)
+
 # print(len(df[df['epoch']==0]), len(df[(df['epoch']==0) & (df['accurate']==0)]), len(df[(df['epoch']==0) & (df['accurate']==1)]), len(df[df['epoch']==10]))
-ax = df.hist(column=['norm'], by=['epoch'], sharey=True, sharex=True)
-sns.scatterplot(x=df['norm'], y=df['logits_stddev'], c=df['epoch'], style=df['accurate'])
+# ax = df.hist(column=['norm'], by=['epoch'], sharey=True, sharex=True)
+sns.histplot(sample_df, x='epoch', y='norm', hue='accurate')
+sns.scatterplot(sample_df, x='norm', y='logits_stddev', c='epoch', style='accurate')
+
+cols = ['epoch', 'param_norm']
+epoch_df = pd.DataFrame(param_norms, columns=cols)
+epoch_df['expected_grad_norm'] = sample_df.groupby(['epoch']).mean()
+sns.lineplot(x='epoch', y='value', hue='variable',
+             data=pd.melt(epoch_df[['epoch', 'param_norm', 'expected_grad_norm']], ['epoch']))
+
 plt.show()
