@@ -137,7 +137,7 @@ def hinge_loss(params, batch):
   inputs, targets = batch
   logits = predict(params, inputs)
   logits = stax.logsoftmax(logits)
-
+  raise NotImplementedError
 
 loss = ce_loss
 
@@ -208,6 +208,14 @@ def grads_with_norm(params, l2_norm_clip, single_example_batch):
   return tree_unflatten(tree_def, nonempty_grads), total_grad_norm
 
 
+def params_norm(params):
+    nonempty_params, tree_def = tree_flatten(params)
+    total_params_norm = jnp.linalg.norm(
+        [jnp.linalg.norm(p.ravel()) for p in nonempty_params]
+    )
+    return total_params_norm
+
+
 def main(_):
 
   if FLAGS.microbatches:
@@ -261,6 +269,7 @@ def main(_):
   itercount = itertools.count()
 
   grad_norms = []
+  param_norms = []
   steps_per_epoch = 60000 // FLAGS.batch_size
   print('\nStarting training...')
   for epoch in range(1, FLAGS.epochs + 1):
@@ -276,11 +285,14 @@ def main(_):
       acc, correct, logits = accuracy(get_params(opt_state), shape_as_image(*next_batch))
       # print('Grad norm', len(total_grad_norm), 'Correct', len(correct))
       epoch_grad_norms += zip(total_grad_norm, correct, logits)
+    param_norms.append(params_norm(get_params(opt_state)))
     epoch_time = time.time() - start_time
     print('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
     grad_norms.append(epoch_grad_norms)
     with open(f'grad_norms_{"dpsgd" if FLAGS.dpsgd else "sgd"}.pkl', 'wb') as f:
         pickle.dump(grad_norms, f)
+    with open(f'param_norms_{"dpsgd" if FLAGS.dpsgd else "sgd"}.pkl', 'wb') as f:
+        pickle.dump(param_norms, f)
 
     # evaluate test accuracy
     params = get_params(opt_state)
