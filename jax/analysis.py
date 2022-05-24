@@ -1,6 +1,7 @@
 import pandas as pd
 import pickle
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 epoch_norms = []
 with open('grad_norms_sgd.pkl', 'rb') as f:
@@ -18,6 +19,5 @@ df = pd.DataFrame(norms, columns=cols+logit_cols)
 df['logits_stddev'] = df[logit_cols].std(axis=1)
 # print(len(df[df['epoch']==0]), len(df[(df['epoch']==0) & (df['accurate']==0)]), len(df[(df['epoch']==0) & (df['accurate']==1)]), len(df[df['epoch']==10]))
 ax = df.hist(column=['norm'], by=['epoch'], sharey=True, sharex=True)
+sns.scatterplot(x=df['norm'], y=df['logits_stddev'], c=df['epoch'], style=df['accurate'])
 plt.show()
-
-# sns.scatterplot(x=df['index'], y=df['data'], c=df['color'], style=df['marker'])

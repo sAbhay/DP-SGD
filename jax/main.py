@@ -147,8 +147,8 @@ def accuracy(params, batch):
   logits = predict(params, inputs)
   predicted_class = jnp.argmax(logits, axis=1)
   logits_list = logits.tolist()
-  print(logits_list[0])
-  return jnp.mean(predicted_class == target_class), predicted_class == target_class,
+  # print(logits_list[0])
+  return jnp.mean(predicted_class == target_class), predicted_class == target_class, logits
 
 
 def clipped_grad(params, l2_norm_clip, single_example_batch):
