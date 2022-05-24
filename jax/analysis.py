@@ -1,11 +1,11 @@
 import pandas as pd
-import _pickle as cPickle
+import pickle
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-with open('grad_norms_dpsgd.pkl.pbz2', 'rb') as f:
-    epoch_norms = cPickle.load(f)
+with open('grad_norms_dpsgd.pkl', 'rb') as f:
+    epoch_norms = pickle.load(f)
 
 norms = []
 for epoch in range(len(epoch_norms)):
@@ -13,8 +13,8 @@ for epoch in range(len(epoch_norms)):
 for i, norm in enumerate(norms):
     norms[i] = (norm[0], norm[1].item(), norm[2].item(), *norms[3])
 
-with open('param_norms_dpsgd.pkl.pbz2', 'rb') as f:
-    param_norms = cPickle.load(f)
+with open('param_norms_dpsgd.pkl', 'rb') as f:
+    param_norms = pickle.load(f)
 for i, param_norm in enumerate(param_norms):
     param_norms[i] = (i, param_norm)
 
