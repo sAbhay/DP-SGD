@@ -139,7 +139,7 @@ def main(_):
         stax.Conv(16*FLAGS.size_multiplier, (8*FLAGS.size_multiplier, 8*FLAGS.size_multiplier), padding='SAME', strides=(2, 2)),
         stax.Relu,
         stax.MaxPool((2, 2), (1, 1)),
-        stax.Conv(32*FLAGS.size_multiplier, (4, 4), padding='VALID', strides=(2, 2)),
+        stax.Conv(32*FLAGS.size_multiplier, (4*FLAGS.size_multiplier, 4*FLAGS.size_multiplier), padding='VALID', strides=(2, 2)),
         stax.Relu,
         stax.MaxPool((2, 2), (1, 1)),
         stax.Flatten,
