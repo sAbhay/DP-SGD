@@ -172,10 +172,11 @@ def main(_):
       return -jnp.mean(jnp.sum(logits * targets, axis=1))  # cross entropy loss
 
     def hinge_loss(params, batch):
-      inputs, targets = batch
-      logits = predict(params, inputs)
-      logits = stax.logsoftmax(logits)
-      raise NotImplementedError
+        inputs, targets = batch
+        target_class = jnp.argmax(targets, axis=1)
+        scores = predict(params, inputs)
+        return jnp.sum(jnp.max(0, 1+scores-scores[target_class], axis=0))-1
+
 
     if FLAGS.loss == 'cross-entropy':
         loss = ce_loss
