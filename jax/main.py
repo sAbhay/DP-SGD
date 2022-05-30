@@ -111,7 +111,7 @@ flags.DEFINE_string('model_dir', None, 'Model directory')
 flags.DEFINE_string('loss', 'cross-entropy', 'Loss function')
 flags.DEFINE_float('size_multiplier', 1.0, 'Model size multiplier')
 
-def main():
+def main(_):
     if FLAGS.microbatches:
         raise NotImplementedError(
             'Microbatches < batch size not currently supported'
