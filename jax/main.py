@@ -109,7 +109,7 @@ flags.DEFINE_integer(
     '(must evenly divide batch_size)')
 flags.DEFINE_string('model_dir', None, 'Model directory')
 flags.DEFINE_string('loss', 'cross-entropy', 'Loss function')
-flags.DEFINE_float('size_multiplier', 1.0, 'Model size multiplier')
+flags.DEFINE_float('overparameterised', True, 'Overparameterised for MNIST')
 
 def main(_):
     if FLAGS.microbatches:
@@ -135,18 +135,32 @@ def main(_):
 
     opt_init, opt_update, get_params = optimizers.sgd(FLAGS.learning_rate)
 
-    init_random_params, predict = stax.serial(
-        stax.Conv(16*FLAGS.size_multiplier, (8*FLAGS.size_multiplier, 8*FLAGS.size_multiplier), padding='SAME', strides=(2, 2)),
-        stax.Relu,
-        stax.MaxPool((2, 2), (1, 1)),
-        stax.Conv(32*FLAGS.size_multiplier, (4*FLAGS.size_multiplier, 4*FLAGS.size_multiplier), padding='VALID', strides=(2, 2)),
-        stax.Relu,
-        stax.MaxPool((2, 2), (1, 1)),
-        stax.Flatten,
-        stax.Dense(32*FLAGS.size_multiplier),
-        stax.Relu,
-        stax.Dense(10),
-    )
+    if FLAGS.overparameterised:
+        init_random_params, predict = stax.serial(
+            stax.Conv(32, (16, 16), padding='SAME', strides=(2, 2)),
+            stax.Relu,
+            stax.MaxPool((2, 2), (1, 1)),
+            stax.Conv(64, (8, 8), padding='VALID', strides=(2, 2)),
+            stax.Relu,
+            stax.MaxPool((2, 2), (1, 1)),
+            stax.Flatten,
+            stax.Dense(64),
+            stax.Relu,
+            stax.Dense(10),
+        )
+    else:
+        init_random_params, predict = stax.serial(
+            stax.Conv(16, (8, 8), padding='SAME', strides=(2, 2)),
+            stax.Relu,
+            stax.MaxPool((2, 2), (1, 1)),
+            stax.Conv(32, (4, 4), padding='VALID', strides=(2, 2)),
+            stax.Relu,
+            stax.MaxPool((2, 2), (1, 1)),
+            stax.Flatten,
+            stax.Dense(32),
+            stax.Relu,
+            stax.Dense(10),
+        )
 
 
     # jconfig.update('jax_platform_name', 'cpu')
