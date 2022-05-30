@@ -112,14 +112,14 @@ flags.DEFINE_string('loss', 'cross-entropy', 'Loss function')
 
 
 init_random_params, predict = stax.serial(
-    stax.Conv(16, (8, 8), padding='SAME', strides=(2, 2)),
+    stax.Conv(32, (16, 16), padding='SAME', strides=(2, 2)),
     stax.Relu,
     stax.MaxPool((2, 2), (1, 1)),
-    stax.Conv(32, (4, 4), padding='VALID', strides=(2, 2)),
+    stax.Conv(64, (8, 8), padding='VALID', strides=(2, 2)),
     stax.Relu,
     stax.MaxPool((2, 2), (1, 1)),
     stax.Flatten,
-    stax.Dense(32),
+    stax.Dense(64),
     stax.Relu,
     stax.Dense(10),
 )
