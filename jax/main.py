@@ -300,9 +300,9 @@ def main(_):
 
         grad_norms.append(epoch_grad_norms)
         if not FLAGS.dpsgd:
-            hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_lr={FLAGS.learning_rate},op={FLAGS.overparameterised}"
+            hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised}"
         else:
-            hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_lr={FLAGS.learning_rate},op={FLAGS.overparameterised},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip}"
+            hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip}"
         with open(f'grad_norms_{hyperparams_string}.pkl', 'wb') as f:
             pickle.dump(grad_norms, f)
         with open(f'param_norms_{hyperparams_string}.pkl', 'wb') as f:
