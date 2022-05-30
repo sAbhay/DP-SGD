@@ -297,8 +297,7 @@ def main(_):
           # print('Grad norm', len(total_grad_norm), 'Correct', len(correct))
           epoch_grad_norms += zip(total_grad_norm, correct, logits)
         param_norms.append(params_norm(get_params(opt_state)))
-        epoch_time = time.time() - start_time
-        print('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
+
         grad_norms.append(epoch_grad_norms)
         if not FLAGS.dpsgd:
             hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_lr={FLAGS.learning_rate},op={FLAGS.overparameterised}"
@@ -325,6 +324,9 @@ def main(_):
               'For delta={:.0e}, the current epsilon is: {:.2f}'.format(delta, eps))
         else:
           print('Trained with vanilla non-private SGD optimizer')
+
+        epoch_time = time.time() - start_time
+        print('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
 
 
 if __name__ == '__main__':
