@@ -109,7 +109,7 @@ flags.DEFINE_integer(
     '(must evenly divide batch_size)')
 flags.DEFINE_string('model_dir', None, 'Model directory')
 flags.DEFINE_string('loss', 'cross-entropy', 'Loss function')
-flags.DEFINE_float('overparameterised', True, 'Overparameterised for MNIST')
+flags.DEFINE_boolean('overparameterised', True, 'Overparameterised for MNIST')
 
 def main(_):
     if FLAGS.microbatches:
