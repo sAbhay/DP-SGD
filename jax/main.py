@@ -301,12 +301,12 @@ def main(_):
         print('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
         grad_norms.append(epoch_grad_norms)
         if not FLAGS.dpsgd:
-            params_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_lr={FLAGS.learning_rate},sm={FLAGS.size_multiplier}"
+            hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_lr={FLAGS.learning_rate},op={FLAGS.overparameterised}"
         else:
-            params_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_lr={FLAGS.learning_rate},sm={FLAGS.size_multiplier},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip}"
-        with open(f'grad_norms_{params_string}.pkl', 'wb') as f:
+            hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_lr={FLAGS.learning_rate},op={FLAGS.overparameterised},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip}"
+        with open(f'grad_norms_{hyperparams_string}.pkl', 'wb') as f:
             pickle.dump(grad_norms, f)
-        with open(f'param_norms_{params_string}.pkl', 'wb') as f:
+        with open(f'param_norms_{hyperparams_string}.pkl', 'wb') as f:
             pickle.dump(param_norms, f)
 
         # evaluate test accuracy
