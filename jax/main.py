@@ -303,14 +303,15 @@ def main(_):
         param_norms.append(params_norm(get_params(opt_state)))
 
         grad_norms.append(epoch_grad_norms)
-        if not FLAGS.dpsgd:
-            hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised}"
-        else:
-            hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip}"
-        with open(f'grad_norms_{hyperparams_string}.pkl', 'wb') as f:
-            pickle.dump(grad_norms, f)
-        with open(f'param_norms_{hyperparams_string}.pkl', 'wb') as f:
-            pickle.dump(param_norms, f)
+        if epoch == FLAGS.epochs:
+            if not FLAGS.dpsgd:
+                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised}"
+            else:
+                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip}"
+            with open(f'grad_norms_{hyperparams_string}.pkl', 'wb') as f:
+                pickle.dump(grad_norms, f)
+            with open(f'param_norms_{hyperparams_string}.pkl', 'wb') as f:
+                pickle.dump(param_norms, f)
 
         # evaluate test accuracy
         params = get_params(opt_state)
