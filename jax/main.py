@@ -173,9 +173,12 @@ def main(_):
 
     def hinge_loss(params, batch):
         inputs, targets = batch
+        if len(targets.shape) == 1:
+            targets = targets.reshape(1, -1)
         target_class = jnp.argmax(targets, axis=1)
         scores = predict(params, inputs)
-        return jnp.sum(jnp.max(0, 1+scores-scores[target_class], axis=0))-1
+        target_class_scores = jnp.choose(target_class, scores.T, mode='wrap')[:, jnp.newaxis]
+        return jnp.mean(jnp.sum(jnp.maximum(0, 1+scores-target_class_scores)-1, axis=1))
 
 
     if FLAGS.loss == 'cross-entropy':
