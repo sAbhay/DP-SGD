@@ -319,6 +319,10 @@ def main(_):
         test_loss = loss(params, shape_as_image(test_images, test_labels))
         print('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             test_loss, 100 * test_acc))
+        train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels))
+        train_loss = loss(params, shape_as_image(train_images, train_labels))
+        print('Train set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
+            train_loss, 100 * train_acc))
 
         # determine privacy loss so far
         if FLAGS.dpsgd:
