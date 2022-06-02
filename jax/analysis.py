@@ -1,47 +1,95 @@
 import pandas as pd
 import pickle
 import matplotlib.pyplot as plt
+import scipy.special
 import seaborn as sns
+import os
 
-hyperparams_string = "dpsgd_loss=cross-entropy,lr=0.25,op=True,nm=1.3,l2nc=1.5"
 
-with open(rf'norms\grad_norms_{hyperparams_string}.pkl', 'rb') as f:
-    epoch_norms = pickle.load(f)
-# print(epoch_norms[0])
+NORM_DIR = r'norms'
 
-norms = []
-for epoch in range(len(epoch_norms)):
-    norms += [(epoch,)+v for v in epoch_norms[epoch]]
-for i, norm in enumerate(norms):
-    norms[i] = tuple([norm[0], norm[1].item(), norm[2].item()] + list(norm[3]))
-# print(norms[0])
+def get_hyperparameter_strings(norm_dir):
+    norm_files = [f for f in os.listdir(NORM_DIR) if os.path.isfile(os.path.join(NORM_DIR, f))]
+    hyperparameter_strings = []
+    for f in norm_files:
+        f = os.path.basename(f)
+        splits = f.split('_')
+        if len(splits) < 4:
+            continue
+        hyperparameter_string = '_'.join(splits[2:])
+        hyperparameter_string = hyperparameter_string.replace(".pkl", "").replace(".zip", "")
+        hyperparameter_strings.append(hyperparameter_string)
+    hyperparameter_strings = set(hyperparameter_strings)
+    return hyperparameter_strings
 
-with open(rf'norms\param_norms_{hyperparams_string}.pkl', 'rb') as f:
-    param_norms = pickle.load(f)
-for i, param_norm in enumerate(param_norms):
-    param_norms[i] = (i, param_norm.item())
+PLOTS_DIR = r'C:\Users\abhay\Documents\P-Lambda\plots'
 
-cols = ['epoch', 'norm', 'accurate']
-logit_cols = [f'{i}_logit' for i in range(0, 10)]
-columns = cols + logit_cols
-sample_df = pd.DataFrame(norms, columns=columns)
-sample_df['logits_stddev'] = sample_df[logit_cols].std(axis=1)
-# print(sample_df)
+if __name__ == '__main__':
+    hyperparameter_strings = get_hyperparameter_strings(NORM_DIR)
+    print(hyperparameter_strings)
 
-# print(len(df[df['epoch']==0]), len(df[(df['epoch']==0) & (df['accurate']==0)]), len(df[(df['epoch']==0) & (df['accurate']==1)]), len(df[df['epoch']==10]))
-# ax = df.hist(column=['norm'], by=['epoch'], sharey=True, sharex=True)
-sample_df[sample_df['epoch'] == 19].hist(column='norm', by='accurate', legend=False)
+    for hyperparams_string in hyperparameter_strings:
+        print(f"Plotting {hyperparams_string}")
+        # hyperparams_string = "dpsgd_loss=cross-entropy,lr=0.25,op=True,nm=1.3,l2nc=1.5"
 
-ax = sns.histplot(data=sample_df, x='epoch', y='norm', hue='accurate')
-sns.move_legend(ax, "upper left")
-plt.show()
+        plot_dir = rf'{PLOTS_DIR}\{hyperparams_string}'
+        if not os.path.exists(plot_dir):
+            os.makedirs(plot_dir)
 
-cols = ['epoch', 'param_norm']
-epoch_df = pd.DataFrame(param_norms, columns=cols)
-epoch_df['expected_grad_norm'] = sample_df.groupby(['epoch']).mean()['norm']
-sns.lineplot(x='epoch', y='value', hue='variable',
-             data=pd.melt(epoch_df[['epoch', 'param_norm', 'expected_grad_norm']], ['epoch']))
-plt.show()
+        with open(rf'{NORM_DIR}\grad_norms_{hyperparams_string}.pkl', 'rb') as f:
+            epoch_norms = pickle.load(f)
+        # print(epoch_norms[0])
 
-sns.scatterplot(data=sample_df, x='norm', y='logits_stddev', hue='epoch', style='accurate')
-plt.show()
+        norms = []
+        for epoch in range(len(epoch_norms)):
+            norms += [(epoch,) + v for v in epoch_norms[epoch]]
+        for i, norm in enumerate(norms):
+            norms[i] = tuple([norm[0], norm[1].item(), norm[2].item()] + list(norm[3]))
+        # print(norms[0])
+
+        with open(rf'{NORM_DIR}\param_norms_{hyperparams_string}.pkl', 'rb') as f:
+            param_norms = pickle.load(f)
+        for i, param_norm in enumerate(param_norms):
+            param_norms[i] = (i, param_norm.item())
+
+        cols = ['epoch', 'norm', 'accurate']
+        logit_cols = [f'{i}_logit' for i in range(0, 10)]
+        columns = cols + logit_cols
+        sample_df = pd.DataFrame(norms, columns=columns)
+        sample_df[logit_cols] = pd.DataFrame(scipy.special.softmax(sample_df[logit_cols].to_numpy(dtype=float), axis=1),
+                                             columns=logit_cols)
+        sample_df["max_logit"] = sample_df[logit_cols].max(axis=1)
+        # print(sample_df)
+
+        # print(len(df[df['epoch']==0]), len(df[(df['epoch']==0) & (df['accurate']==0)]), len(df[(df['epoch']==0) & (df['accurate']==1)]), len(df[df['epoch']==10]))
+        # ax = df.hist(column=['norm'], by=['epoch'], sharey=True, sharex=True)
+        ax = sample_df[sample_df['epoch'] == 19][['norm', 'accurate']].hist(column='norm', by='accurate', legend=False)
+        plt.savefig(rf'{plot_dir}\epoch_20_grad_norms_accuracy.png')
+        plt.close()
+        print("Saved Epoch 20 grad norms hist at", plot_dir)
+
+        ax = sns.histplot(data=sample_df, x='epoch', y='norm', hue='accurate')
+        sns.move_legend(ax, "upper left")
+        plt.savefig(rf'{plot_dir}\grad_norms_accuracy.png')
+        plt.close()
+        print("Saved grad norms hist")
+
+        cols = ['epoch', 'param_norm']
+        epoch_df = pd.DataFrame(param_norms, columns=cols)
+        epoch_df['expected_grad_norm'] = sample_df.groupby(['epoch']).mean()['norm']
+        sns.lineplot(x='epoch', y='value', hue='variable',
+                     data=pd.melt(epoch_df[['epoch', 'param_norm', 'expected_grad_norm']], ['epoch']))
+        plt.savefig(rf'{plot_dir}\grad_norms_param_norms.png')
+        plt.close()
+        print("Saved grad and param norms plot")
+
+        temp_df = sample_df[sample_df['accurate'] == True]
+        slope, intercept, r_value_classified, p_value, std_err = scipy.stats.linregress(temp_df['norm'], temp_df['max_logit'])
+        temp_df = sample_df[sample_df['accurate'] == False]
+        slope, intercept, r_value_misclassified, p_value, std_err = scipy.stats.linregress(temp_df['norm'], temp_df['max_logit'])
+        sns.scatterplot(data=sample_df, x='norm', y='max_logit', hue='epoch', style='accurate')
+        plt.text(0, 0.15, 'R(norm, max logit) given correct classification: {:.3f}'.format(r_value_classified), size='small')
+        plt.text(0, 0.1, 'R(norm, max logit) given misclassification: {:.3f}'.format(r_value_misclassified), size='small')
+        plt.savefig(rf'{plot_dir}\grad_norms_max_logit.png')
+        plt.close()
+        print("Saved grad norms vs max logit hist")
