@@ -1,6 +1,4 @@
-## TODO: Share with Jared Stanford email
-## TODO: Link original codebase
-
+# Original example code: https://github.com/google/jax/blob/main/examples/differentially_private_sgd.py
 # Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
