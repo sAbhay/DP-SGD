@@ -27,11 +27,14 @@ def concat_images(image_paths, size, shape=None):
 
 
 hyperparameter_strings = get_hyperparameter_strings(NORM_DIR)
-folder = rf'{PLOTS_DIR}\{hyperparameter_strings.pop()}'
-image_paths = [os.path.join(folder, f)
-               for f in os.listdir(folder) if f.endswith('.png')]
+
+while len(hyperparameter_strings) > 0:
+    hyperparameter_string = hyperparameter_strings.pop()
+    folder = rf'{PLOTS_DIR}\{hyperparameter_string}'
+    image_paths = [os.path.join(folder, f)
+                   for f in os.listdir(folder) if f.endswith('.png')]
 
 
-# Create and save image grid
-image = concat_images(image_paths, (800, 800), (2, 2))
-image.save('image.png', 'PNG')
+    # Create and save image grid
+    image = concat_images(image_paths, (640, 480), (2, 2))
+    image.save(rf'{PLOTS_DIR}\all\{hyperparameter_string}.png', 'PNG')

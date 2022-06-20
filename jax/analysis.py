@@ -63,7 +63,10 @@ if __name__ == '__main__':
 
         # print(len(df[df['epoch']==0]), len(df[(df['epoch']==0) & (df['accurate']==0)]), len(df[(df['epoch']==0) & (df['accurate']==1)]), len(df[df['epoch']==10]))
         # ax = df.hist(column=['norm'], by=['epoch'], sharey=True, sharex=True)
-        ax = sample_df[sample_df['epoch'] == 19][['norm', 'accurate']].hist(column='norm', by='accurate', legend=False)
+        ax = sample_df[(sample_df['epoch'] == 0) | (sample_df['epoch'] == 19)][['epoch', 'norm', 'accurate']].\
+            hist(column='norm', by=['epoch', 'accurate'], legend=False)
+        # ax = sns.histplot(data=sample_df[(sample_df['epoch'] == 0) | (sample_df['epoch'] == 19)],
+        #                   x='norm', stat='count', hue='accurate', by=)
         plt.savefig(rf'{plot_dir}\epoch_20_grad_norms_accuracy.png')
         plt.close()
         print("Saved Epoch 20 grad norms hist at", plot_dir)
@@ -83,13 +86,14 @@ if __name__ == '__main__':
         plt.close()
         print("Saved grad and param norms plot")
 
+        sample_df = sample_df[sample_df['epoch'] == 19]
         temp_df = sample_df[sample_df['accurate'] == True]
         slope, intercept, r_value_classified, p_value, std_err = scipy.stats.linregress(temp_df['norm'], temp_df['max_logit'])
         temp_df = sample_df[sample_df['accurate'] == False]
         slope, intercept, r_value_misclassified, p_value, std_err = scipy.stats.linregress(temp_df['norm'], temp_df['max_logit'])
         sns.scatterplot(data=sample_df, x='norm', y='max_logit', hue='epoch', style='accurate')
-        plt.text(0, 0.15, 'R(norm, max logit) given correct classification: {:.3f}'.format(r_value_classified), size='small')
-        plt.text(0, 0.1, 'R(norm, max logit) given misclassification: {:.3f}'.format(r_value_misclassified), size='small')
+        plt.text(0, 0.55, 'R(norm, max logit) given correct classification: {:.3f}'.format(r_value_classified), size='small')
+        plt.text(0, 0.5, 'R(norm, max logit) given misclassification: {:.3f}'.format(r_value_misclassified), size='small')
         plt.savefig(rf'{plot_dir}\grad_norms_max_logit.png')
         plt.close()
         print("Saved grad norms vs max logit hist")

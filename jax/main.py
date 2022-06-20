@@ -1,3 +1,6 @@
+## TODO: Share with Jared Stanford email
+## TODO: Link original codebase
+
 # Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
