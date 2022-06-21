@@ -1,0 +1,3 @@
+[submodule "jax_privacy"]
+	path = jax_privacy
+	url = https://github.com/sAbhay/jax_privacy.git
