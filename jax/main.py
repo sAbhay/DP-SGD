@@ -136,6 +136,10 @@ def main(_):
                 batch_idx = perm[i * FLAGS.batch_size:(i + 1) * FLAGS.batch_size]
                 yield train_images[batch_idx], train_labels[batch_idx]
 
+    def shape_as_image(images, labels, dummy_dim=False):
+        target_shape = (-1, 1, 28, 28, 1) if dummy_dim else (-1, 28, 28, 1)
+        return jnp.reshape(images, target_shape), labels
+
     batches = data_stream()
 
     opt_init, opt_update, get_params = optimizers.sgd(FLAGS.learning_rate)
@@ -144,8 +148,7 @@ def main(_):
     model_fn = models.mnist.get_mnist_model_fn(FLAGS.overparameterised, FLAGS.groups)
     model = hk.transform(model_fn, apply_rng=True)
 
-    key = random.PRNGKey(FLAGS.seed)
-    init_random_params = model.init(key, next(batches))
+    init_random_params = model.init(key, shape_as_image(next(batches)))
     def predict(params, inputs):
         return model.call(params, None, inputs)
 
@@ -215,11 +218,6 @@ def main(_):
         grads_flat, grads_treedef = tree_flatten(grads)
         aggregated_grads = [g.sum(0) / batch_size for g in grads_flat]
         return tree_unflatten(grads_treedef, aggregated_grads), total_grad_norm
-
-
-    def shape_as_image(images, labels, dummy_dim=False):
-      target_shape = (-1, 1, 28, 28, 1) if dummy_dim else (-1, 28, 28, 1)
-      return jnp.reshape(images, target_shape), labels
 
 
     def compute_epsilon(steps, num_examples=60000, target_delta=1e-5):
