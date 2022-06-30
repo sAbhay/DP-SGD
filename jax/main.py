@@ -322,6 +322,8 @@ def main(_):
                 pickle.dump(grad_norms, f)
             with open(f'param_norms_{hyperparams_string}.pkl', 'wb') as f:
                 pickle.dump(param_norms, f)
+            with open(f'stats_{hyperparams_string}.pkl', 'wb') as f:
+                pickle.dump(param_norms, f)
 
         epoch_time = time.time() - start_time
         print('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
