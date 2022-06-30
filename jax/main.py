@@ -145,7 +145,7 @@ def main(_):
     model = hk.transform(model_fn, apply_rng=True)
 
     key = random.PRNGKey(FLAGS.seed)
-    init_random_params = model.init(next(batches))
+    init_random_params = model.init(key, next(batches))
     def predict(params, inputs):
         return model.call(params, None, inputs)
 
