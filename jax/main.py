@@ -66,11 +66,11 @@ Example invocations:
 """
 import functools
 import os
-os.environ['XLA_FLAGS'] = '--xla_gpu_strict_conv_algorithm_picker=false'
+# os.environ['XLA_FLAGS'] = '--xla_gpu_strict_conv_algorithm_picker=false'
 
 import itertools
 import time
-import warnings
+import warningsg
 
 from absl import app
 from absl import flags
