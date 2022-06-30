@@ -64,7 +64,7 @@ Example invocations:
    --epochs=45 \
    --learning_rate=.25 \
 """
-
+import functools
 import os
 os.environ['XLA_FLAGS'] = '--xla_gpu_strict_conv_algorithm_picker=false'
 
@@ -83,7 +83,8 @@ from jax.example_libraries import optimizers
 from jax.example_libraries import stax
 from jax.tree_util import tree_flatten, tree_unflatten
 import jax.numpy as jnp
-from jax import default_backend
+import haiku as hk
+
 import datasets
 import numpy.random as npr
 
@@ -92,6 +93,8 @@ from tensorflow_privacy.privacy.analysis.rdp_accountant import compute_rdp
 from tensorflow_privacy.privacy.analysis.rdp_accountant import get_privacy_spent
 
 import pickle
+
+import models.mnist
 
 FLAGS = flags.FLAGS
 
@@ -111,6 +114,7 @@ flags.DEFINE_integer(
 flags.DEFINE_string('model_dir', None, 'Model directory')
 flags.DEFINE_string('loss', 'cross-entropy', 'Loss function')
 flags.DEFINE_boolean('overparameterised', True, 'Overparameterised for MNIST')
+flags.DEFINE_integer('groups', None, 'Number of groups for GroupNorm, default None for no group normalisation')
 
 def main(_):
     if FLAGS.microbatches:
@@ -136,33 +140,14 @@ def main(_):
 
     opt_init, opt_update, get_params = optimizers.sgd(FLAGS.learning_rate)
 
-    if FLAGS.overparameterised:
-        init_random_params, predict = stax.serial(
-            stax.Conv(32, (16, 16), padding='SAME', strides=(2, 2)),
-            stax.Relu,
-            stax.MaxPool((2, 2), (1, 1)),
-            stax.Conv(64, (8, 8), padding='VALID', strides=(2, 2)),
-            stax.Relu,
-            stax.MaxPool((2, 2), (1, 1)),
-            stax.Flatten,
-            stax.Dense(64),
-            stax.Relu,
-            stax.Dense(10),
-        )
-    else:
-        init_random_params, predict = stax.serial(
-            stax.Conv(16, (8, 8), padding='SAME', strides=(2, 2)),
-            stax.Relu,
-            stax.MaxPool((2, 2), (1, 1)),
-            stax.Conv(32, (4, 4), padding='VALID', strides=(2, 2)),
-            stax.Relu,
-            stax.MaxPool((2, 2), (1, 1)),
-            stax.Flatten,
-            stax.Dense(32),
-            stax.Relu,
-            stax.Dense(10),
-        )
+    rng = random.PRNGKey(42)
+    model_fn = models.mnist.get_mnist_model_fn(FLAGS.overparameterised, FLAGS.groups)
+    model = hk.transform(model_fn, apply_rng=True)
 
+    key = random.PRNGKey(FLAGS.seed)
+    init_random_params = model.init(next(batches))
+    def predict(params, inputs):
+        return model.call(params, None, inputs)
 
     # jconfig.update('jax_platform_name', 'cpu')
 
@@ -286,6 +271,7 @@ def main(_):
 
     grad_norms = []
     param_norms = []
+    stats = []
     steps_per_epoch = 60000 // FLAGS.batch_size
     print('\nStarting training...')
     for epoch in range(1, FLAGS.epochs + 1):
@@ -304,15 +290,6 @@ def main(_):
         param_norms.append(params_norm(get_params(opt_state)))
 
         grad_norms.append(epoch_grad_norms)
-        if epoch == FLAGS.epochs:
-            if not FLAGS.dpsgd:
-                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised}"
-            else:
-                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip}"
-            with open(f'grad_norms_{hyperparams_string}.pkl', 'wb') as f:
-                pickle.dump(grad_norms, f)
-            with open(f'param_norms_{hyperparams_string}.pkl', 'wb') as f:
-                pickle.dump(param_norms, f)
 
         # evaluate test accuracy
         params = get_params(opt_state)
@@ -327,13 +304,26 @@ def main(_):
 
         # determine privacy loss so far
         if FLAGS.dpsgd:
-          delta = 1e-5
-          num_examples = 60000
-          eps = compute_epsilon(epoch * steps_per_epoch, num_examples, delta)
-          print(
-              'For delta={:.0e}, the current epsilon is: {:.2f}'.format(delta, eps))
+            delta = 1e-5
+            num_examples = 60000
+            eps = compute_epsilon(epoch * steps_per_epoch, num_examples, delta)
+            print(
+                'For delta={:.0e}, the current epsilon is: {:.2f}'.format(delta, eps))
         else:
-          print('Trained with vanilla non-private SGD optimizer')
+            eps = None
+            print('Trained with vanilla non-private SGD optimizer')
+
+        stats.append((train_loss, train_acc, test_loss, test_acc, eps))
+
+        if epoch == FLAGS.epochs:
+            if not FLAGS.dpsgd:
+                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised}"
+            else:
+                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip}"
+            with open(f'grad_norms_{hyperparams_string}.pkl', 'wb') as f:
+                pickle.dump(grad_norms, f)
+            with open(f'param_norms_{hyperparams_string}.pkl', 'wb') as f:
+                pickle.dump(param_norms, f)
 
         epoch_time = time.time() - start_time
         print('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
