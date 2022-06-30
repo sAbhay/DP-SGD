@@ -150,7 +150,7 @@ def main(_):
 
     init_params = model.init(key, shape_as_image(*next(batches))[0])
     def predict(params, inputs):
-        return model.call(params, None, inputs)
+        return model.apply(params, None, inputs)
 
     # jconfig.update('jax_platform_name', 'cpu')
 
