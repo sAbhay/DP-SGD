@@ -1,46 +1,26 @@
 import haiku as hk
 import jax
 
-def mnist_model(features, **_):
-    return hk.Sequential([
-        hk.Conv2D(16, (8, 8), padding='SAME', stride=(2, 2)),
-        jax.nn.relu,
-        hk.MaxPool(2, 1, padding='VALID'),  # matches stax
-        hk.GroupNorm(4),
-        hk.Conv2D(32, (4, 4), padding='VALID', stride=(2, 2)),
-        jax.nn.relu,
-        hk.MaxPool(2, 1, padding='VALID'),  # matches stax
-        hk.GroupNorm(4),
-        hk.Flatten(),
-        hk.Linear(32),
-        jax.nn.relu,
-        hk.Linear(10),
-    ])(features)
-
-def overparameterised_mnist_model(features, **_):
-    return hk.Sequential([
-        hk.Conv2D(32, (16, 16), padding='SAME', stride=(2, 2)),
-        jax.nn.relu,
-        hk.MaxPool(2, 1, padding='VALID'),  # matches stax
-        hk.GroupNorm(4),
-        hk.Conv2D(64, (8, 8), padding='VALID', stride=(2, 2)),
-        jax.nn.relu,
-        hk.MaxPool(2, 1, padding='VALID'),  # matches stax
-        hk.GroupNorm(4),
-        hk.Flatten(),
-        hk.Linear(32),
-        jax.nn.relu,
-        hk.Linear(10),
-    ])(features)
-
 def get_mnist_model_fn(overparameterised: bool, groups: int):
+    mult = 1
     if overparameterised:
-        model_fn = mnist_model
-    else:
-        model_fn = overparameterised_mnist_model
+        mult = 2
 
     def mnist_model_fn(features, **_):
-        out = model_fn(features)
+        out = hk.Sequential([
+            hk.Conv2D(16*mult, (8, 8), padding='SAME', stride=(2, 2)),
+            jax.nn.relu,
+            hk.MaxPool(2, 1, padding='VALID'),  # matches stax
+            hk.GroupNorm(groups),
+            hk.Conv2D(32*mult, (4, 4), padding='VALID', stride=(2, 2)),
+            jax.nn.relu,
+            hk.MaxPool(2, 1, padding='VALID'),  # matches stax
+            hk.GroupNorm(groups),
+            hk.Flatten(),
+            hk.Linear(32),
+            jax.nn.relu,
+            hk.Linear(10),
+        ])(features)
         return out
 
     return mnist_model_fn
