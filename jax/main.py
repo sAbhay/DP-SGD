@@ -148,7 +148,7 @@ def main(_):
     model_fn = models.mnist.get_mnist_model_fn(FLAGS.overparameterised, FLAGS.groups)
     model = hk.transform(model_fn, apply_rng=True)
 
-    init_random_params = model.init(key, shape_as_image(*next(batches))[0])
+    init_params = model.init(key, shape_as_image(*next(batches))[0])
     def predict(params, inputs):
         return model.call(params, None, inputs)
 
@@ -263,7 +263,7 @@ def main(_):
             i, private_grads
             , opt_state), total_grad_norm
 
-    _, init_params = init_random_params(key, (-1, 28, 28, 1))
+    # _, init_params = init_random_params(key, (-1, 28, 28, 1))
     opt_state = opt_init(init_params)
     itercount = itertools.count()
 
