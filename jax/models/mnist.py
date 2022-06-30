@@ -29,19 +29,14 @@ def overparameterised_mnist_model(features, **_):
         hk.Linear(10),
     ])(features)
 
-def get_mnist_model_fn(overparameterised: bool, groups=None):
+def get_mnist_model_fn(overparameterised: bool, groups: int):
     if overparameterised:
         model_fn = mnist_model
     else:
         model_fn = overparameterised_mnist_model
 
-    if groups is not None:
-        group_norm_fn = hk.GroupNorm(groups)
-    else:
-        group_norm_fn = lambda x: x
-
     def mnist_model_fn(features, **_):
-        out = group_norm_fn(features)
+        out = hk.GroupNorm(groups)(features)
         out = model_fn(features)
         return out
 
