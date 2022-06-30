@@ -6,9 +6,11 @@ def mnist_model(features, **_):
         hk.Conv2D(16, (8, 8), padding='SAME', stride=(2, 2)),
         jax.nn.relu,
         hk.MaxPool(2, 1, padding='VALID'),  # matches stax
+        hk.GroupNorm(4),
         hk.Conv2D(32, (4, 4), padding='VALID', stride=(2, 2)),
         jax.nn.relu,
         hk.MaxPool(2, 1, padding='VALID'),  # matches stax
+        hk.GroupNorm(4),
         hk.Flatten(),
         hk.Linear(32),
         jax.nn.relu,
@@ -20,9 +22,11 @@ def overparameterised_mnist_model(features, **_):
         hk.Conv2D(32, (16, 16), padding='SAME', stride=(2, 2)),
         jax.nn.relu,
         hk.MaxPool(2, 1, padding='VALID'),  # matches stax
+        hk.GroupNorm(4),
         hk.Conv2D(64, (8, 8), padding='VALID', stride=(2, 2)),
         jax.nn.relu,
         hk.MaxPool(2, 1, padding='VALID'),  # matches stax
+        hk.GroupNorm(4),
         hk.Flatten(),
         hk.Linear(32),
         jax.nn.relu,
@@ -36,7 +40,6 @@ def get_mnist_model_fn(overparameterised: bool, groups: int):
         model_fn = overparameterised_mnist_model
 
     def mnist_model_fn(features, **_):
-        out = hk.GroupNorm(groups)(features)
         out = model_fn(features)
         return out
 
