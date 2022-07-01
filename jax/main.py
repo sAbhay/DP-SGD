@@ -1,4 +1,6 @@
 # Original example code: https://github.com/google/jax/blob/main/examples/differentially_private_sgd.py
+# Additional reference: https://github.com/TheSalon/fast-dpsgd/blob/9584c9d4a6d061ca814005d02463537319b99faf/jaxdp.py
+
 # Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -64,9 +66,6 @@ Example invocations:
    --epochs=45 \
    --learning_rate=.25 \
 """
-import functools
-import os
-# os.environ['XLA_FLAGS'] = '--xla_gpu_strict_conv_algorithm_picker=false'
 
 import itertools
 import time
