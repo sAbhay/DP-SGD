@@ -1,4 +1,4 @@
-from layers import WSConv2D
+from .layers import WSConv2D
 import haiku as hk
 import jax
 
