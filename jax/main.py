@@ -114,6 +114,7 @@ flags.DEFINE_string('model_dir', None, 'Model directory')
 flags.DEFINE_string('loss', 'cross-entropy', 'Loss function')
 flags.DEFINE_boolean('overparameterised', True, 'Overparameterised for MNIST')
 flags.DEFINE_integer('groups', None, 'Number of groups for GroupNorm, default None for no group normalisation')
+flags.DEFINE_boolean('weight_standardisation', True, "Weight standardisation")
 
 def main(_):
     if FLAGS.microbatches:
@@ -314,9 +315,9 @@ def main(_):
 
         if epoch == FLAGS.epochs:
             if not FLAGS.dpsgd:
-                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},grp={FLAGS.groups},bs={FLAGS.batch_size}"
+                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation}"
             else:
-                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip},grp={FLAGS.groups},bs={FLAGS.batch_size}"
+                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation}"
             with open(f'grad_norms_{hyperparams_string}.pkl', 'wb') as f:
                 pickle.dump(grad_norms, f)
             with open(f'param_norms_{hyperparams_string}.pkl', 'wb') as f:
