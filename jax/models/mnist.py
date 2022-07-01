@@ -1,3 +1,4 @@
+from layers import WSConv2D
 import haiku as hk
 import jax
 
@@ -8,11 +9,11 @@ def get_mnist_model_fn(overparameterised: bool, groups: int):
 
     def mnist_model_fn(features, **_):
         out = hk.Sequential([
-            hk.WSConv2D(16*mult, (8, 8), padding='SAME', stride=(2, 2)),
+            WSConv2D(16*mult, (8, 8), padding='SAME', stride=(2, 2)),
             jax.nn.relu,
             hk.MaxPool(2, 1, padding='VALID'),  # matches stax
             hk.GroupNorm(groups),
-            hk.WSConv2D(32*mult, (4, 4), padding='VALID', stride=(2, 2)),
+            WSConv2D(32*mult, (4, 4), padding='VALID', stride=(2, 2)),
             jax.nn.relu,
             hk.MaxPool(2, 1, padding='VALID'),  # matches stax
             hk.GroupNorm(groups),
