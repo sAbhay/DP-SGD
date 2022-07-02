@@ -1,9 +1,10 @@
 # As in jax_privacy/jax_privacy/src/training/image_classification/models/common.py
 
+import chex
 import haiku as hk
 import jax.numpy as jnp
 import numpy as np
-import jax
+from jax import lax
 
 class WSConv2D(hk.Conv2D):
   """2D Convolution with Scaled Weight Standardization and affine gain+bias."""
@@ -17,11 +18,11 @@ class WSConv2D(hk.Conv2D):
     gain = hk.get_parameter('gain', shape=(weight.shape[-1],),
                             dtype=weight.dtype, init=jnp.ones)
     # Manually fused normalization, eq. to (w - mean) * gain / sqrt(N * var).
-    scale = jax.lax.rsqrt(jnp.maximum(var * fan_in, eps)) * gain
+    scale = lax.rsqrt(jnp.maximum(var * fan_in, eps)) * gain
     shift = mean * scale
     return weight * scale - shift
 
-  def __call__(self, inputs, eps: float = 1e-4):
+  def __call__(self, inputs: chex.Array, eps: float = 1e-4) -> chex.Array:
     w_shape = self.kernel_shape + (
         inputs.shape[self.channel_index] // self.feature_group_count,
         self.output_channels)
@@ -29,7 +30,7 @@ class WSConv2D(hk.Conv2D):
     w_init = hk.initializers.VarianceScaling(1.0, 'fan_in', 'normal')
     w = hk.get_parameter('w', w_shape, inputs.dtype, init=w_init)
     weight = self.standardize_weight(w, eps)
-    out = jax.lax.conv_general_dilated(
+    out = lax.conv_general_dilated(
         inputs, weight, window_strides=self.stride, padding=self.padding,
         lhs_dilation=self.lhs_dilation, rhs_dilation=self.kernel_dilation,
         dimension_numbers=self.dimension_numbers,

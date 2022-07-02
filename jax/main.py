@@ -79,7 +79,7 @@ from jax import jit
 from jax import random
 from jax import vmap
 from jax.example_libraries import optimizers
-from jax.example_libraries import stax
+from jax import nn
 from jax.tree_util import tree_flatten, tree_unflatten
 import jax.numpy as jnp
 import haiku as hk
@@ -115,6 +115,10 @@ flags.DEFINE_string('loss', 'cross-entropy', 'Loss function')
 flags.DEFINE_boolean('overparameterised', True, 'Overparameterised for MNIST')
 flags.DEFINE_integer('groups', None, 'Number of groups for GroupNorm, default None for no group normalisation')
 flags.DEFINE_boolean('weight_standardisation', True, "Weight standardisation")
+flags.DEFINE_boolean('parameter_averaging', True, "Parameter averaging")
+flags.DEFINE_float('ema_coef', 0.999, "EMA parameter averaging coefficient")
+flags.DEFINE_integer('ema_start_step', 0, "EMA start step")
+flags.DEFINE_integer('polyak_start_step', 0, "Polyak start step")
 
 def main(_):
     if FLAGS.microbatches:
@@ -157,7 +161,7 @@ def main(_):
     def ce_loss(params, batch):
       inputs, targets = batch
       logits = predict(params, inputs)
-      logits = stax.logsoftmax(logits)  # log normalize
+      logits = nn.log_softmax(logits)  # log normalize
       return -jnp.mean(jnp.sum(logits * targets, axis=1))  # cross entropy loss
 
     def hinge_loss(params, batch):
