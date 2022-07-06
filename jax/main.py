@@ -280,7 +280,7 @@ def main(_):
             i, private_grads, opt_state)
         params = get_params(opt_state)
         avg_params = average_params(params, add_params, i)
-        logging.info(f"Average params: {avg_params}, \n Grads: {private_grads}")
+        logger.info(f"Average params: {avg_params}, \n Grads: {private_grads}")
         opt_state = set_params(avg_params, params)
         return opt_state, total_grad_norm
 
@@ -293,7 +293,7 @@ def main(_):
     stats = []
     steps_per_epoch = 60000 // FLAGS.batch_size
     add_params = {'ema': get_params(opt_state), 'polyak': get_params(opt_state)}
-    logging.info('Starting training...')
+    logger.info('Starting training...')
     for epoch in range(1, FLAGS.epochs + 1):
         start_time = time.time()
         epoch_grad_norms = []
@@ -315,11 +315,11 @@ def main(_):
         params = get_params(opt_state)
         test_acc, _, _ = accuracy(params, shape_as_image(test_images, test_labels))
         test_loss = loss(params, shape_as_image(test_images, test_labels))
-        logging.info('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
+        logger.info('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             test_loss, 100 * test_acc))
         train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels))
         train_loss = loss(params, shape_as_image(train_images, train_labels))
-        logging.info('Train set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
+        logger.info('Train set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             train_loss, 100 * train_acc))
 
         # determine privacy loss so far
@@ -327,11 +327,11 @@ def main(_):
             delta = 1e-5
             num_examples = 60000
             eps = compute_epsilon(epoch * steps_per_epoch, num_examples, delta)
-            logging.info(
+            logger.info(
                 'For delta={:.0e}, the current epsilon is: {:.2f}'.format(delta, eps))
         else:
             eps = None
-            logging.info('Trained with vanilla non-private SGD optimizer')
+            logger.info('Trained with vanilla non-private SGD optimizer')
 
         stats.append((train_loss, train_acc, test_loss, test_acc, eps))
 
@@ -348,7 +348,7 @@ def main(_):
                 pickle.dump(param_norms, f)
 
         epoch_time = time.time() - start_time
-        logging.info('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
+        logger.info('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
 
 
 if __name__ == '__main__':
