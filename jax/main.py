@@ -69,13 +69,13 @@ Example invocations:
 
 import logging
 import sys
+logger = logging.getLogger('dp-sgd_experiment')
 logging.basicConfig(filename='log.txt',
                         filemode='w',
                         format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                         datefmt='%H:%M:%S',
                         level=logging.DEBUG)
 logging.disable_existing_loggers=False
-logger = logging.getLogger('dp-sgd_experiment')
 logger.addHandler(logging.StreamHandler(sys.stdout))
 
 import itertools
@@ -286,13 +286,10 @@ def main(_):
                      FLAGS.noise_multiplier, FLAGS.batch_size)
         opt_state = opt_update(
             i, private_grads, opt_state)
-        logger.info(len(opt_state))
         params = get_params(opt_state)
-        logger.info(len(opt_state))
         avg_params = average_params(params, add_params, i)
-        logger.info(len(opt_state))
+        logging.info(f"Average params: {avg_params}, \n Grads: {private_grads}")
         opt_state = set_params(avg_params, params)
-        logger.info(len(opt_state))
         return opt_state, total_grad_norm
 
     # _, init_params = init_random_params(key, (-1, 28, 28, 1))
@@ -304,7 +301,7 @@ def main(_):
     stats = []
     steps_per_epoch = 60000 // FLAGS.batch_size
     add_params = {'ema': get_params(opt_state), 'polyak': get_params(opt_state)}
-    logging.info('\nStarting training...')
+    logging.info('Starting training...')
     for epoch in range(1, FLAGS.epochs + 1):
         start_time = time.time()
         epoch_grad_norms = []
