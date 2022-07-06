@@ -78,7 +78,6 @@ from jax import grad
 from jax import jit
 from jax import random
 from jax import vmap
-from jax.example_libraries import optimizers
 from jax import nn
 from jax.tree_util import tree_flatten, tree_unflatten
 import jax.numpy as jnp
@@ -94,6 +93,8 @@ from tensorflow_privacy.privacy.analysis.rdp_accountant import get_privacy_spent
 import pickle
 
 import models.mnist
+import optim
+from common import averaging
 
 FLAGS = flags.FLAGS
 
@@ -146,7 +147,10 @@ def main(_):
 
     batches = data_stream()
 
-    opt_init, opt_update, get_params = optimizers.sgd(FLAGS.learning_rate)
+    def average_params(params, add_params, t):
+        return averaging.average_params(params, add_params, t,
+                                        FLAGS.ema_coef, FLAGS.ema_start_step, FLAGS.polyak_start_step)
+    opt_init, opt_update, get_params = optim.sgd_avg(FLAGS.learning_rate, average_params)
 
     rng = random.PRNGKey(42)
     model_fn = models.mnist.get_mnist_model_fn(FLAGS.overparameterised, FLAGS.groups)
@@ -252,20 +256,20 @@ def main(_):
         return total_params_norm
 
     @jit
-    def update(_, i, opt_state, batch):
+    def update(_, i, opt_state, batch, add_params):
         params = get_params(opt_state)
         grads, total_grad_norm = non_private_grad(params, batch, FLAGS.batch_size)
-        return opt_update(i, grads, opt_state), total_grad_norm
+        return opt_update(i, grads, opt_state, add_params), total_grad_norm
 
     @jit
-    def private_update(rng, i, opt_state, batch):
+    def private_update(rng, i, opt_state, batch, add_params):
         params = get_params(opt_state)
         rng = random.fold_in(rng, i)  # get new key for new random numbers
         private_grads, total_grad_norm = private_grad(params, batch, rng, FLAGS.l2_norm_clip,
                      FLAGS.noise_multiplier, FLAGS.batch_size)
         return opt_update(
             i, private_grads
-            , opt_state), total_grad_norm
+            , opt_state, add_params), total_grad_norm
 
     # _, init_params = init_random_params(key, (-1, 28, 28, 1))
     opt_state = opt_init(init_params)
@@ -275,6 +279,7 @@ def main(_):
     param_norms = []
     stats = []
     steps_per_epoch = 60000 // FLAGS.batch_size
+    add_params = {'ema': get_params(opt_state), 'polyak': get_params(opt_state)}
     print('\nStarting training...')
     for epoch in range(1, FLAGS.epochs + 1):
         start_time = time.time()
@@ -282,10 +287,10 @@ def main(_):
         for _ in range(num_batches):
           next_batch = next(batches)
           if FLAGS.dpsgd:
-            opt_state, total_grad_norm = private_update(key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True))
+            opt_state, total_grad_norm = private_update(key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True), add_params)
           else:
             opt_state, total_grad_norm = update(
-                key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True))
+                key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True), add_params)
           acc, correct, logits = accuracy(get_params(opt_state), shape_as_image(*next_batch))
           # print('Grad norm', len(total_grad_norm), 'Correct', len(correct))
           epoch_grad_norms += zip(total_grad_norm, correct, logits)
