@@ -20,6 +20,6 @@ def sgd(step_size):
   def get_params(x):
     return x
   def set_params(x_new, x):
-    logger.debug(f"x_new: {x_new}, x: {x}")
+    logger.info(f"x_new: {x_new}, x: {x}")
     return x_new
   return Optimizer(init, update, get_params, set_params)

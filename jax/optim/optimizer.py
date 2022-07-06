@@ -109,7 +109,7 @@ def optimizer(opt_maker: Callable[...,
 
     @functools.wraps(set_params)
     def tree_set_params(new_tree, opt_state):
-      logger.debug(opt_state)
+      logger.info(f"opt_state: {len(opt_state)}, {opt_state}")
       states_flat, tree, subtrees = opt_state
       new_flat, tree2 = tree_flatten(new_tree)
       if tree2 != tree:

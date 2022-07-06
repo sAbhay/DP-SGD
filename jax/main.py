@@ -280,7 +280,7 @@ def main(_):
             i, private_grads, opt_state)
         params = get_params(opt_state)
         avg_params = average_params(params, add_params, i)
-        logger.info(f"Average params: {avg_params}, \n Grads: {private_grads}")
+        # logger.info(f"Average params: {avg_params}, \n Grads: {private_grads}")
         opt_state = set_params(avg_params, params)
         return opt_state, total_grad_norm
 
