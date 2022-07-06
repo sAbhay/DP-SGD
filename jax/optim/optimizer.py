@@ -44,7 +44,7 @@ def optimizer(opt_maker: Callable[...,
   optimizers.py for examples.
 
   Args:
-    opt_maker: a function that returns an ``(init_fun, update_fun, get_params, average_params)``
+    opt_maker: a function that returns an ``(init_fun, update_fun, get_params, set_params)``
       triple of functions that might only work with ndarrays, as per
 
       .. code-block:: haskell
