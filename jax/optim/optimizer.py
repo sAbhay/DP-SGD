@@ -22,7 +22,7 @@ register_pytree_node(
     lambda data, xs: OptimizerState(xs[0], data[0], data[1]))  # type: ignore[index]
 
 GetParamsFn = Callable[[OptimizerState], Params]
-SetParamsFn = Callable[[OptimizerState], OptimizerState]
+SetParamsFn = Callable[[Step, Updates, OptimizerState], OptimizerState]
 
 class Optimizer(NamedTuple):
   init_fn: InitFn
