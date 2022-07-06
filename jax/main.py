@@ -123,6 +123,7 @@ flags.DEFINE_boolean('parameter_averaging', True, "Parameter averaging")
 flags.DEFINE_float('ema_coef', 0.999, "EMA parameter averaging coefficient")
 flags.DEFINE_integer('ema_start_step', 0, "EMA start step")
 flags.DEFINE_integer('polyak_start_step', 0, "Polyak start step")
+flags.DEFINE_boolean('param_averaging', True, "Parameter averaging")
 
 def main(_):
     logger.info("Running Experiment")
@@ -265,9 +266,10 @@ def main(_):
         params = get_params(opt_state)
         grads, total_grad_norm = non_private_grad(params, batch, FLAGS.batch_size)
         opt_state = opt_update(i, grads, opt_state)
-        params = get_params(opt_state)
-        avg_params = average_params(params, add_params, i)
-        opt_state = set_params(avg_params, params)
+        if FLAGS.param_averaging:
+            params = get_params(opt_state)
+            avg_params = average_params(params, add_params, i)
+            opt_state = set_params(avg_params, params)
         return opt_state, total_grad_norm
 
     @jit
@@ -338,9 +340,9 @@ def main(_):
 
         if epoch == FLAGS.epochs:
             if not FLAGS.dpsgd:
-                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step}"
+                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step},pa={FLAGS.param_averaging}"
             else:
-                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step}"
+                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step},pa={FLAGS.param_averaging}"
             with open(f'grad_norms_{hyperparams_string}.pkl', 'wb') as f:
                 pickle.dump(grad_norms, f)
             with open(f'param_norms_{hyperparams_string}.pkl', 'wb') as f:
