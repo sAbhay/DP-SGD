@@ -3,7 +3,9 @@ import functools
 from functools import partial
 
 from jax.example_libraries.optimizers import Params, InitFn, UpdateFn, Step, State, Updates, OptimizerState
-from ..common import util
+from sys import path
+path.append('.')
+from common import util
 from jax.tree_util import (tree_flatten, tree_unflatten)
 
 map = util.safe_map
