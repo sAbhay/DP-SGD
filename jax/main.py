@@ -72,7 +72,7 @@ logging.basicConfig(filename='log.txt',
                         filemode='w',
                         format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                         datefmt='%H:%M:%S',
-                        level=logging.INFO)
+                        level=logging.DEBUG)
 logger = logging.getLogger('experiment')
 
 import itertools
