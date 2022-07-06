@@ -273,13 +273,9 @@ def main(_):
         params = get_params(opt_state)
         grads, total_grad_norm = non_private_grad(params, batch, FLAGS.batch_size)
         opt_state = opt_update(i, grads, opt_state)
-        logger.debug(len(opt_state))
         params = get_params(opt_state)
-        logger.debug(len(opt_state))
         avg_params = average_params(params, add_params, i)
-        logger.debug(len(opt_state))
         opt_state = set_params(avg_params, params)
-        logger.debug(len(opt_state))
         return opt_state, total_grad_norm
 
     @jit
@@ -290,9 +286,13 @@ def main(_):
                      FLAGS.noise_multiplier, FLAGS.batch_size)
         opt_state = opt_update(
             i, private_grads, opt_state)
+        logger.debug(len(opt_state))
         params = get_params(opt_state)
+        logger.debug(len(opt_state))
         avg_params = average_params(params, add_params, i)
+        logger.debug(len(opt_state))
         opt_state = set_params(avg_params, params)
+        logger.debug(len(opt_state))
         return opt_state, total_grad_norm
 
     # _, init_params = init_random_params(key, (-1, 28, 28, 1))
