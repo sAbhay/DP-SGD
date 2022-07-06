@@ -1,0 +1,77 @@
+11:58:32,619 tensorflow DEBUG Falling back to TensorFlow client; we recommended you install the Cloud TPU client directly with pip install cloud-tpu-client.
+11:58:33,1 h5py._conv DEBUG Creating converter from 7 to 5
+11:58:33,1 h5py._conv DEBUG Creating converter from 5 to 7
+11:58:33,1 h5py._conv DEBUG Creating converter from 7 to 5
+11:58:33,1 h5py._conv DEBUG Creating converter from 5 to 7
+11:58:35,688 dp-sgd_experiment INFO Running Experiment
+11:58:36,224 absl INFO Unable to initialize backend 'tpu_driver': NOT_FOUND: Unable to find driver in registry given worker: 
+11:58:36,340 absl INFO Unable to initialize backend 'rocm': NOT_FOUND: Could not find registered platform with name: "rocm". Available platform names are: Interpreter Host CUDA
+11:58:36,340 absl INFO Unable to initialize backend 'tpu': module 'jaxlib.xla_extension' has no attribute 'get_tpu_client'
+11:58:44,61 root INFO Starting training...
+11:58:44,641 root INFO Average params: {'group_norm': {'offset': Traced<ShapedArray(float32[16])>with<DynamicJaxprTrace(level=0/1)>, 'scale': Traced<ShapedArray(float32[16])>with<DynamicJaxprTrace(level=0/1)>}, 'group_norm_1': {'offset': Traced<ShapedArray(float32[32])>with<DynamicJaxprTrace(level=0/1)>, 'scale': Traced<ShapedArray(float32[32])>with<DynamicJaxprTrace(level=0/1)>}, 'linear': {'b': Traced<ShapedArray(float32[32])>with<DynamicJaxprTrace(level=0/1)>, 'w': Traced<ShapedArray(float32[512,32])>with<DynamicJaxprTrace(level=0/1)>}, 'linear_1': {'b': Traced<ShapedArray(float32[10])>with<DynamicJaxprTrace(level=0/1)>, 'w': Traced<ShapedArray(float32[32,10])>with<DynamicJaxprTrace(level=0/1)>}, 'ws_conv2_d': {'bias': Traced<ShapedArray(float32[16])>with<DynamicJaxprTrace(level=0/1)>, 'gain': Traced<ShapedArray(float32[16])>with<DynamicJaxprTrace(level=0/1)>, 'w': Traced<ShapedArray(float32[8,8,1,16])>with<DynamicJaxprTrace(level=0/1)>}, 'ws_conv2_d_1': {'bias': Traced<ShapedArray(float32[32])>with<DynamicJaxprTrace(level=0/1)>, 'gain': Traced<ShapedArray(float32[32])>with<DynamicJaxprTrace(level=0/1)>, 'w': Traced<ShapedArray(float32[4,4,16,32])>with<DynamicJaxprTrace(level=0/1)>}}, 
+ Grads: {'group_norm': {'offset': Traced<ShapedArray(float32[16])>with<DynamicJaxprTrace(level=0/1)>, 'scale': Traced<ShapedArray(float32[16])>with<DynamicJaxprTrace(level=0/1)>}, 'group_norm_1': {'offset': Traced<ShapedArray(float32[32])>with<DynamicJaxprTrace(level=0/1)>, 'scale': Traced<ShapedArray(float32[32])>with<DynamicJaxprTrace(level=0/1)>}, 'linear': {'b': Traced<ShapedArray(float32[32])>with<DynamicJaxprTrace(level=0/1)>, 'w': Traced<ShapedArray(float32[512,32])>with<DynamicJaxprTrace(level=0/1)>}, 'linear_1': {'b': Traced<ShapedArray(float32[10])>with<DynamicJaxprTrace(level=0/1)>, 'w': Traced<ShapedArray(float32[32,10])>with<DynamicJaxprTrace(level=0/1)>}, 'ws_conv2_d': {'bias': Traced<ShapedArray(float32[16])>with<DynamicJaxprTrace(level=0/1)>, 'gain': Traced<ShapedArray(float32[16])>with<DynamicJaxprTrace(level=0/1)>, 'w': Traced<ShapedArray(float32[8,8,1,16])>with<DynamicJaxprTrace(level=0/1)>}, 'ws_conv2_d_1': {'bias': Traced<ShapedArray(float32[32])>with<DynamicJaxprTrace(level=0/1)>, 'gain': Traced<ShapedArray(float32[32])>with<DynamicJaxprTrace(level=0/1)>, 'w': Traced<ShapedArray(float32[4,4,16,32])>with<DynamicJaxprTrace(level=0/1)>}}
+11:58:44,648 dp-sgd_experiment ERROR too many values to unpack (expected 3)
+Traceback (most recent call last):
+  File "/juice/scr/sabhay/DP-SGD/jax/main.py", line 364, in <module>
+    app.run(main)
+  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+  File "/juice/scr/sabhay/DP-SGD/jax/main.py", line 311, in main
+    opt_state, total_grad_norm = private_update(key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True), add_params)
+  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/_src/traceback_util.py", line 162, in reraise_with_filtered_traceback
+    return fun(*args, **kwargs)
+  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/_src/api.py", line 522, in cache_miss
+    out_flat = xla.xla_call(
+  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/core.py", line 1831, in bind
+    return call_bind(self, fun, *args, **params)
+  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/core.py", line 1847, in call_bind
+    outs = top_trace.process_call(primitive, fun_, tracers, params)
+  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/core.py", line 683, in process_call
+    return primitive.impl(f, *tracers, **params)
+  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/_src/dispatch.py", line 196, in _xla_call_impl
+    compiled_fun = xla_callable(fun, device, backend, name, donated_invars,
+  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/linear_util.py", line 286, in memoized_fun
+    ans = call(fun, *args)
+  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/_src/dispatch.py", line 245, in _xla_callable_uncached
+    return lower_xla_callable(fun, device, backend, name, donated_invars, False,
+  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/_src/profiler.py", line 312, in wrapper
+    return func(*args, **kwargs)
+  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/_src/dispatch.py", line 290, in lower_xla_callable
+    jaxpr, out_type, consts = pe.trace_to_jaxpr_final2(
+  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/_src/profiler.py", line 312, in wrapper
+    return func(*args, **kwargs)
+  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/interpreters/partial_eval.py", line 1959, in trace_to_jaxpr_final2
+    jaxpr, out_type, consts = trace_to_subjaxpr_dynamic2(fun, main)
+  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/interpreters/partial_eval.py", line 1920, in trace_to_subjaxpr_dynamic2
+    ans = fun.call_wrapped(*in_tracers_)
+  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/linear_util.py", line 168, in call_wrapped
+    ans = self.f(*args, **dict(self.params, **kwargs))
+  File "/juice/scr/sabhay/DP-SGD/jax/main.py", line 292, in private_update
+    opt_state = set_params(avg_params, params)
+  File "/juice/scr/sabhay/DP-SGD/jax/optim/optimizer.py", line 110, in tree_set_params
+    states_flat, tree, subtrees = opt_state
+jax._src.traceback_util.UnfilteredStackTrace: ValueError: too many values to unpack (expected 3)
+
+The stack trace below excludes JAX-internal frames.
+The preceding is the original exception that occurred, unmodified.
+
+--------------------
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/juice/scr/sabhay/DP-SGD/jax/main.py", line 364, in <module>
+    app.run(main)
+  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/absl/app.py", line 312, in run
+    _run_main(main, args)
+  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/absl/app.py", line 258, in _run_main
+    sys.exit(main(argv))
+  File "/juice/scr/sabhay/DP-SGD/jax/main.py", line 311, in main
+    opt_state, total_grad_norm = private_update(key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True), add_params)
+  File "/juice/scr/sabhay/DP-SGD/jax/main.py", line 292, in private_update
+    opt_state = set_params(avg_params, params)
+  File "/juice/scr/sabhay/DP-SGD/jax/optim/optimizer.py", line 110, in tree_set_params
+    states_flat, tree, subtrees = opt_state
+ValueError: too many values to unpack (expected 3)
