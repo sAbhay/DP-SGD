@@ -2,14 +2,22 @@ from typing import NamedTuple, Callable, Tuple
 import functools
 from functools import partial
 
-from jax.example_libraries.optimizers import Params, InitFn, UpdateFn, Step, State, Updates, OptimizerState
+from jax.example_libraries.optimizers import Params, InitFn, UpdateFn, Step, State, Updates, Schedule
 from sys import path
 path.append('.')
 from common import util
-from jax.tree_util import (tree_flatten, tree_unflatten)
+from jax.tree_util import tree_flatten, tree_unflatten, register_pytree_node
+from collections import namedtuple
 
 map = util.safe_map
 zip = util.safe_zip
+
+OptimizerState = namedtuple("OptimizerState",
+                            ["packed_state", "tree_def", "subtree_defs"])
+register_pytree_node(
+    OptimizerState,
+    lambda xs: ((xs.packed_state,), (xs.tree_def, xs.subtree_defs)),
+    lambda data, xs: OptimizerState(xs[0], data[0], data[1]))  # type: ignore[index]
 
 GetParamsFn = Callable[[OptimizerState], Params]
 SetParamsFn = Callable[[Params], OptimizerState]
@@ -19,9 +27,6 @@ class Optimizer(NamedTuple):
   update_fn: UpdateFn
   get_params_fn: GetParamsFn
   set_params_fn: SetParamsFn
-
-
-Schedule = Callable[[Step], float]
 
 
 def optimizer(opt_maker: Callable[...,
