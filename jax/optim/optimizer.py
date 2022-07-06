@@ -118,7 +118,7 @@ def optimizer(opt_maker: Callable[...,
                "initialized: parameter tree {} and new tree {}.")
         raise TypeError(msg.format(tree, tree2))
       states = map(tree_unflatten, subtrees, states_flat)
-      new_states = map(partial(update, i), grad_flat, states)
+      new_states = map(partial(set_params, i), grad_flat, states)
       new_states_flat, subtrees2 = util.unzip2(map(tree_flatten, new_states))
       for subtree, subtree2 in zip(subtrees, subtrees2):
         if subtree2 != subtree:
