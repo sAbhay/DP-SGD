@@ -101,7 +101,8 @@ def optimizer(opt_maker: Callable[...,
       return tree_unflatten(tree, params)
 
     @functools.wraps(set_params)
-    def tree_set(new_tree, opt_state):
+    def tree_set_params(new_tree, opt_state):
+      print(len(opt_state), opt_state)
       states_flat, tree, subtrees = opt_state
       new_flat, tree2 = tree_flatten(new_tree)
       if tree2 != tree:
@@ -119,5 +120,5 @@ def optimizer(opt_maker: Callable[...,
           raise TypeError(msg.format(subtree, subtree2))
       return OptimizerState(new_states_flat, tree, subtrees)
 
-    return Optimizer(tree_init, tree_update, tree_get_params, tree_set)
+    return Optimizer(tree_init, tree_update, tree_get_params, tree_set_params)
   return tree_opt_maker
