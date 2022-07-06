@@ -68,6 +68,11 @@ Example invocations:
 """
 
 import logging
+logging.basicConfig(filename='log.txt',
+                        filemode='w',
+                        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                        datefmt='%H:%M:%S',
+                        level=logging.INFO)
 
 import itertools
 import time
@@ -124,12 +129,6 @@ flags.DEFINE_integer('ema_start_step', 0, "EMA start step")
 flags.DEFINE_integer('polyak_start_step', 0, "Polyak start step")
 
 def main(_):
-    logging.basicConfig(filename='log.txt',
-                        filemode='w',
-                        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                        datefmt='%H:%M:%S',
-                        level=logging.INFO)
-
     logging.info("Running Experiment")
 
     if FLAGS.microbatches:
