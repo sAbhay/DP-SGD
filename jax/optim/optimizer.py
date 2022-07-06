@@ -3,11 +3,8 @@ import functools
 from functools import partial
 
 from jax.example_libraries.optimizers import Params, InitFn, UpdateFn, Step, State, Updates, OptimizerState
-import jax.numpy as jnp
 from .common import util
-from jax import tree_util
-from jax.tree_util import (tree_map, tree_flatten, tree_unflatten,
-                           register_pytree_node)
+from jax.tree_util import (tree_flatten, tree_unflatten)
 
 map = util.safe_map
 zip = util.safe_zip
