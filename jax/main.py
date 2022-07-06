@@ -363,4 +363,8 @@ def main(_):
 
 
 if __name__ == '__main__':
-  app.run(main)
+    try:
+        app.run(main)
+    except Exception as e:
+        logging.error(e)
+        raise e
