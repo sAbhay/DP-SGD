@@ -150,7 +150,7 @@ def main(_):
     def average_params(params, add_params, t):
         return averaging.average_params(params, add_params, t,
                                         FLAGS.ema_coef, FLAGS.ema_start_step, FLAGS.polyak_start_step)
-    opt_init, opt_update, get_params = sgdavg.sgd_avg(FLAGS.learning_rate, average_params)
+    opt_init, opt_update, get_params, set_params = sgdavg.sgd(FLAGS.learning_rate)
 
     rng = random.PRNGKey(42)
     model_fn = models.mnist.get_mnist_model_fn(FLAGS.overparameterised, FLAGS.groups)
@@ -259,7 +259,11 @@ def main(_):
     def update(_, i, opt_state, batch, add_params):
         params = get_params(opt_state)
         grads, total_grad_norm = non_private_grad(params, batch, FLAGS.batch_size)
-        return opt_update(i, {'g': grads, 'avg_args': [add_params, i]}, opt_state), total_grad_norm
+        opt_state = opt_update(i, grads, opt_state)
+        params = get_params(opt_state)
+        avg_params = average_params(params, add_params, i)
+        opt_state = set_params(avg_params, params)
+        return opt_state, total_grad_norm
 
     @jit
     def private_update(rng, i, opt_state, batch, add_params):
@@ -267,9 +271,12 @@ def main(_):
         rng = random.fold_in(rng, i)  # get new key for new random numbers
         private_grads, total_grad_norm = private_grad(params, batch, rng, FLAGS.l2_norm_clip,
                      FLAGS.noise_multiplier, FLAGS.batch_size)
-        return opt_update(
-            i, {'g': private_grads, 'avg_args': [add_params, i]}
-            , opt_state), total_grad_norm
+        opt_state = opt_update(
+            i, private_grads, opt_state)
+        params = get_params(opt_state)
+        avg_params = average_params(params, add_params, i)
+        opt_state = set_params(avg_params, params)
+        return opt_state, total_grad_norm
 
     # _, init_params = init_random_params(key, (-1, 28, 28, 1))
     opt_state = opt_init(init_params)
