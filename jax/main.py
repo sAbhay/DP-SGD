@@ -68,12 +68,15 @@ Example invocations:
 """
 
 import logging
+import sys
 logging.basicConfig(filename='log.txt',
                         filemode='w',
                         format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                         datefmt='%H:%M:%S',
                         level=logging.DEBUG)
-logger = logging.getLogger('experiment')
+logging.disable_existing_loggers=False
+logger = logging.getLogger('dp-sgd_experiment')
+logger.addHandler(logging.StreamHandler(sys.stdout))
 
 import itertools
 import time
