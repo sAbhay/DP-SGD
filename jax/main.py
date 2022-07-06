@@ -263,6 +263,8 @@ def main(_):
         params = get_params(opt_state)
         avg_params = average_params(params, add_params, i)
         opt_state = set_params(avg_params, params)
+        print("Called set params")
+        assert False
         return opt_state, total_grad_norm
 
     @jit
