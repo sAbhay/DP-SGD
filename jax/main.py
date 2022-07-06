@@ -73,6 +73,7 @@ logging.basicConfig(filename='log.txt',
                         format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                         datefmt='%H:%M:%S',
                         level=logging.INFO)
+logger = logging.getLogger('experiment')
 
 import itertools
 import time
@@ -129,7 +130,7 @@ flags.DEFINE_integer('ema_start_step', 0, "EMA start step")
 flags.DEFINE_integer('polyak_start_step', 0, "Polyak start step")
 
 def main(_):
-    logging.info("Running Experiment")
+    logger.info("Running Experiment")
 
     if FLAGS.microbatches:
         raise NotImplementedError(
@@ -269,13 +270,13 @@ def main(_):
         params = get_params(opt_state)
         grads, total_grad_norm = non_private_grad(params, batch, FLAGS.batch_size)
         opt_state = opt_update(i, grads, opt_state)
-        logging.debug(len(opt_state))
+        logger.debug(len(opt_state))
         params = get_params(opt_state)
-        logging.debug(len(opt_state))
+        logger.debug(len(opt_state))
         avg_params = average_params(params, add_params, i)
-        logging.debug(len(opt_state))
+        logger.debug(len(opt_state))
         opt_state = set_params(avg_params, params)
-        logging.debug(len(opt_state))
+        logger.debug(len(opt_state))
         return opt_state, total_grad_norm
 
     @jit
@@ -300,7 +301,7 @@ def main(_):
     stats = []
     steps_per_epoch = 60000 // FLAGS.batch_size
     add_params = {'ema': get_params(opt_state), 'polyak': get_params(opt_state)}
-    print('\nStarting training...')
+    logging.info('\nStarting training...')
     for epoch in range(1, FLAGS.epochs + 1):
         start_time = time.time()
         epoch_grad_norms = []
@@ -322,11 +323,11 @@ def main(_):
         params = get_params(opt_state)
         test_acc, _, _ = accuracy(params, shape_as_image(test_images, test_labels))
         test_loss = loss(params, shape_as_image(test_images, test_labels))
-        print('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
+        logging.info('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             test_loss, 100 * test_acc))
         train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels))
         train_loss = loss(params, shape_as_image(train_images, train_labels))
-        print('Train set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
+        logging.info('Train set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             train_loss, 100 * train_acc))
 
         # determine privacy loss so far
@@ -334,11 +335,11 @@ def main(_):
             delta = 1e-5
             num_examples = 60000
             eps = compute_epsilon(epoch * steps_per_epoch, num_examples, delta)
-            print(
+            logging.info(
                 'For delta={:.0e}, the current epsilon is: {:.2f}'.format(delta, eps))
         else:
             eps = None
-            print('Trained with vanilla non-private SGD optimizer')
+            logging.info('Trained with vanilla non-private SGD optimizer')
 
         stats.append((train_loss, train_acc, test_loss, test_acc, eps))
 
@@ -355,7 +356,7 @@ def main(_):
                 pickle.dump(param_norms, f)
 
         epoch_time = time.time() - start_time
-        print('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
+        logging.info('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
 
 
 if __name__ == '__main__':
