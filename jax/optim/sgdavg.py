@@ -20,5 +20,5 @@ def sgd(step_size):
   def get_params(x):
     return x
   def set_params(x_new, x):
-    return x_new
+    pass
   return Optimizer(init, update, get_params, set_params)
