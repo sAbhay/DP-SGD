@@ -67,6 +67,8 @@ Example invocations:
    --learning_rate=.25 \
 """
 
+import logging
+
 import itertools
 import time
 import warnings
@@ -122,6 +124,14 @@ flags.DEFINE_integer('ema_start_step', 0, "EMA start step")
 flags.DEFINE_integer('polyak_start_step', 0, "Polyak start step")
 
 def main(_):
+    logging.basicConfig(filename='log.txt',
+                        filemode='w',
+                        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                        datefmt='%H:%M:%S',
+                        level=logging.INFO)
+
+    logging.info("Running Experiment")
+
     if FLAGS.microbatches:
         raise NotImplementedError(
             'Microbatches < batch size not currently supported'
@@ -260,11 +270,13 @@ def main(_):
         params = get_params(opt_state)
         grads, total_grad_norm = non_private_grad(params, batch, FLAGS.batch_size)
         opt_state = opt_update(i, grads, opt_state)
+        logging.debug(len(opt_state))
         params = get_params(opt_state)
+        logging.debug(len(opt_state))
         avg_params = average_params(params, add_params, i)
+        logging.debug(len(opt_state))
         opt_state = set_params(avg_params, params)
-        print("Called set params")
-        assert False
+        logging.debug(len(opt_state))
         return opt_state, total_grad_norm
 
     @jit
