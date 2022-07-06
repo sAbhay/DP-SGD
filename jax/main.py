@@ -259,7 +259,7 @@ def main(_):
     def update(_, i, opt_state, batch, add_params):
         params = get_params(opt_state)
         grads, total_grad_norm = non_private_grad(params, batch, FLAGS.batch_size)
-        return opt_update(i, grads, opt_state, add_params), total_grad_norm
+        return opt_update(i, {'g': grads, 'average_args': add_params}, opt_state), total_grad_norm
 
     @jit
     def private_update(rng, i, opt_state, batch, add_params):
@@ -268,8 +268,8 @@ def main(_):
         private_grads, total_grad_norm = private_grad(params, batch, rng, FLAGS.l2_norm_clip,
                      FLAGS.noise_multiplier, FLAGS.batch_size)
         return opt_update(
-            i, private_grads
-            , opt_state, add_params), total_grad_norm
+            i, {'g': private_grads, 'average_args': add_params}
+            , opt_state), total_grad_norm
 
     # _, init_params = init_random_params(key, (-1, 28, 28, 1))
     opt_state = opt_init(init_params)

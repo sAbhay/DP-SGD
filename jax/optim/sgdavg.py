@@ -14,9 +14,9 @@ def sgd_avg(step_size, average_params):
   step_size = make_schedule(step_size)
   def init(x0):
     return x0
-  def update(i, g, x, *avg_args):
-    x = x - step_size(i) * g
-    return average_params(x, *avg_args)
+  def update(i, update_args, x):
+    x = x - step_size(i) * update_args['g']
+    return average_params(x, *update_args['avg_args'])
   def get_params(x):
     return x
   return Optimizer(init, update, get_params)
