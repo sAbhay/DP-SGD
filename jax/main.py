@@ -282,7 +282,7 @@ def main(_):
         avg_params = average_params(params, add_params, i)
         # logger.info(f"Average params: {avg_params}, \n Grads: {private_grads}")
         logger.info("Optimization state: {}".format(opt_state))
-        opt_state = set_params(i, avg_params, params)
+        opt_state = set_params(i, private_grads, params)
         return opt_state, total_grad_norm
 
     # _, init_params = init_random_params(key, (-1, 28, 28, 1))
