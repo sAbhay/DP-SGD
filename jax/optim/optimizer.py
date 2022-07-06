@@ -22,7 +22,7 @@ register_pytree_node(
     lambda data, xs: OptimizerState(xs[0], data[0], data[1]))  # type: ignore[index]
 
 GetParamsFn = Callable[[OptimizerState], Params]
-SetParamsFn = Callable[[Step, Updates, OptimizerState], OptimizerState]
+SetParamsFn = Callable[[Updates, OptimizerState], OptimizerState]
 
 class Optimizer(NamedTuple):
   init_fn: InitFn
@@ -35,7 +35,7 @@ def optimizer(opt_maker: Callable[...,
   Tuple[Callable[[Params], State],
         Callable[[Step, Updates, Params], Params],
         Callable[[State], Params],
-        Callable[[Step, Updates, Params], Params]]]) -> Callable[..., Optimizer]:
+        Callable[[Updates, Params], Params]]]) -> Callable[..., Optimizer]:
   """Decorator to make an optimizer defined for arrays generalize to containers.
 
   With this decorator, you can write init, update, and get_params functions that
@@ -108,17 +108,17 @@ def optimizer(opt_maker: Callable[...,
       return tree_unflatten(tree, params)
 
     @functools.wraps(set_params)
-    def tree_set_params(i, grad_tree, opt_state):
-      logger.info("Opt_state set_params: {}".format(opt_state))
+    def tree_set_params(new_tree, opt_state):
+      # logger.info("Opt_state set_params: {}".format(opt_state))
       states_flat, tree, subtrees = opt_state
-      grad_flat, tree2 = tree_flatten(grad_tree)
+      new_flat, tree2 = tree_flatten(new_tree)
       if tree2 != tree:
         msg = ("optimizer update function was passed a new tree that did "
                "not match the parameter tree structure with which it was "
                "initialized: parameter tree {} and new tree {}.")
         raise TypeError(msg.format(tree, tree2))
       states = map(tree_unflatten, subtrees, states_flat)
-      new_states = map(partial(set_params, i), grad_flat, states)
+      new_states = map(set_params, new_flat, states)
       new_states_flat, subtrees2 = util.unzip2(map(tree_flatten, new_states))
       for subtree, subtree2 in zip(subtrees, subtrees2):
         if subtree2 != subtree:
