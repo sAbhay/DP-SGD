@@ -102,8 +102,11 @@ def optimizer(opt_maker: Callable[...,
 
     @functools.wraps(set_params)
     def tree_set_params(new_tree, opt_state):
-      print(len(opt_state), opt_state)
-      states_flat, tree, subtrees = opt_state
+      try:
+        states_flat, tree, subtrees = opt_state
+      except ValueError as e:
+        print(len(opt_state), opt_state)
+        assert False
       new_flat, tree2 = tree_flatten(new_tree)
       if tree2 != tree:
         msg = ("optimizer update function was passed a new tree that did "
