@@ -96,6 +96,7 @@ def optimizer(opt_maker: Callable[...,
     @functools.wraps(get_params)
     def tree_get_params(opt_state):
       states_flat, tree, subtrees = opt_state
+      assert False, f"{len(opt_state)}, {opt_state})"
       states = map(tree_unflatten, subtrees, states_flat)
       params = map(get_params, states)
       return tree_unflatten(tree, params)
