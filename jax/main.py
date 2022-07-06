@@ -93,7 +93,7 @@ from tensorflow_privacy.privacy.analysis.rdp_accountant import get_privacy_spent
 import pickle
 
 import models.mnist
-import optim
+from optim import sgdavg
 from common import averaging
 
 FLAGS = flags.FLAGS
@@ -150,7 +150,7 @@ def main(_):
     def average_params(params, add_params, t):
         return averaging.average_params(params, add_params, t,
                                         FLAGS.ema_coef, FLAGS.ema_start_step, FLAGS.polyak_start_step)
-    opt_init, opt_update, get_params = optim.sgdavg.sgd_avg(FLAGS.learning_rate, average_params)
+    opt_init, opt_update, get_params = sgdavg.sgd_avg(FLAGS.learning_rate, average_params)
 
     rng = random.PRNGKey(42)
     model_fn = models.mnist.get_mnist_model_fn(FLAGS.overparameterised, FLAGS.groups)
