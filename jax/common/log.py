@@ -10,5 +10,5 @@ def get_logger(name):
                             datefmt='%H:%M:%S',
                             level=logging.DEBUG)
     logging.disable_existing_loggers=False
-    logger.addHandler(logging.StreamHandler(sys.stdout))
+    # logger.addHandler(logging.StreamHandler(sys.stdout))
     return logger

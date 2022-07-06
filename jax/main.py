@@ -257,7 +257,7 @@ def main(_):
         total_params_norm = jnp.linalg.norm(
             [jnp.linalg.norm(p.ravel()) for p in nonempty_params]
         )
-        print("Params count:", sum([len(p.ravel()) for p in nonempty_params]))
+        logger.info("Params count:", sum([len(p.ravel()) for p in nonempty_params]))
         return total_params_norm
 
     @jit
