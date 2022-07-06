@@ -1,4 +1,4 @@
-from .optimizer import Optimizer, optimizer
+from .optimizer import Optimizer, optimizer, logger
 from jax.example_libraries.optimizers import make_schedule
 
 @optimizer
@@ -20,5 +20,6 @@ def sgd(step_size):
   def get_params(x):
     return x
   def set_params(x_new, x):
-    pass
+    logger.debug(f"x_new: {x_new}, x: {x}")
+    return x_new
   return Optimizer(init, update, get_params, set_params)
