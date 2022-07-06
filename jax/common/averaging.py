@@ -52,8 +52,10 @@ def ema(
       tree_new,
   )
 
-average_polyak = jax.vmap(polyak, (None, None, None))
-average_ema = jax.vmap(ema, (None, None, None, None, None))
+# average_polyak = jax.vmap(polyak, (None, None, None))
+# average_ema = jax.vmap(ema, (None, None, None, None, None))
+average_polyak = polyak
+average_ema = ema
 
 def average_params(params, add_params, t, mu, ema_start_step, polyak_start_step):
     """Performs both EMA and Polyak parameter averaging."""
