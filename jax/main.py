@@ -67,16 +67,8 @@ Example invocations:
    --learning_rate=.25 \
 """
 
-import logging
-import sys
-logger = logging.getLogger('dp-sgd_experiment')
-logging.basicConfig(filename='log.txt',
-                        filemode='w',
-                        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                        datefmt='%H:%M:%S',
-                        level=logging.DEBUG)
-logging.disable_existing_loggers=False
-logger.addHandler(logging.StreamHandler(sys.stdout))
+from common import log
+logger = log.get_logger('experiment')
 
 import itertools
 import time

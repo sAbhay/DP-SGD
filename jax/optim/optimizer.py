@@ -1,11 +1,13 @@
+from sys import path
+path.append('.')
+from common import util, log
+logger = log.get_logger('optimizer')
+
 from typing import NamedTuple, Callable, Tuple
 import functools
 from functools import partial
 
 from jax.example_libraries.optimizers import Params, InitFn, UpdateFn, Step, State, Updates, Schedule
-from sys import path
-path.append('.')
-from common import util
 from jax.tree_util import tree_flatten, tree_unflatten, register_pytree_node
 from collections import namedtuple
 
@@ -107,6 +109,7 @@ def optimizer(opt_maker: Callable[...,
 
     @functools.wraps(set_params)
     def tree_set_params(new_tree, opt_state):
+      logger.debug(opt_state)
       states_flat, tree, subtrees = opt_state
       new_flat, tree2 = tree_flatten(new_tree)
       if tree2 != tree:
