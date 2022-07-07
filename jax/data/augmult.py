@@ -144,8 +144,6 @@ def apply_augmult(
     return apply_augmult_tf(images, labels, image_size=image_size, augmult=augmult,
                                                   random_flip=random_flip, random_crop=random_crop, crop_size=crop_size,
                                                   pad=pad)
-  out = tf.vectorized_map(apply_augmult_partial, (images, labels))
-  logger.info(f"augmult out: {out}")
-  # images = tf.stack(image_list, axis=0).numpy()
-  # labels = tf.stack(label_list, axis=0).numpy()
+  images, labels = tf.vectorized_map(apply_augmult_partial, (images, labels))
+  logger.info(f"augmult images: {images.shape}, labels: {labels.shape}")
   return images, labels
