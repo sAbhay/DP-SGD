@@ -216,14 +216,17 @@ def main(_):
       target_class = jnp.argmax(targets, axis=1)
       logits = predict(params, inputs)
       predicted_class = jnp.argmax(logits, axis=1)
-      logits_list = logits.tolist()
+      # logits_list = logits.tolist()
       # print(logits_list[0])
       return jnp.mean(predicted_class == target_class), predicted_class == target_class, logits
 
 
     def clipped_grad(params, l2_norm_clip, single_example_batch):
       """Evaluate gradient for a single-example batch and clip its grad norm."""
+      logger.info("Single example batch: {}".format(single_example_batch, single_example_batch.shape))
       grads = grad(loss)(params, single_example_batch)
+      if FLAGS.augmult > 0:
+          grads = grads.mean(axis=0)
       nonempty_grads, tree_def = tree_flatten(grads)
       total_grad_norm = jnp.linalg.norm(
           [jnp.linalg.norm(neg.ravel()) for neg in nonempty_grads])
