@@ -355,7 +355,7 @@ def main(_):
                 key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
           acc, correct, logits = accuracy(get_params(opt_state), shape_as_image(*next_batch, augmult=FLAGS.augmult, flatten_augmult=True))
           # print('Grad norm', len(total_grad_norm), 'Correct', len(correct))
-          epoch_grad_norms += zip(float(total_grad_norm), float(correct), logits.tolist())
+          epoch_grad_norms += zip(total_grad_norm.tolist(), correct.tolist(), logits.tolist())
         param_norms.append(float(params_norm(get_params(opt_state))))
 
         grad_norms.append(epoch_grad_norms)
