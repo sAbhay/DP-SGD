@@ -46,13 +46,13 @@ if __name__ == '__main__':
         for epoch in range(len(epoch_norms)):
             norms += [(epoch,) + v for v in epoch_norms[epoch]]
         for i, norm in enumerate(norms):
-            norms[i] = tuple([norm[0], norm[1].item(), norm[2].item()] + list(norm[3]))
+            norms[i] = tuple([norm[0], norm[1], norm[2]] + list(norm[3]))
         # print(norms[0])
 
         with open(rf'{NORM_DIR}\param_norms_{hyperparams_string}.pkl', 'rb') as f:
             param_norms = pickle.load(f)
         for i, param_norm in enumerate(param_norms):
-            param_norms[i] = (i, param_norm.item())
+            param_norms[i] = (i, param_norm)
 
         cols = ['epoch', 'norm', 'accurate']
         logit_cols = [f'{i}_logit' for i in range(0, 10)]
