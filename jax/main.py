@@ -67,7 +67,7 @@ Example invocations:
    --learning_rate=.25 \
 """
 
-# TODO: clean up reshaping, move it out of predict and shape_as_image into dedicated functionst
+# TODO: set up log debugging
 # TODO: add virtual gradient accumulation
 
 from common import log
@@ -145,20 +145,20 @@ def main(_):
     if FLAGS.dpsgd and FLAGS.augmult > 0:
         start_time = time.time()
         image_size = [int(dim) for dim in FLAGS.image_shape.split("x")]
-        train_images, train_labels = datasets.apply_augmult(train_images, train_labels,
+        aug_train_images, aug_train_labels = datasets.apply_augmult(train_images, train_labels,
                                                             image_size=image_size, augmult=FLAGS.augmult,
                                                             random_flip=FLAGS.random_flip, random_crop=FLAGS.random_crop)
-        train_images = train_images.reshape((train_images.shape[0], train_images.shape[1], -1))
+        aug_train_images = aug_train_images.reshape((aug_train_images.shape[0], aug_train_images.shape[1], -1))
+        logger.info(f"Augmented train set shape: {aug_train_images.shape}, {aug_train_labels.shape}")
         logger.info("Augmented train images in {:.2f} sec".format(time.time() - start_time))
     else:
         logger.warn("No data augmentation applied for vanilla SGD")
-    logger.info(f"Train set shape: {train_images.shape}, {train_labels.shape}")
     num_train = train_images.shape[0]
     num_complete_batches, leftover = divmod(num_train, FLAGS.batch_size)
     num_batches = num_complete_batches + bool(leftover)
     key = random.PRNGKey(FLAGS.seed)
 
-    def data_stream():
+    def data_stream(train_images, train_labels):
         rng = npr.RandomState(FLAGS.seed)
         while True:
             perm = rng.permutation(num_train)
@@ -177,7 +177,10 @@ def main(_):
             target_shape = (-1, augmult, 1, 28, 28, 1) if dummy_dim else (-1, augmult, 28, 28, 1)
         return jnp.reshape(images, target_shape), labels
 
-    batches = data_stream()
+    if FLAGS.dpsgd and FLAGS.augmult > 0:
+        batches = data_stream(aug_train_images, aug_train_labels)
+    else:
+        batches = data_stream(train_images, train_labels)
 
     def average_params(params, add_params, t):
         return averaging.average_params(params, add_params, t,
@@ -363,8 +366,8 @@ def main(_):
         test_loss = loss(params, shape_as_image(test_images, test_labels, augmult=0))
         logger.info('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             test_loss, 100 * test_acc))
-        train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels, augmult=FLAGS.augmult, flatten_augmult=True))
-        train_loss = loss(params, shape_as_image(train_images, train_labels, augmult=FLAGS.augmult, flatten_augmult=False))
+        train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels, augmult=0))
+        train_loss = loss(params, shape_as_image(train_images, train_labels, augmult=0))
         logger.info('Train set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             train_loss, 100 * train_acc))
 
