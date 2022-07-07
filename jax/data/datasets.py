@@ -23,7 +23,7 @@ import struct
 import urllib.request
 
 import numpy as np
-import .augmult
+from .augmult import apply_augmult
 
 
 _DATA = "/tmp/jax_example_data/"
@@ -96,6 +96,6 @@ def mnist(permute_train=False):
 
 def augmult_images(images, labels, image_size, augmult, random_flip, random_crop):
     """Augment images and labels with augmult."""
-    images, labels = augmult.apply_augmult(images, labels, image_size=image_size, augmult=augmult,
+    images, labels = apply_augmult(images, labels, image_size=image_size, augmult=augmult,
                                            random_flip=random_flip, random_crop=random_crop)
     return images, labels
