@@ -182,7 +182,7 @@ def main(_):
     model_fn = models.mnist.get_mnist_model_fn(FLAGS.overparameterised, FLAGS.groups)
     model = hk.transform(model_fn, apply_rng=True)
 
-    init_batch = shape_as_image(*next(batches), dummy_dim=True, augmult=FLAGS.augmult)[0]
+    init_batch = shape_as_image(*next(batches), augmult=FLAGS.augmult)[0]
     logger.info(f"Init batch shape: {init_batch.shape}")
     init_params = model.init(key, init_batch)
     def predict(params, inputs):
