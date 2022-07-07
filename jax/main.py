@@ -138,6 +138,7 @@ def main(_):
         )
 
     train_images, train_labels, test_images, test_labels = datasets.mnist()
+    logger.info(f"Train set shape: {train_images.shape}, {train_labels.shape}")
     if FLAGS.dpsgd and FLAGS.augmult > 0:
         start_time = time.time()
         train_images, train_labels = datasets.apply_augmult(train_images, train_labels,
