@@ -233,7 +233,10 @@ def main(_):
       """Evaluate gradient for a single-example batch and clip its grad norm."""
       logger.info("Single example batch: {}".format(single_example_batch[0].shape, single_example_batch[1].shape))
       if FLAGS.augmult > 0:
-          grads = vmap(grad(loss), (None, 0))(params, single_example_batch)
+          def _single_augmult_grad(params, single_example_augmult):
+              logger.info(f"Single example augmult batch: {single_example_augmult[0].shape}, {single_example_augmult[1].shape}")
+              return grad(loss)(params, single_example_augmult)
+          grads = vmap(_single_augmult_grad, (None, 0))(params, single_example_batch)
           nonempty_grads, tree_def = tree_flatten(grads)
           logger.info("Number of grads: {}".format(len(nonempty_grads), nonempty_grads))
           nonempty_grads = [g.mean(0) for g in grads]
