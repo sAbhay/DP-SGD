@@ -238,7 +238,7 @@ def main(_):
     def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
                      batch_size):
       """Return differentially private gradients for params, evaluated on batch."""
-      clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, (0, 1)))(params, l2_norm_clip, batch)
+      clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, (0, 0)))(params, l2_norm_clip, batch)
       clipped_grads_flat, grads_treedef = tree_flatten(clipped_grads)
       aggregated_clipped_grads = [g.sum(0) for g in clipped_grads_flat]
       rngs = random.split(rng, len(aggregated_clipped_grads))
@@ -299,7 +299,7 @@ def main(_):
     def private_update(rng, i, opt_state, batch, add_params):
         params = get_params(opt_state)
         rng = random.fold_in(rng, i)  # get new key for new random numbers
-        logger.info("Batch shape: {}".format(batch.shape))
+        logger.info("Batch shape: {}".format(batch[0].shape, batch[0].shape))
         private_grads, total_grad_norm = private_grad(params, batch, rng, FLAGS.l2_norm_clip,
                      FLAGS.noise_multiplier, FLAGS.batch_size)
         opt_state = opt_update(
