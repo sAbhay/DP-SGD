@@ -163,14 +163,11 @@ def main(_):
                 batch_idx = perm[i * FLAGS.batch_size:(i + 1) * FLAGS.batch_size]
                 yield train_images[batch_idx], train_labels[batch_idx]
 
-    def shape_as_image(images, labels, dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True):
+    def shape_as_image(images, labels, dummy_dim=False, augmult=FLAGS.augmult):
         logger.info(f"Preshaped images shape: {images.shape}")
         target_shape = (-1, 1, 28, 28, 1) if dummy_dim else (-1, 28, 28, 1)
-        if flatten_augmult:
-            if augmult > 0:
-                labels = jnp.reshape(labels, (FLAGS.batch_size * FLAGS.augmult, *labels.shape[2:]))
-        elif augmult > 0:
-            target_shape = (-1, augmult, 1, 28, 28, 1) if dummy_dim else (-1, augmult, 28, 28, 1)
+        if augmult > 0:
+            labels = jnp.reshape(labels, (FLAGS.batch_size * FLAGS.augmult, *labels.shape[2:]))
         return jnp.reshape(images, target_shape), labels
 
     batches = data_stream()
@@ -184,31 +181,29 @@ def main(_):
     model_fn = models.mnist.get_mnist_model_fn(FLAGS.overparameterised, FLAGS.groups)
     model = hk.transform(model_fn, apply_rng=True)
 
-    init_batch = shape_as_image(*next(batches), dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True)[0]
+    init_batch = shape_as_image(*next(batches), augmult=FLAGS.augmult)[0]
     logger.info(f"Init batch shape: {init_batch.shape}")
     init_params = model.init(key, init_batch)
-    def predict(params, inputs, augmult_reshape=True):
-        if FLAGS.augmult > 0:
-            inputs = inputs.reshape(-1, *inputs.shape[2:])
+    def predict(params, inputs):
         predictions = model.apply(params, None, inputs)
-        if augmult_reshape and FLAGS.augmult > 0:
-            predictions = predictions.reshape(-1, FLAGS.augmult, *predictions.shape[1:])
+        # if FLAGS.augmult > 0:
+        #     predictions = predictions.reshape(-1, FLAGS.augmult, *predictions.shape[1:])
         return predictions
 
     # jconfig.update('jax_platform_name', 'cpu')
 
     def ce_loss(params, batch):
       inputs, targets = batch
-      logits = predict(params, inputs, augmult_reshape=False)
-      logits = nn.log_softmax(logits, axis=-1)  # log normalize
+      logits = predict(params, inputs)
+      logits = nn.log_softmax(logits)  # log normalize
       return -jnp.mean(jnp.sum(logits * targets, axis=-1), axis=0)  # cross entropy loss
 
     def hinge_loss(params, batch):
         inputs, targets = batch
         if len(targets.shape) == 1:
             targets = targets.reshape(1, -1)
-        target_class = jnp.argmax(targets, axis=-1)
-        scores = predict(params, inputs, augmult_reshape=False)
+        target_class = jnp.argmax(targets, axis=1)
+        scores = predict(params, inputs)
         target_class_scores = jnp.choose(target_class, scores.T, mode='wrap')[:, jnp.newaxis]
         return jnp.mean(jnp.sum(jnp.maximum(0, 1+scores-target_class_scores)-1, axis=-1), axis=0)
 
@@ -222,9 +217,9 @@ def main(_):
 
     def accuracy(params, batch):
       inputs, targets = batch
-      target_class = jnp.argmax(targets, axis=-1)
-      logits = predict(params, inputs, augmult_reshape=False)
-      predicted_class = jnp.argmax(logits, axis=-1)
+      target_class = jnp.argmax(targets, axis=1)
+      logits = predict(params, inputs)
+      predicted_class = jnp.argmax(logits, axis=1)
       # logits_list = logits.tolist()
       # print(logits_list[0])
       return jnp.mean(predicted_class == target_class), predicted_class == target_class, logits
@@ -339,10 +334,10 @@ def main(_):
           next_batch = next(batches)
           if FLAGS.dpsgd:
             opt_state, total_grad_norm = private_update(
-                key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
+                key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult), add_params)
           else:
             opt_state, total_grad_norm = update(
-                key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
+                key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult), add_params)
           acc, correct, logits = accuracy(get_params(opt_state), shape_as_image(*next_batch))
           # print('Grad norm', len(total_grad_norm), 'Correct', len(correct))
           epoch_grad_norms += zip(total_grad_norm, correct, logits)
