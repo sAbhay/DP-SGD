@@ -165,10 +165,7 @@ def main(_):
 
     def shape_as_image(images, labels, dummy_dim=False, augmult=FLAGS.augmult):
         logger.info(f"Preshaped images shape: {images.shape}")
-        if augmult <= 0:
-            target_shape = (-1, 1, 28, 28, 1) if dummy_dim else (-1, 28, 28, 1)
-        else:
-            target_shape = (-1, augmult, 1, 28, 28, 1) if dummy_dim else (-1, augmult, 28, 28, 1)
+        target_shape = (-1, 1, 28, 28, 1) if dummy_dim else (-1, 28, 28, 1)
         return jnp.reshape(images, target_shape), labels
 
     batches = data_stream()
@@ -186,7 +183,10 @@ def main(_):
     logger.info(f"Init batch shape: {init_batch.shape}")
     init_params = model.init(key, init_batch)
     def predict(params, inputs):
-        return model.apply(params, None, inputs)
+        predictions = model.apply(params, None, inputs)
+        if FLAGS.augmult > 0:
+            predictions = predictions.reshape(-1, FLAGS.augmult, *predictions.shape[1:])
+        return predictions
 
     # jconfig.update('jax_platform_name', 'cpu')
 
