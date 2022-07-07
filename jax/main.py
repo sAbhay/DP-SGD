@@ -86,7 +86,7 @@ from jax.tree_util import tree_flatten, tree_unflatten
 import jax.numpy as jnp
 import haiku as hk
 
-import datasets
+from jax.data import datasets
 import numpy.random as npr
 
 # https://github.com/tensorflow/privacy
