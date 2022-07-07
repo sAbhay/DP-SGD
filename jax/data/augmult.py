@@ -146,4 +146,4 @@ def apply_augmult(
                                                   pad=pad)
   images, labels = tf.vectorized_map(apply_augmult_partial, (images, labels))
   logger.info(f"augmult images: {images.shape}, labels: {labels.shape}, image: {images[0][:10]}, label: {labels[0]}")
-  return images, labels
+  return images.numpy(), labels.numpy()
