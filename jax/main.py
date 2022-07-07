@@ -393,7 +393,7 @@ def main(_):
                 logger.info("grad norms: {}".format(grad_norms[-1][0:100]))
                 pickle.dump(grad_norms, f)
             with open(f'param_norms_{hyperparams_string}.pkl', 'wb') as f:
-                logger.info("param norms: {}".format(param_norms[-1][0:100]))
+                # logger.info("param norms: {}".format(param_norms[-1]))
                 pickle.dump(param_norms, f)
             with open(f'stats_{hyperparams_string}.pkl', 'wb') as f:
                 pickle.dump(stats, f)
