@@ -165,7 +165,7 @@ def main(_):
                 yield train_images[batch_idx], train_labels[batch_idx]
 
     def shape_as_image(images, labels, dummy_dim=False, augmult=FLAGS.augmult):
-        # logger.info(f"Preshaped images shape: {images.shape}")
+        logger.info(f"Preshaped images shape: {images.shape}")
         if augmult <= 0:
             target_shape = (-1, 1, 28, 28, 1) if dummy_dim else (-1, 28, 28, 1)
         else:
@@ -183,7 +183,9 @@ def main(_):
     model_fn = models.mnist.get_mnist_model_fn(FLAGS.overparameterised, FLAGS.groups)
     model = hk.transform(model_fn, apply_rng=True)
 
-    init_params = model.init(key, shape_as_image(*next(batches), augmult=FLAGS.augmult)[0])
+    init_batch = shape_as_image(*next(batches), augmult=FLAGS.augmult)[0]
+    logger.info(f"Init batch shape: {init_batch.shape}")
+    init_params = model.init(key, init_batch)
     def predict(params, inputs):
         return model.apply(params, None, inputs)
 
@@ -239,7 +241,7 @@ def main(_):
     def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
                      batch_size):
       """Return differentially private gradients for params, evaluated on batch."""
-      logger.info("Batch shape: {}".format(batch[0].shape, batch[0].shape))
+      logger.info("Batch shape: {}".format(batch[0].shape, batch[1].shape))
       clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0))(params, l2_norm_clip, batch)
       clipped_grads_flat, grads_treedef = tree_flatten(clipped_grads)
       aggregated_clipped_grads = [g.sum(0) for g in clipped_grads_flat]
