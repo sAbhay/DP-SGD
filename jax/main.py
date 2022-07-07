@@ -124,7 +124,7 @@ flags.DEFINE_float('ema_coef', 0.999, "EMA parameter averaging coefficient")
 flags.DEFINE_integer('ema_start_step', 0, "EMA start step")
 flags.DEFINE_integer('polyak_start_step', 0, "Polyak start step")
 flags.DEFINE_boolean('param_averaging', True, "Parameter averaging")
-# flags.DEFINE_string('image_shape', None, "Augmult image shape")
+flags.DEFINE_string('image_shape', '28x28x1', "Augmult image shape")
 flags.DEFINE_integer('augmult', 0, "Number of augmentation multipliers")
 flags.DEFINE_boolean('random_flip', True, "Random flip augmentation")
 flags.DEFINE_boolean('random_crop', True, "Random crop augmentation")
@@ -142,7 +142,7 @@ def main(_):
     if FLAGS.dpsgd and FLAGS.augmult > 0:
         start_time = time.time()
         train_images, train_labels = datasets.apply_augmult(train_images, train_labels,
-                                                            image_size=train_images[0].shape, augmult=FLAGS.augmult,
+                                                            image_size=FLAGS.image_size.split("x"), augmult=FLAGS.augmult,
                                                             random_flip=FLAGS.random_flip, random_crop=FLAGS.random_crop)
         FLAGS.batch_size *= FLAGS.augmult
         logger.info("Augmented train images in {:.2f} sec".format(time.time() - start_time))
