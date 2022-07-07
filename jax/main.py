@@ -171,7 +171,8 @@ def main(_):
         target_shape = (-1, 1, 28, 28, 1) if dummy_dim else (-1, 28, 28, 1)
         if flatten_augmult:
             if augmult > 0:
-                labels = jnp.reshape(labels, (FLAGS.batch_size * FLAGS.augmult, *labels.shape[2:]))
+                logger.info(f"Preshaped labels shape: {labels.shape}")
+                labels = jnp.reshape(labels, (-1, *labels.shape[2:]))
         elif augmult > 0:
             target_shape = (-1, augmult, 1, 28, 28, 1) if dummy_dim else (-1, augmult, 28, 28, 1)
         return jnp.reshape(images, target_shape), labels
@@ -231,7 +232,7 @@ def main(_):
 
     def clipped_grad(params, l2_norm_clip, single_example_batch):
       """Evaluate gradient for a single-example batch and clip its grad norm."""
-      logger.info("Single example batch: {}".format(single_example_batch[0].shape, single_example_batch[1].shape))
+      # logger.info("Single example batch: {}".format(single_example_batch[0].shape, single_example_batch[1].shape))
       if FLAGS.augmult > 0:
           # def _single_augmult_grad(params, single_example_augmult):
           #     logger.info(f"Single example augmult batch: {single_example_augmult[0].shape}, {single_example_augmult[1].shape}")
