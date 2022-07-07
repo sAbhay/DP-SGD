@@ -164,7 +164,7 @@ def main(_):
                 batch_idx = perm[i * FLAGS.batch_size:(i + 1) * FLAGS.batch_size]
                 yield train_images[batch_idx], train_labels[batch_idx]
 
-    def shape_as_image(images, labels, dummy_dim=False, augmult=0):
+    def shape_as_image(images, labels, dummy_dim=False, augmult=FLAGS.augmult):
         # logger.info(f"Preshaped images shape: {images.shape}")
         if augmult <= 0:
             target_shape = (-1, 1, 28, 28, 1) if dummy_dim else (-1, 28, 28, 1)
