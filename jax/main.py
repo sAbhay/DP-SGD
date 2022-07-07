@@ -238,7 +238,7 @@ def main(_):
     def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
                      batch_size):
       """Return differentially private gradients for params, evaluated on batch."""
-      clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0))(params, l2_norm_clip, batch)
+      clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, (0, 1)))(params, l2_norm_clip, batch)
       clipped_grads_flat, grads_treedef = tree_flatten(clipped_grads)
       aggregated_clipped_grads = [g.sum(0) for g in clipped_grads_flat]
       rngs = random.split(rng, len(aggregated_clipped_grads))
