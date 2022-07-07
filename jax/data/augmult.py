@@ -115,8 +115,7 @@ def apply_augmult_single(
           crop_size: Optional[Sequence[int]] = None,
           pad: Optional[int] = None,
   ) -> Tuple[np.ndarray, np.ndarray]:
-    image = tf.convert_to_tensor(image)
-    label = tf.convert_to_tensor(label)
+
     aug_images, aug_labels = apply_augmult_tf(image, label,
                                               image_size=image_size, augmult=augmult, random_flip=random_flip,
                                               random_crop=random_crop, crop_size=crop_size, pad=pad)
@@ -134,9 +133,11 @@ def apply_augmult(
         crop_size: Optional[Sequence[int]] = None,
         pad: Optional[int] = None,
 ) -> Tuple[np.ndarray, np.ndarray]:
-  image_list, label_list = zip(*[(apply_augmult_single(images[i], labels[i], image_size=image_size, augmult=augmult,
+  images = tf.convert_to_tensor(images)
+  labels = tf.convert_to_tensor(labels)
+  image_list, label_list = zip(*[(apply_augmult_tf(images[i], labels[i], image_size=image_size, augmult=augmult,
                                                   random_flip=random_flip, random_crop=random_crop, crop_size=crop_size,
                                                   pad=pad)) for i in range(images.shape[0])])
-  images = np.stack(image_list, axis=0)
-  labels = np.stack(label_list, axis=0)
+  images = tf.stack(image_list, axis=0).numpy()
+  labels = tf.stack(label_list, axis=0).numpy()
   return images, labels
