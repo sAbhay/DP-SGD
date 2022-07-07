@@ -171,7 +171,7 @@ def main(_):
         target_shape = (-1, 1, 28, 28, 1) if dummy_dim else (-1, 28, 28, 1)
         if flatten_augmult:
             if augmult > 0:
-                logger.info(f"Preshaped labels shape: {labels.shape}")
+                # logger.info(f"Preshaped labels shape: {labels.shape}")
                 labels = jnp.reshape(labels, (-1, *labels.shape[2:]))
         elif augmult > 0:
             target_shape = (-1, augmult, 1, 28, 28, 1) if dummy_dim else (-1, augmult, 28, 28, 1)
