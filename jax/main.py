@@ -359,8 +359,8 @@ def main(_):
 
         # evaluate test accuracy
         params = get_params(opt_state)
-        test_acc, _, _ = accuracy(params, shape_as_image(test_images, test_labels, augmult=FLAGS.augmult, flatten_augmult=True))
-        test_loss = loss(params, shape_as_image(test_images, test_labels, augmult=FLAGS.augmult, flatten_augmult=False))
+        test_acc, _, _ = accuracy(params, shape_as_image(test_images, test_labels, augmult=0))
+        test_loss = loss(params, shape_as_image(test_images, test_labels, augmult=0))
         logger.info('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             test_loss, 100 * test_acc))
         train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels, augmult=FLAGS.augmult, flatten_augmult=True))
