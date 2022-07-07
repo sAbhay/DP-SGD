@@ -166,6 +166,8 @@ def main(_):
     def shape_as_image(images, labels, dummy_dim=False, augmult=FLAGS.augmult):
         logger.info(f"Preshaped images shape: {images.shape}")
         target_shape = (-1, 1, 28, 28, 1) if dummy_dim else (-1, 28, 28, 1)
+        if augmult > 0:
+            labels = jnp.reshape(labels, (FLAGS.batch_size * FLAGS.augmult, labels.shape[2:]))
         return jnp.reshape(images, target_shape), labels
 
     batches = data_stream()
