@@ -234,11 +234,9 @@ def main(_):
       """Evaluate gradient for a single-example batch and clip its grad norm."""
       logger.info("Single example batch: {}".format(single_example_batch[0].shape, single_example_batch[1].shape))
       grads = grad(loss)(params, single_example_batch)
-      logger.info("Grads: {}".format(grads))
-      logger.info("Grads shape: {}".format(grads.shape))
-      # if FLAGS.augmult > 0:
-      #     grads = grads.mean(axis=0)
       nonempty_grads, tree_def = tree_flatten(grads)
+      if FLAGS.augmult > 0:
+          nonempty_grads = [g.mean(0) for g in grads]
       total_grad_norm = jnp.linalg.norm(
           [jnp.linalg.norm(neg.ravel()) for neg in nonempty_grads])
       divisor = jnp.maximum(total_grad_norm / l2_norm_clip, 1.)
