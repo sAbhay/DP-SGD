@@ -186,8 +186,8 @@ def main(_):
     init_params = model.init(key, init_batch)
     def predict(params, inputs):
         predictions = model.apply(params, None, inputs)
-        if FLAGS.augmult > 0:
-            predictions = predictions.reshape(-1, FLAGS.augmult, *predictions.shape[1:])
+        # if FLAGS.augmult > 0:
+        #     predictions = predictions.reshape(-1, FLAGS.augmult, *predictions.shape[1:])
         return predictions
 
     # jconfig.update('jax_platform_name', 'cpu')
