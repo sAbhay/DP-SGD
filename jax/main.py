@@ -167,7 +167,7 @@ def main(_):
                 yield train_images[batch_idx], train_labels[batch_idx]
 
     def shape_as_image(images, labels, dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True):
-        logger.info(f"Preshaped images shape: {images.shape}")
+        # logger.info(f"Preshaped images shape: {images.shape}")
         target_shape = (-1, 1, 28, 28, 1) if dummy_dim else (-1, 28, 28, 1)
         if flatten_augmult:
             if augmult > 0:
@@ -238,10 +238,10 @@ def main(_):
           #     return grad(loss)(params, single_example_augmult)
           grads = vmap(grad(loss), (None, 0))(params, single_example_batch)
           nonempty_grads, tree_def = tree_flatten(grads)
-          logger.info("Number of grads: {}, grads: {}".format(len(nonempty_grads), nonempty_grads))
+          # logger.info("Number of grads: {}, grads: {}".format(len(nonempty_grads), nonempty_grads))
           # logger.info("Grad unwrapped: {}".format(*nonempty_grads[0]))
           nonempty_grads = [g.mean(0) for g in nonempty_grads]
-          logger.info("Number of grads: {}, grads: {}".format(len(nonempty_grads), nonempty_grads))
+          # logger.info("Number of grads: {}, grads: {}".format(len(nonempty_grads), nonempty_grads))
       else:
           grads = grad(loss)(params, single_example_batch)
           nonempty_grads, tree_def = tree_flatten(grads)
@@ -255,7 +255,7 @@ def main(_):
     def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
                      batch_size):
       """Return differentially private gradients for params, evaluated on batch."""
-      logger.info("Batch shape: {}".format(batch[0].shape, batch[1].shape))
+      # logger.info("Batch shape: {}".format(batch[0].shape, batch[1].shape))
       clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0))(params, l2_norm_clip, batch)
       clipped_grads_flat, grads_treedef = tree_flatten(clipped_grads)
       aggregated_clipped_grads = [g.sum(0) for g in clipped_grads_flat]
