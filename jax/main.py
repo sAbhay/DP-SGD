@@ -124,6 +124,10 @@ flags.DEFINE_float('ema_coef', 0.999, "EMA parameter averaging coefficient")
 flags.DEFINE_integer('ema_start_step', 0, "EMA start step")
 flags.DEFINE_integer('polyak_start_step', 0, "Polyak start step")
 flags.DEFINE_boolean('param_averaging', True, "Parameter averaging")
+# flags.DEFINE_string('image_shape', None, "Augmult image shape")
+flags.DEFINE_integer('augmult', 0, "Number of augmentation multipliers")
+flags.DEFINE_boolean('random_flip', True, "Random flip augmentation")
+flags.DEFINE_boolean('random_crop', True, "Random crop augmentation")
 
 def main(_):
     logger.info("Running Experiment")
@@ -134,6 +138,14 @@ def main(_):
         )
 
     train_images, train_labels, test_images, test_labels = datasets.mnist()
+    if FLAGS.dpsgd and FLAGS.augmult > 0:
+        train_images, train_labels = datasets.apply_augmult(train_images, train_labels,
+                                                            image_size=train_images[0].shape, augmult=FLAGS.augmult,
+                                                            random_flip=FLAGS.random_flip, random_crop=FLAGS.random_crop)
+        FLAGS.batch_size *= FLAGS.augmult
+    else:
+        logger.warn("No data augmentation applied for vanilla SGD")
+    logger.info(f"Train set shape: {train_images.shape}, {train_labels.shape}")
     num_train = train_images.shape[0]
     num_complete_batches, leftover = divmod(num_train, FLAGS.batch_size)
     num_batches = num_complete_batches + bool(leftover)
@@ -342,7 +354,7 @@ def main(_):
             if not FLAGS.dpsgd:
                 hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step},pa={FLAGS.param_averaging}"
             else:
-                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step},pa={FLAGS.param_averaging}"
+                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step},pa={FLAGS.param_averaging},aug={FLAGS.augmult},rf={FLAGS.random_flip},rc={FLAGS.random_crop}"
             with open(f'grad_norms_{hyperparams_string}.pkl', 'wb') as f:
                 pickle.dump(grad_norms, f)
             with open(f'param_norms_{hyperparams_string}.pkl', 'wb') as f:
