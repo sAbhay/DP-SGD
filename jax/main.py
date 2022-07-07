@@ -146,7 +146,6 @@ def main(_):
                                                             image_size=image_size, augmult=FLAGS.augmult,
                                                             random_flip=FLAGS.random_flip, random_crop=FLAGS.random_crop)
         train_images = train_images.reshape((train_images.shape[0], train_images.shape[1], -1))
-        FLAGS.batch_size *= FLAGS.augmult
         logger.info("Augmented train images in {:.2f} sec".format(time.time() - start_time))
     else:
         logger.warn("No data augmentation applied for vanilla SGD")
@@ -183,7 +182,7 @@ def main(_):
     model_fn = models.mnist.get_mnist_model_fn(FLAGS.overparameterised, FLAGS.groups)
     model = hk.transform(model_fn, apply_rng=True)
 
-    init_batch = shape_as_image(*next(batches), augmult=FLAGS.augmult)[0]
+    init_batch = shape_as_image(*next(batches), dummy_dim=True, augmult=FLAGS.augmult)[0]
     logger.info(f"Init batch shape: {init_batch.shape}")
     init_params = model.init(key, init_batch)
     def predict(params, inputs):
