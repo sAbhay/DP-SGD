@@ -251,7 +251,6 @@ def main(_):
           nonempty_grads, tree_def = tree_flatten(grads)
       total_grad_norm = jnp.linalg.norm(
           [jnp.linalg.norm(neg.ravel()) for neg in nonempty_grads])
-      logger.info("Total grad norm: {}".format(total_grad_norm))
       divisor = jnp.maximum(total_grad_norm / l2_norm_clip, 1.)
       normalized_nonempty_grads = [g / divisor for g in nonempty_grads]
       return tree_unflatten(tree_def, normalized_nonempty_grads), total_grad_norm
@@ -391,8 +390,10 @@ def main(_):
             else:
                 hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step},pa={FLAGS.param_averaging},aug={FLAGS.augmult},rf={FLAGS.random_flip},rc={FLAGS.random_crop}"
             with open(f'grad_norms_{hyperparams_string}.pkl', 'wb') as f:
+                logger.info("grad norms: {}".format(grad_norms[-1][0:100]))
                 pickle.dump(grad_norms, f)
             with open(f'param_norms_{hyperparams_string}.pkl', 'wb') as f:
+                logger.info("param norms: {}".format(param_norms[-1][0:100]))
                 pickle.dump(param_norms, f)
             with open(f'stats_{hyperparams_string}.pkl', 'wb') as f:
                 pickle.dump(stats, f)
