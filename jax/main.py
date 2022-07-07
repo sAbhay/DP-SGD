@@ -240,7 +240,7 @@ def main(_):
           nonempty_grads, tree_def = tree_flatten(grads)
           logger.info("Number of grads: {}, grads: {}".format(len(nonempty_grads), nonempty_grads))
           # logger.info("Grad unwrapped: {}".format(*nonempty_grads[0]))
-          nonempty_grads = [g.mean(1) for g in nonempty_grads]
+          nonempty_grads = [g.mean(0) for g in nonempty_grads]
           logger.info("Number of grads: {}, grads: {}".format(len(nonempty_grads), nonempty_grads))
       else:
           grads = grad(loss)(params, single_example_batch)
