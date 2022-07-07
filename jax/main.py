@@ -299,6 +299,7 @@ def main(_):
     def private_update(rng, i, opt_state, batch, add_params):
         params = get_params(opt_state)
         rng = random.fold_in(rng, i)  # get new key for new random numbers
+        logger.info("Batch shape: {}".format(batch.shape))
         private_grads, total_grad_norm = private_grad(params, batch, rng, FLAGS.l2_norm_clip,
                      FLAGS.noise_multiplier, FLAGS.batch_size)
         opt_state = opt_update(
