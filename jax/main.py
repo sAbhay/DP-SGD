@@ -187,19 +187,19 @@ def main(_):
     init_batch = shape_as_image(*next(batches), dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True)[0]
     logger.info(f"Init batch shape: {init_batch.shape}")
     init_params = model.init(key, init_batch)
-    def predict(params, inputs, augmult_reshape=True):
+    def predict(params, inputs):
         if FLAGS.augmult > 0:
             inputs = inputs.reshape(-1, *inputs.shape[2:])
         predictions = model.apply(params, None, inputs)
-        if augmult_reshape and FLAGS.augmult > 0:
-            predictions = predictions.reshape(-1, FLAGS.augmult, *predictions.shape[1:])
+        # if augmult_reshape and FLAGS.augmult > 0:
+        #     predictions = predictions.reshape(-1, FLAGS.augmult, *predictions.shape[1:])
         return predictions
 
     # jconfig.update('jax_platform_name', 'cpu')
 
     def ce_loss(params, batch):
       inputs, targets = batch
-      logits = predict(params, inputs, augmult_reshape=False)
+      logits = predict(params, inputs)
       logits = nn.log_softmax(logits, axis=-1)  # log normalize
       return -jnp.mean(jnp.sum(logits * targets, axis=-1), axis=0)  # cross entropy loss
 
@@ -208,7 +208,7 @@ def main(_):
         if len(targets.shape) == 1:
             targets = targets.reshape(1, -1)
         target_class = jnp.argmax(targets, axis=-1)
-        scores = predict(params, inputs, augmult_reshape=False)
+        scores = predict(params, inputs)
         target_class_scores = jnp.choose(target_class, scores.T, mode='wrap')[:, jnp.newaxis]
         return jnp.mean(jnp.sum(jnp.maximum(0, 1+scores-target_class_scores)-1, axis=-1), axis=0)
 
