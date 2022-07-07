@@ -142,9 +142,10 @@ def main(_):
     if FLAGS.dpsgd and FLAGS.augmult > 0:
         start_time = time.time()
         image_size = [int(dim) for dim in FLAGS.image_shape.split("x")]
-        train_images, train_labels = datasets.apply_augmult(train_images[:500], train_labels[:500],
+        train_images, train_labels = datasets.apply_augmult(train_images, train_labels,
                                                             image_size=image_size, augmult=FLAGS.augmult,
                                                             random_flip=FLAGS.random_flip, random_crop=FLAGS.random_crop)
+        train_images = train_images.reshape((train_images.shape[0], train_images.shape[1], -1))
         FLAGS.batch_size *= FLAGS.augmult
         logger.info("Augmented train images in {:.2f} sec".format(time.time() - start_time))
     else:
