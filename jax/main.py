@@ -233,11 +233,14 @@ def main(_):
     def clipped_grad(params, l2_norm_clip, single_example_batch):
       """Evaluate gradient for a single-example batch and clip its grad norm."""
       logger.info("Single example batch: {}".format(single_example_batch[0].shape, single_example_batch[1].shape))
-      grads = grad(loss)(params, single_example_batch)
-      nonempty_grads, tree_def = tree_flatten(grads)
-      logger.info("Number of grads: {}".format(len(nonempty_grads)))
       if FLAGS.augmult > 0:
+          grads = vmap(grad(loss), (None, 0))(params, single_example_batch)
+          nonempty_grads, tree_def = tree_flatten(grads)
+          logger.info("Number of grads: {}".format(len(nonempty_grads), nonempty_grads))
           nonempty_grads = [g.mean(0) for g in grads]
+      else:
+          grads = grad(loss)(params, single_example_batch)
+          nonempty_grads, tree_def = tree_flatten(grads)
       total_grad_norm = jnp.linalg.norm(
           [jnp.linalg.norm(neg.ravel()) for neg in nonempty_grads])
       divisor = jnp.maximum(total_grad_norm / l2_norm_clip, 1.)
@@ -351,8 +354,8 @@ def main(_):
 
         # evaluate test accuracy
         params = get_params(opt_state)
-        test_acc, _, _ = accuracy(params, shape_as_image(test_images, test_labels))
-        test_loss = loss(params, shape_as_image(test_images, test_labels))
+        test_acc, _, _ = accuracy(params, shape_as_image(test_images, test_labels, augmult=FLAGS.augmult, flatten_augmult=True))
+        test_loss = loss(params, shape_as_image(test_images, test_labels, augmult=FLAGS.augmult, flatten_augmult=True))
         logger.info('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             test_loss, 100 * test_acc))
         train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels))
