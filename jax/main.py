@@ -142,7 +142,7 @@ def main(_):
     if FLAGS.dpsgd and FLAGS.augmult > 0:
         start_time = time.time()
         train_images, train_labels = datasets.apply_augmult(train_images, train_labels,
-                                                            image_size=FLAGS.image_size.split("x"), augmult=FLAGS.augmult,
+                                                            image_size=FLAGS.image_shape.split("x"), augmult=FLAGS.augmult,
                                                             random_flip=FLAGS.random_flip, random_crop=FLAGS.random_crop)
         FLAGS.batch_size *= FLAGS.augmult
         logger.info("Augmented train images in {:.2f} sec".format(time.time() - start_time))
