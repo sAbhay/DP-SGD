@@ -165,6 +165,7 @@ def main(_):
                 yield train_images[batch_idx], train_labels[batch_idx]
 
     def shape_as_image(images, labels, dummy_dim=False, augmult=0):
+        # logger.info(f"Preshaped images shape: {images.shape}")
         if augmult <= 0:
             target_shape = (-1, 1, 28, 28, 1) if dummy_dim else (-1, 28, 28, 1)
         else:
@@ -182,7 +183,7 @@ def main(_):
     model_fn = models.mnist.get_mnist_model_fn(FLAGS.overparameterised, FLAGS.groups)
     model = hk.transform(model_fn, apply_rng=True)
 
-    init_params = model.init(key, shape_as_image(*next(batches))[0])
+    init_params = model.init(key, shape_as_image(*next(batches), augmult=FLAGS.augmult)[0])
     def predict(params, inputs):
         return model.apply(params, None, inputs)
 
@@ -192,7 +193,7 @@ def main(_):
       inputs, targets = batch
       logits = predict(params, inputs)
       logits = nn.log_softmax(logits)  # log normalize
-      return -jnp.mean(jnp.sum(logits * targets, axis=1))  # cross entropy loss
+      return -jnp.mean(jnp.sum(logits * targets, axis=-1), axis=0)  # cross entropy loss
 
     def hinge_loss(params, batch):
         inputs, targets = batch
@@ -201,7 +202,7 @@ def main(_):
         target_class = jnp.argmax(targets, axis=1)
         scores = predict(params, inputs)
         target_class_scores = jnp.choose(target_class, scores.T, mode='wrap')[:, jnp.newaxis]
-        return jnp.mean(jnp.sum(jnp.maximum(0, 1+scores-target_class_scores)-1, axis=1))
+        return jnp.mean(jnp.sum(jnp.maximum(0, 1+scores-target_class_scores)-1, axis=-1), axis=0)
 
 
     if FLAGS.loss == 'cross-entropy':
@@ -238,7 +239,8 @@ def main(_):
     def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
                      batch_size):
       """Return differentially private gradients for params, evaluated on batch."""
-      clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, (0, 0)))(params, l2_norm_clip, batch)
+      logger.info("Batch shape: {}".format(batch[0].shape, batch[0].shape))
+      clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0))(params, l2_norm_clip, batch)
       clipped_grads_flat, grads_treedef = tree_flatten(clipped_grads)
       aggregated_clipped_grads = [g.sum(0) for g in clipped_grads_flat]
       rngs = random.split(rng, len(aggregated_clipped_grads))
@@ -299,7 +301,6 @@ def main(_):
     def private_update(rng, i, opt_state, batch, add_params):
         params = get_params(opt_state)
         rng = random.fold_in(rng, i)  # get new key for new random numbers
-        logger.info("Batch shape: {}".format(batch[0].shape, batch[0].shape))
         private_grads, total_grad_norm = private_grad(params, batch, rng, FLAGS.l2_norm_clip,
                      FLAGS.noise_multiplier, FLAGS.batch_size)
         opt_state = opt_update(
@@ -327,10 +328,11 @@ def main(_):
         for _ in range(num_batches):
           next_batch = next(batches)
           if FLAGS.dpsgd:
-            opt_state, total_grad_norm = private_update(key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True), add_params)
+            opt_state, total_grad_norm = private_update(
+                key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult), add_params)
           else:
             opt_state, total_grad_norm = update(
-                key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True), add_params)
+                key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult), add_params)
           acc, correct, logits = accuracy(get_params(opt_state), shape_as_image(*next_batch))
           # print('Grad norm', len(total_grad_norm), 'Correct', len(correct))
           epoch_grad_norms += zip(total_grad_norm, correct, logits)
