@@ -187,11 +187,11 @@ def main(_):
     init_batch = shape_as_image(*next(batches), dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True)[0]
     logger.info(f"Init batch shape: {init_batch.shape}")
     init_params = model.init(key, init_batch)
-    def predict(params, inputs, augmult_reshape=True):
-        if FLAGS.augmult > 0:
+    def predict(params, inputs, augmult_reshape_input=True, augmult_reshape_preds=True):
+        if augmult_reshape_input and FLAGS.augmult > 0:
             inputs = inputs.reshape(-1, *inputs.shape[2:])
         predictions = model.apply(params, None, inputs)
-        if augmult_reshape and FLAGS.augmult > 0:
+        if augmult_reshape_preds and FLAGS.augmult > 0:
             predictions = predictions.reshape(-1, FLAGS.augmult, *predictions.shape[1:])
         return predictions
 
@@ -234,7 +234,7 @@ def main(_):
       """Evaluate gradient for a single-example batch and clip its grad norm."""
       logger.info("Single example batch: {}".format(single_example_batch[0].shape, single_example_batch[1].shape))
       if FLAGS.augmult > 0:
-          grads = vmap(grad(loss), (None, 0))(params, single_example_batch)
+          grads = vmap(grad(loss), (None, 0))(params, single_example_batch, augmult_reshape_input=False, augmult_reshape_preds=False)
           nonempty_grads, tree_def = tree_flatten(grads)
           logger.info("Number of grads: {}".format(len(nonempty_grads), nonempty_grads))
           nonempty_grads = [g.mean(0) for g in grads]
