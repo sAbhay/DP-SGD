@@ -190,19 +190,15 @@ def main(_):
     init_batch = shape_as_image(*next(batches), dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True)[0]
     logger.info(f"Init batch shape: {init_batch.shape}")
     init_params = model.init(key, init_batch)
-    def predict(params, inputs, augmult_reshape_input=True, augmult_reshape_preds=True):
-        if augmult_reshape_input and FLAGS.augmult > 0:
-            inputs = inputs.reshape(-1, *inputs.shape[2:])
+    def predict(params, inputs):
         predictions = model.apply(params, None, inputs)
-        if augmult_reshape_preds and FLAGS.augmult > 0:
-            predictions = predictions.reshape(-1, FLAGS.augmult, *predictions.shape[1:])
         return predictions
 
     # jconfig.update('jax_platform_name', 'cpu')
 
     def ce_loss(params, batch):
       inputs, targets = batch
-      logits = predict(params, inputs, augmult_reshape=True)
+      logits = predict(params, inputs)
       logits = nn.log_softmax(logits, axis=-1)  # log normalize
       return -jnp.mean(jnp.mean(jnp.sum(logits * targets, axis=-1), axis=0))  # cross entropy loss
 
@@ -211,7 +207,7 @@ def main(_):
         if len(targets.shape) == 1:
             targets = targets.reshape(1, -1)
         target_class = jnp.argmax(targets, axis=-1)
-        scores = predict(params, inputs, augmult_reshape=True)
+        scores = predict(params, inputs)
         target_class_scores = jnp.choose(target_class, scores.T, mode='wrap')[:, jnp.newaxis]
         return jnp.mean(jnp.mean(jnp.sum(jnp.maximum(0, 1+scores-target_class_scores)-1, axis=-1), axis=0))
 
@@ -226,7 +222,7 @@ def main(_):
     def accuracy(params, batch):
       inputs, targets = batch
       target_class = jnp.argmax(targets, axis=-1)
-      logits = predict(params, inputs, augmult_reshape=False)
+      logits = predict(params, inputs)
       predicted_class = jnp.argmax(logits, axis=-1)
       # logits_list = logits.tolist()
       # print(logits_list[0])
@@ -237,7 +233,7 @@ def main(_):
       """Evaluate gradient for a single-example batch and clip its grad norm."""
       logger.info("Single example batch: {}".format(single_example_batch[0].shape, single_example_batch[1].shape))
       if FLAGS.augmult > 0:
-          grads = vmap(grad(loss), (None, 0, None, None))(params, single_example_batch, augmult_reshape_input=False, augmult_reshape_preds=False)
+          grads = vmap(grad(loss), (None, 0))(params, single_example_batch)
           nonempty_grads, tree_def = tree_flatten(grads)
           logger.info("Number of grads: {}".format(len(nonempty_grads), nonempty_grads))
           nonempty_grads = [g.mean(0) for g in grads]
@@ -348,7 +344,7 @@ def main(_):
           else:
             opt_state, total_grad_norm = update(
                 key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
-          acc, correct, logits = accuracy(get_params(opt_state), shape_as_image(*next_batch))
+          acc, correct, logits = accuracy(get_params(opt_state), shape_as_image(*next_batch, augmult=FLAGS.augmult, flatten_augmult=True))
           # print('Grad norm', len(total_grad_norm), 'Correct', len(correct))
           epoch_grad_norms += zip(total_grad_norm, correct, logits)
         param_norms.append(params_norm(get_params(opt_state)))
@@ -358,11 +354,11 @@ def main(_):
         # evaluate test accuracy
         params = get_params(opt_state)
         test_acc, _, _ = accuracy(params, shape_as_image(test_images, test_labels, augmult=FLAGS.augmult, flatten_augmult=True))
-        test_loss = loss(params, shape_as_image(test_images, test_labels, augmult=FLAGS.augmult, flatten_augmult=True))
+        test_loss = loss(params, shape_as_image(test_images, test_labels, augmult=FLAGS.augmult, flatten_augmult=False))
         logger.info('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             test_loss, 100 * test_acc))
-        train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels))
-        train_loss = loss(params, shape_as_image(train_images, train_labels))
+        train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels, augmult=FLAGS.augmult, flatten_augmult=True))
+        train_loss = loss(params, shape_as_image(train_images, train_labels, augmult=FLAGS.augmult, flatten_augmult=False))
         logger.info('Train set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             train_loss, 100 * train_acc))
 
