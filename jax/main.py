@@ -67,7 +67,8 @@ Example invocations:
    --learning_rate=.25 \
 """
 
-# TODO: clean up reshaping, move it out of predict and shape_as_image into dedicated functions
+# TODO: clean up reshaping, move it out of predict and shape_as_image into dedicated functionst
+# TODO: add virtual gradient accumulation
 
 from common import log
 logger = log.get_logger('experiment')
