@@ -238,8 +238,10 @@ def main(_):
           #     return grad(loss)(params, single_example_augmult)
           grads = vmap(grad(loss), (None, 0))(params, single_example_batch)
           nonempty_grads, tree_def = tree_flatten(grads)
-          logger.info("Number of grads: {}, grads: {}".format(len(nonempty_grads), nonempty_grads))
-          nonempty_grads = [g.mean(0) for g in grads]
+          logger.info("Number of grads: {}, grads: {}, grads shape: {}".format(len(nonempty_grads), nonempty_grads,
+                                                                               [g.shape() for g in nonempty_grads]))
+          nonempty_grads = [g.sum(0) for g in grads]
+          assert False
       else:
           grads = grad(loss)(params, single_example_batch)
           nonempty_grads, tree_def = tree_flatten(grads)
