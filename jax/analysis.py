@@ -25,8 +25,10 @@ def get_hyperparameter_strings(norm_dir):
 PLOTS_DIR = r'C:\Users\abhay\Documents\P-Lambda\plots'
 
 if __name__ == '__main__':
-    hyperparameter_strings = get_hyperparameter_strings(NORM_DIR)
-    print(hyperparameter_strings)
+    # hyperparameter_strings = get_hyperparameter_strings(NORM_DIR)
+    # print(hyperparameter_strings)
+    hyperparameter_strings = ['dpsgd_loss=cross-entropy,lr=0.25,op=False,nm=1.3,l2nc=1.5,grp=8,bs=1024,ws=True,mu=0.999,ess=0,pss=0,pa=True,aug=0,rf=True,rc=True',
+                              'dpsgd_loss=cross-entropy,lr=0.25,op=False,nm=1.3,l2nc=1.5,grp=8,bs=1024,ws=True,mu=0.999,ess=0,pss=0,pa=True,aug=4,rf=True,rc=True']
 
     for hyperparams_string in hyperparameter_strings:
         print(f"Plotting {hyperparams_string}")

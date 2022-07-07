@@ -251,6 +251,7 @@ def main(_):
           nonempty_grads, tree_def = tree_flatten(grads)
       total_grad_norm = jnp.linalg.norm(
           [jnp.linalg.norm(neg.ravel()) for neg in nonempty_grads])
+      logger.info("Total grad norm: {}".format(total_grad_norm))
       divisor = jnp.maximum(total_grad_norm / l2_norm_clip, 1.)
       normalized_nonempty_grads = [g / divisor for g in nonempty_grads]
       return tree_unflatten(tree_def, normalized_nonempty_grads), total_grad_norm
@@ -394,7 +395,7 @@ def main(_):
             with open(f'param_norms_{hyperparams_string}.pkl', 'wb') as f:
                 pickle.dump(param_norms, f)
             with open(f'stats_{hyperparams_string}.pkl', 'wb') as f:
-                pickle.dump(param_norms, f)
+                pickle.dump(stats, f)
 
         epoch_time = time.time() - start_time
         logger.info('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
