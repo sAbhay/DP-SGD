@@ -32,7 +32,9 @@ logger = log.get_logger('augmult')
 from typing import Optional, Sequence, Tuple
 import numpy as np
 import tensorflow as tf
-
+gpus = tf.config.experimental.list_physical_devices('GPU')
+for gpu in gpus:
+  tf.config.experimental.set_memory_growth(gpu, True)
 
 def apply_augmult_tf(
     image: tf.Tensor,
