@@ -26,8 +26,7 @@ References:
 """
 
 from typing import Optional, Sequence, Tuple
-import jax
-import jax.numpy as jnp
+import numpy as np
 import tensorflow as tf
 
 
@@ -106,8 +105,8 @@ def padding_input(x: tf.Tensor, pad: int):
   return x
 
 def apply_augmult_single(
-          image: jnp.ndarray,
-          label: jnp.ndarray,
+          image: np.ndarray,
+          label: np.ndarray,
           *,
           image_size: Sequence[int],
           augmult: int,
@@ -115,7 +114,7 @@ def apply_augmult_single(
           random_crop: bool,
           crop_size: Optional[Sequence[int]] = None,
           pad: Optional[int] = None,
-  ) -> Tuple[jnp.ndarray, jnp.ndarray]:
+  ) -> Tuple[np.ndarray, np.ndarray]:
     image = tf.convert_to_tensor(image)
     label = tf.convert_to_tensor(label)
     aug_images, aug_labels = apply_augmult_tf(image, label,
@@ -124,4 +123,20 @@ def apply_augmult_single(
     return aug_images.numpy(), aug_labels.numpy()
 
 
-apply_augmult = jax.vmap(apply_augmult_single, (0, 0, 0, None, None, None, 0, None))
+def apply_augmult(
+        images: np.ndarray,
+        labels: np.ndarray,
+        *,
+        image_size: Sequence[int],
+        augmult: int,
+        random_flip: bool,
+        random_crop: bool,
+        crop_size: Optional[Sequence[int]] = None,
+        pad: Optional[int] = None,
+) -> Tuple[np.ndarray, np.ndarray]:
+  image_list, label_list = zip(*[(apply_augmult_single(images[i], labels[i], image_size=image_size, augmult=augmult,
+                                                  random_flip=random_flip, random_crop=random_crop, crop_size=crop_size,
+                                                  pad=pad)) for i in range(images.shape[0])])
+  images = np.stack(image_list, axis=0)
+  labels = np.stack(label_list, axis=0)
+  return images, labels
