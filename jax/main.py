@@ -235,6 +235,7 @@ def main(_):
       logger.info("Single example batch: {}".format(single_example_batch[0].shape, single_example_batch[1].shape))
       grads = grad(loss)(params, single_example_batch)
       nonempty_grads, tree_def = tree_flatten(grads)
+      logger.info("Number of grads: {}".format(len(nonempty_grads)))
       if FLAGS.augmult > 0:
           nonempty_grads = [g.mean(0) for g in grads]
       total_grad_norm = jnp.linalg.norm(
