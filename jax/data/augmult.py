@@ -24,6 +24,10 @@ References:
   Drawing multiple augmentation samples perimage during training efficiently
   decreases test error.arXiv, 2021.
 """
+from sys import path
+path.append('.')
+from common import log
+logger = log.get_logger('augmult')
 
 from typing import Optional, Sequence, Tuple
 import numpy as np
@@ -135,9 +139,12 @@ def apply_augmult(
 ) -> Tuple[np.ndarray, np.ndarray]:
   images = tf.convert_to_tensor(images)
   labels = tf.convert_to_tensor(labels)
-  image_list, label_list = zip(*[(apply_augmult_tf(images[i], labels[i], image_size=image_size, augmult=augmult,
+  def apply_augmult_partial(images, labels):
+    return apply_augmult_tf(images, labels, image_size=image_size, augmult=augmult,
                                                   random_flip=random_flip, random_crop=random_crop, crop_size=crop_size,
-                                                  pad=pad)) for i in range(images.shape[0])])
-  images = tf.stack(image_list, axis=0).numpy()
-  labels = tf.stack(label_list, axis=0).numpy()
+                                                  pad=pad)
+  out = tf.vectorized_map(apply_augmult_partial, (images, labels))
+  logger.info(f"augmult out: {out}")
+  # images = tf.stack(image_list, axis=0).numpy()
+  # labels = tf.stack(label_list, axis=0).numpy()
   return images, labels

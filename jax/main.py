@@ -142,7 +142,7 @@ def main(_):
     if FLAGS.dpsgd and FLAGS.augmult > 0:
         start_time = time.time()
         image_size = [int(dim) for dim in FLAGS.image_shape.split("x")]
-        train_images, train_labels = datasets.apply_augmult(train_images, train_labels,
+        train_images, train_labels = datasets.apply_augmult(train_images[:500], train_labels[:500],
                                                             image_size=image_size, augmult=FLAGS.augmult,
                                                             random_flip=FLAGS.random_flip, random_crop=FLAGS.random_crop)
         FLAGS.batch_size *= FLAGS.augmult
@@ -163,8 +163,11 @@ def main(_):
                 batch_idx = perm[i * FLAGS.batch_size:(i + 1) * FLAGS.batch_size]
                 yield train_images[batch_idx], train_labels[batch_idx]
 
-    def shape_as_image(images, labels, dummy_dim=False):
-        target_shape = (-1, 1, 28, 28, 1) if dummy_dim else (-1, 28, 28, 1)
+    def shape_as_image(images, labels, dummy_dim=False, augmult=0):
+        if augmult <= 0:
+            target_shape = (-1, 1, 28, 28, 1) if dummy_dim else (-1, 28, 28, 1)
+        else:
+            target_shape = (-1, augmult, 1, 28, 28, 1) if dummy_dim else (-1, augmult, 28, 28, 1)
         return jnp.reshape(images, target_shape), labels
 
     batches = data_stream()
