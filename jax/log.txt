@@ -1,77 +1,73 @@
-11:58:32,619 tensorflow DEBUG Falling back to TensorFlow client; we recommended you install the Cloud TPU client directly with pip install cloud-tpu-client.
-11:58:33,1 h5py._conv DEBUG Creating converter from 7 to 5
-11:58:33,1 h5py._conv DEBUG Creating converter from 5 to 7
-11:58:33,1 h5py._conv DEBUG Creating converter from 7 to 5
-11:58:33,1 h5py._conv DEBUG Creating converter from 5 to 7
-11:58:35,688 dp-sgd_experiment INFO Running Experiment
-11:58:36,224 absl INFO Unable to initialize backend 'tpu_driver': NOT_FOUND: Unable to find driver in registry given worker: 
-11:58:36,340 absl INFO Unable to initialize backend 'rocm': NOT_FOUND: Could not find registered platform with name: "rocm". Available platform names are: Interpreter Host CUDA
-11:58:36,340 absl INFO Unable to initialize backend 'tpu': module 'jaxlib.xla_extension' has no attribute 'get_tpu_client'
-11:58:44,61 root INFO Starting training...
-11:58:44,641 root INFO Average params: {'group_norm': {'offset': Traced<ShapedArray(float32[16])>with<DynamicJaxprTrace(level=0/1)>, 'scale': Traced<ShapedArray(float32[16])>with<DynamicJaxprTrace(level=0/1)>}, 'group_norm_1': {'offset': Traced<ShapedArray(float32[32])>with<DynamicJaxprTrace(level=0/1)>, 'scale': Traced<ShapedArray(float32[32])>with<DynamicJaxprTrace(level=0/1)>}, 'linear': {'b': Traced<ShapedArray(float32[32])>with<DynamicJaxprTrace(level=0/1)>, 'w': Traced<ShapedArray(float32[512,32])>with<DynamicJaxprTrace(level=0/1)>}, 'linear_1': {'b': Traced<ShapedArray(float32[10])>with<DynamicJaxprTrace(level=0/1)>, 'w': Traced<ShapedArray(float32[32,10])>with<DynamicJaxprTrace(level=0/1)>}, 'ws_conv2_d': {'bias': Traced<ShapedArray(float32[16])>with<DynamicJaxprTrace(level=0/1)>, 'gain': Traced<ShapedArray(float32[16])>with<DynamicJaxprTrace(level=0/1)>, 'w': Traced<ShapedArray(float32[8,8,1,16])>with<DynamicJaxprTrace(level=0/1)>}, 'ws_conv2_d_1': {'bias': Traced<ShapedArray(float32[32])>with<DynamicJaxprTrace(level=0/1)>, 'gain': Traced<ShapedArray(float32[32])>with<DynamicJaxprTrace(level=0/1)>, 'w': Traced<ShapedArray(float32[4,4,16,32])>with<DynamicJaxprTrace(level=0/1)>}}, 
- Grads: {'group_norm': {'offset': Traced<ShapedArray(float32[16])>with<DynamicJaxprTrace(level=0/1)>, 'scale': Traced<ShapedArray(float32[16])>with<DynamicJaxprTrace(level=0/1)>}, 'group_norm_1': {'offset': Traced<ShapedArray(float32[32])>with<DynamicJaxprTrace(level=0/1)>, 'scale': Traced<ShapedArray(float32[32])>with<DynamicJaxprTrace(level=0/1)>}, 'linear': {'b': Traced<ShapedArray(float32[32])>with<DynamicJaxprTrace(level=0/1)>, 'w': Traced<ShapedArray(float32[512,32])>with<DynamicJaxprTrace(level=0/1)>}, 'linear_1': {'b': Traced<ShapedArray(float32[10])>with<DynamicJaxprTrace(level=0/1)>, 'w': Traced<ShapedArray(float32[32,10])>with<DynamicJaxprTrace(level=0/1)>}, 'ws_conv2_d': {'bias': Traced<ShapedArray(float32[16])>with<DynamicJaxprTrace(level=0/1)>, 'gain': Traced<ShapedArray(float32[16])>with<DynamicJaxprTrace(level=0/1)>, 'w': Traced<ShapedArray(float32[8,8,1,16])>with<DynamicJaxprTrace(level=0/1)>}, 'ws_conv2_d_1': {'bias': Traced<ShapedArray(float32[32])>with<DynamicJaxprTrace(level=0/1)>, 'gain': Traced<ShapedArray(float32[32])>with<DynamicJaxprTrace(level=0/1)>, 'w': Traced<ShapedArray(float32[4,4,16,32])>with<DynamicJaxprTrace(level=0/1)>}}
-11:58:44,648 dp-sgd_experiment ERROR too many values to unpack (expected 3)
-Traceback (most recent call last):
-  File "/juice/scr/sabhay/DP-SGD/jax/main.py", line 364, in <module>
-    app.run(main)
-  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/absl/app.py", line 312, in run
-    _run_main(main, args)
-  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/absl/app.py", line 258, in _run_main
-    sys.exit(main(argv))
-  File "/juice/scr/sabhay/DP-SGD/jax/main.py", line 311, in main
-    opt_state, total_grad_norm = private_update(key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True), add_params)
-  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/_src/traceback_util.py", line 162, in reraise_with_filtered_traceback
-    return fun(*args, **kwargs)
-  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/_src/api.py", line 522, in cache_miss
-    out_flat = xla.xla_call(
-  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/core.py", line 1831, in bind
-    return call_bind(self, fun, *args, **params)
-  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/core.py", line 1847, in call_bind
-    outs = top_trace.process_call(primitive, fun_, tracers, params)
-  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/core.py", line 683, in process_call
-    return primitive.impl(f, *tracers, **params)
-  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/_src/dispatch.py", line 196, in _xla_call_impl
-    compiled_fun = xla_callable(fun, device, backend, name, donated_invars,
-  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/linear_util.py", line 286, in memoized_fun
-    ans = call(fun, *args)
-  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/_src/dispatch.py", line 245, in _xla_callable_uncached
-    return lower_xla_callable(fun, device, backend, name, donated_invars, False,
-  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/_src/profiler.py", line 312, in wrapper
-    return func(*args, **kwargs)
-  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/_src/dispatch.py", line 290, in lower_xla_callable
-    jaxpr, out_type, consts = pe.trace_to_jaxpr_final2(
-  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/_src/profiler.py", line 312, in wrapper
-    return func(*args, **kwargs)
-  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/interpreters/partial_eval.py", line 1959, in trace_to_jaxpr_final2
-    jaxpr, out_type, consts = trace_to_subjaxpr_dynamic2(fun, main)
-  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/interpreters/partial_eval.py", line 1920, in trace_to_subjaxpr_dynamic2
-    ans = fun.call_wrapped(*in_tracers_)
-  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/jax/linear_util.py", line 168, in call_wrapped
-    ans = self.f(*args, **dict(self.params, **kwargs))
-  File "/juice/scr/sabhay/DP-SGD/jax/main.py", line 292, in private_update
-    opt_state = set_params(avg_params, params)
-  File "/juice/scr/sabhay/DP-SGD/jax/optim/optimizer.py", line 110, in tree_set_params
-    states_flat, tree, subtrees = opt_state
-jax._src.traceback_util.UnfilteredStackTrace: ValueError: too many values to unpack (expected 3)
-
-The stack trace below excludes JAX-internal frames.
-The preceding is the original exception that occurred, unmodified.
-
---------------------
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "/juice/scr/sabhay/DP-SGD/jax/main.py", line 364, in <module>
-    app.run(main)
-  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/absl/app.py", line 312, in run
-    _run_main(main, args)
-  File "/nlp/scr/sabhay/miniconda3/envs/jax-privacy-dm/lib/python3.9/site-packages/absl/app.py", line 258, in _run_main
-    sys.exit(main(argv))
-  File "/juice/scr/sabhay/DP-SGD/jax/main.py", line 311, in main
-    opt_state, total_grad_norm = private_update(key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True), add_params)
-  File "/juice/scr/sabhay/DP-SGD/jax/main.py", line 292, in private_update
-    opt_state = set_params(avg_params, params)
-  File "/juice/scr/sabhay/DP-SGD/jax/optim/optimizer.py", line 110, in tree_set_params
-    states_flat, tree, subtrees = opt_state
-ValueError: too many values to unpack (expected 3)
+12:38:05,660 tensorflow DEBUG Falling back to TensorFlow client; we recommended you install the Cloud TPU client directly with pip install cloud-tpu-client.
+12:38:06,100 h5py._conv DEBUG Creating converter from 7 to 5
+12:38:06,100 h5py._conv DEBUG Creating converter from 5 to 7
+12:38:06,100 h5py._conv DEBUG Creating converter from 7 to 5
+12:38:06,100 h5py._conv DEBUG Creating converter from 5 to 7
+12:38:09,328 experiment INFO Running Experiment
+12:38:09,876 experiment INFO Train set shape: (60000, 784), (60000, 10)
+12:38:09,877 experiment WARNING No data augmentation applied for vanilla SGD
+12:38:09,880 absl INFO Unable to initialize backend 'tpu_driver': NOT_FOUND: Unable to find driver in registry given worker: 
+12:38:10,43 absl INFO Unable to initialize backend 'rocm': NOT_FOUND: Could not find registered platform with name: "rocm". Available platform names are: Host CUDA Interpreter
+12:38:10,44 absl INFO Unable to initialize backend 'tpu': module 'jaxlib.xla_extension' has no attribute 'get_tpu_client'
+12:38:10,472 experiment INFO Init batch shape: (1024, 28, 28, 1)
+12:38:18,500 experiment INFO Starting training...
+12:38:39,79 experiment INFO Test set loss, accuracy (%): (0.68, 78.78)
+12:38:43,776 experiment INFO Train set loss, accuracy (%): (0.71, 78.39)
+12:38:54,343 experiment INFO For delta=1e-05, the current epsilon is: 0.79
+12:38:54,344 experiment INFO Epoch 1 in 35.84 sec
+12:38:57,630 experiment INFO Test set loss, accuracy (%): (0.34, 89.07)
+12:38:57,826 experiment INFO Train set loss, accuracy (%): (0.36, 88.74)
+12:39:07,538 experiment INFO For delta=1e-05, the current epsilon is: 0.92
+12:39:07,539 experiment INFO Epoch 2 in 13.19 sec
+12:39:10,863 experiment INFO Test set loss, accuracy (%): (0.25, 92.09)
+12:39:11,56 experiment INFO Train set loss, accuracy (%): (0.27, 91.73)
+12:39:20,759 experiment INFO For delta=1e-05, the current epsilon is: 1.04
+12:39:20,759 experiment INFO Epoch 3 in 13.22 sec
+12:39:24,24 experiment INFO Test set loss, accuracy (%): (0.21, 93.51)
+12:39:24,227 experiment INFO Train set loss, accuracy (%): (0.22, 93.26)
+12:39:33,957 experiment INFO For delta=1e-05, the current epsilon is: 1.15
+12:39:33,957 experiment INFO Epoch 4 in 13.20 sec
+12:39:37,215 experiment INFO Test set loss, accuracy (%): (0.18, 94.48)
+12:39:37,413 experiment INFO Train set loss, accuracy (%): (0.20, 94.16)
+12:39:47,164 experiment INFO For delta=1e-05, the current epsilon is: 1.25
+12:39:47,164 experiment INFO Epoch 5 in 13.21 sec
+12:39:50,486 experiment INFO Test set loss, accuracy (%): (0.17, 94.95)
+12:39:50,688 experiment INFO Train set loss, accuracy (%): (0.18, 94.71)
+12:40:00,462 experiment INFO For delta=1e-05, the current epsilon is: 1.35
+12:40:00,462 experiment INFO Epoch 6 in 13.30 sec
+12:40:03,750 experiment INFO Test set loss, accuracy (%): (0.15, 95.37)
+12:40:03,947 experiment INFO Train set loss, accuracy (%): (0.17, 95.15)
+12:40:13,676 experiment INFO For delta=1e-05, the current epsilon is: 1.45
+12:40:13,676 experiment INFO Epoch 7 in 13.21 sec
+12:40:16,933 experiment INFO Test set loss, accuracy (%): (0.14, 95.77)
+12:40:17,128 experiment INFO Train set loss, accuracy (%): (0.16, 95.46)
+12:40:26,820 experiment INFO For delta=1e-05, the current epsilon is: 1.54
+12:40:26,820 experiment INFO Epoch 8 in 13.14 sec
+12:40:30,76 experiment INFO Test set loss, accuracy (%): (0.13, 96.10)
+12:40:30,276 experiment INFO Train set loss, accuracy (%): (0.15, 95.68)
+12:40:40,21 experiment INFO For delta=1e-05, the current epsilon is: 1.63
+12:40:40,21 experiment INFO Epoch 9 in 13.20 sec
+12:40:43,281 experiment INFO Test set loss, accuracy (%): (0.13, 96.25)
+12:40:43,477 experiment INFO Train set loss, accuracy (%): (0.14, 95.88)
+12:40:53,200 experiment INFO For delta=1e-05, the current epsilon is: 1.72
+12:40:53,200 experiment INFO Epoch 10 in 13.18 sec
+12:40:56,465 experiment INFO Test set loss, accuracy (%): (0.12, 96.47)
+12:40:56,668 experiment INFO Train set loss, accuracy (%): (0.14, 96.06)
+12:41:06,351 experiment INFO For delta=1e-05, the current epsilon is: 1.80
+12:41:06,351 experiment INFO Epoch 11 in 13.15 sec
+12:41:09,760 experiment INFO Test set loss, accuracy (%): (0.12, 96.65)
+12:41:09,957 experiment INFO Train set loss, accuracy (%): (0.13, 96.22)
+12:41:19,670 experiment INFO For delta=1e-05, the current epsilon is: 1.88
+12:41:19,671 experiment INFO Epoch 12 in 13.32 sec
+12:41:22,931 experiment INFO Test set loss, accuracy (%): (0.12, 96.76)
+12:41:23,132 experiment INFO Train set loss, accuracy (%): (0.13, 96.38)
+12:41:32,961 experiment INFO For delta=1e-05, the current epsilon is: 1.96
+12:41:32,961 experiment INFO Epoch 13 in 13.29 sec
+12:41:36,219 experiment INFO Test set loss, accuracy (%): (0.11, 96.93)
+12:41:36,422 experiment INFO Train set loss, accuracy (%): (0.12, 96.51)
+12:41:46,129 experiment INFO For delta=1e-05, the current epsilon is: 2.03
+12:41:46,129 experiment INFO Epoch 14 in 13.17 sec
+12:41:49,397 experiment INFO Test set loss, accuracy (%): (0.11, 97.04)
+12:41:49,597 experiment INFO Train set loss, accuracy (%): (0.12, 96.65)
+12:41:59,348 experiment INFO For delta=1e-05, the current epsilon is: 2.10
+12:44:37,717 experiment INFO Epoch 15 in 171.59 sec
