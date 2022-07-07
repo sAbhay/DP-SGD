@@ -139,7 +139,8 @@ def apply_augmult(
 ) -> Tuple[np.ndarray, np.ndarray]:
   images = tf.convert_to_tensor(images)
   labels = tf.convert_to_tensor(labels)
-  def apply_augmult_partial(images, labels):
+  def apply_augmult_partial(args):
+    images, labels = args
     return apply_augmult_tf(images, labels, image_size=image_size, augmult=augmult,
                                                   random_flip=random_flip, random_crop=random_crop, crop_size=crop_size,
                                                   pad=pad)
