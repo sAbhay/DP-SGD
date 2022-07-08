@@ -1,102 +1,102 @@
-14:59:12,201 tensorflow DEBUG Falling back to TensorFlow client; we recommended you install the Cloud TPU client directly with pip install cloud-tpu-client.
-14:59:12,593 h5py._conv DEBUG Creating converter from 7 to 5
-14:59:12,593 h5py._conv DEBUG Creating converter from 5 to 7
-14:59:12,593 h5py._conv DEBUG Creating converter from 7 to 5
-14:59:12,593 h5py._conv DEBUG Creating converter from 5 to 7
-14:59:15,574 experiment INFO Running Experiment
-14:59:16,156 experiment INFO Train set shape: (60000, 784), (60000, 10)
-14:59:17,126 tensorflow WARNING Note that RandomUniformInt inside pfor op may not give same output as inside a sequential loop.
-14:59:17,198 tensorflow WARNING Note that RandomUniform inside pfor op may not give same output as inside a sequential loop.
-14:59:17,302 tensorflow WARNING Note that RandomUniformInt inside pfor op may not give same output as inside a sequential loop.
-14:59:17,370 tensorflow WARNING Note that RandomUniform inside pfor op may not give same output as inside a sequential loop.
-14:59:17,409 tensorflow WARNING Note that RandomUniformInt inside pfor op may not give same output as inside a sequential loop.
-14:59:17,477 tensorflow WARNING Note that RandomUniform inside pfor op may not give same output as inside a sequential loop.
-14:59:17,516 tensorflow WARNING Note that RandomUniformInt inside pfor op may not give same output as inside a sequential loop.
-14:59:17,583 tensorflow WARNING Note that RandomUniform inside pfor op may not give same output as inside a sequential loop.
-14:59:23,911 experiment INFO Augmented train set shape: (60000, 4, 784), (60000, 4, 10)
-14:59:23,911 experiment INFO Augmented train images in 7.75 sec
-14:59:23,914 absl INFO Unable to initialize backend 'tpu_driver': NOT_FOUND: Unable to find driver in registry given worker: 
-14:59:23,916 absl INFO Unable to initialize backend 'rocm': NOT_FOUND: Could not find registered platform with name: "rocm". Available platform names are: Host CUDA Interpreter
-14:59:23,916 absl INFO Unable to initialize backend 'tpu': module 'jaxlib.xla_extension' has no attribute 'get_tpu_client'
-14:59:24,316 experiment INFO Init batch shape: (4096, 28, 28, 1)
-14:59:32,499 experiment INFO Starting training...
-14:59:52,47 experiment INFO Test set loss, accuracy (%): (0.95, 68.89)
-14:59:57,65 experiment INFO Train set loss, accuracy (%): (0.97, 68.17)
-15:00:08,101 experiment INFO For delta=1e-05, the current epsilon is: 0.79
-15:00:08,102 experiment INFO Epoch 1 in 35.60 sec
-15:00:10,510 experiment INFO Test set loss, accuracy (%): (0.62, 79.65)
-15:00:10,704 experiment INFO Train set loss, accuracy (%): (0.64, 79.04)
-15:00:20,799 experiment INFO For delta=1e-05, the current epsilon is: 0.92
-15:00:20,799 experiment INFO Epoch 2 in 12.70 sec
-15:00:23,257 experiment INFO Test set loss, accuracy (%): (0.51, 83.31)
-15:00:23,452 experiment INFO Train set loss, accuracy (%): (0.53, 82.99)
-15:00:33,554 experiment INFO For delta=1e-05, the current epsilon is: 1.04
-15:00:33,554 experiment INFO Epoch 3 in 12.75 sec
-15:00:36,0 experiment INFO Test set loss, accuracy (%): (0.43, 86.30)
-15:00:36,195 experiment INFO Train set loss, accuracy (%): (0.46, 85.81)
-15:00:46,287 experiment INFO For delta=1e-05, the current epsilon is: 1.15
-15:00:46,287 experiment INFO Epoch 4 in 12.73 sec
-15:00:48,856 experiment INFO Test set loss, accuracy (%): (0.39, 87.87)
-15:00:49,70 experiment INFO Train set loss, accuracy (%): (0.42, 87.42)
-15:00:59,10 experiment INFO For delta=1e-05, the current epsilon is: 1.25
-15:00:59,10 experiment INFO Epoch 5 in 12.72 sec
-15:01:01,673 experiment INFO Test set loss, accuracy (%): (0.36, 89.17)
-15:01:01,889 experiment INFO Train set loss, accuracy (%): (0.38, 88.75)
-15:01:12,424 experiment INFO For delta=1e-05, the current epsilon is: 1.35
-15:01:12,425 experiment INFO Epoch 6 in 13.41 sec
-15:01:14,754 experiment INFO Test set loss, accuracy (%): (0.33, 90.11)
-15:01:14,970 experiment INFO Train set loss, accuracy (%): (0.36, 89.72)
-15:01:25,292 experiment INFO For delta=1e-05, the current epsilon is: 1.45
-15:01:25,292 experiment INFO Epoch 7 in 12.87 sec
-15:01:27,877 experiment INFO Test set loss, accuracy (%): (0.31, 90.91)
-15:01:28,92 experiment INFO Train set loss, accuracy (%): (0.33, 90.47)
-15:01:37,874 experiment INFO For delta=1e-05, the current epsilon is: 1.54
-15:01:37,874 experiment INFO Epoch 8 in 12.58 sec
-15:01:40,227 experiment INFO Test set loss, accuracy (%): (0.30, 91.40)
-15:01:40,441 experiment INFO Train set loss, accuracy (%): (0.32, 90.96)
-15:01:50,608 experiment INFO For delta=1e-05, the current epsilon is: 1.63
-15:01:50,609 experiment INFO Epoch 9 in 12.73 sec
-15:01:53,222 experiment INFO Test set loss, accuracy (%): (0.28, 91.98)
-15:01:53,434 experiment INFO Train set loss, accuracy (%): (0.30, 91.50)
-15:02:03,398 experiment INFO For delta=1e-05, the current epsilon is: 1.72
-15:02:03,398 experiment INFO Epoch 10 in 12.79 sec
-15:02:05,745 experiment INFO Test set loss, accuracy (%): (0.27, 92.28)
-15:02:05,956 experiment INFO Train set loss, accuracy (%): (0.29, 91.85)
-15:02:15,794 experiment INFO For delta=1e-05, the current epsilon is: 1.80
-15:02:15,794 experiment INFO Epoch 11 in 12.40 sec
-15:02:18,432 experiment INFO Test set loss, accuracy (%): (0.26, 92.78)
-15:02:18,647 experiment INFO Train set loss, accuracy (%): (0.28, 92.27)
-15:02:28,551 experiment INFO For delta=1e-05, the current epsilon is: 1.88
-15:02:28,551 experiment INFO Epoch 12 in 12.76 sec
-15:02:30,884 experiment INFO Test set loss, accuracy (%): (0.25, 93.18)
-15:02:31,97 experiment INFO Train set loss, accuracy (%): (0.27, 92.60)
-15:02:41,2 experiment INFO For delta=1e-05, the current epsilon is: 1.96
-15:02:41,2 experiment INFO Epoch 13 in 12.45 sec
-15:02:43,797 experiment INFO Test set loss, accuracy (%): (0.24, 93.29)
-15:02:44,11 experiment INFO Train set loss, accuracy (%): (0.26, 92.81)
-15:02:53,866 experiment INFO For delta=1e-05, the current epsilon is: 2.03
-15:02:53,866 experiment INFO Epoch 14 in 12.86 sec
-15:02:56,209 experiment INFO Test set loss, accuracy (%): (0.23, 93.63)
-15:02:56,424 experiment INFO Train set loss, accuracy (%): (0.25, 93.10)
-15:03:06,272 experiment INFO For delta=1e-05, the current epsilon is: 2.10
-15:03:06,272 experiment INFO Epoch 15 in 12.41 sec
-15:03:08,610 experiment INFO Test set loss, accuracy (%): (0.23, 93.75)
-15:03:08,826 experiment INFO Train set loss, accuracy (%): (0.25, 93.21)
-15:03:18,675 experiment INFO For delta=1e-05, the current epsilon is: 2.17
-15:03:18,675 experiment INFO Epoch 16 in 12.40 sec
-15:03:21,489 experiment INFO Test set loss, accuracy (%): (0.22, 93.94)
-15:03:21,702 experiment INFO Train set loss, accuracy (%): (0.24, 93.44)
-15:03:31,552 experiment INFO For delta=1e-05, the current epsilon is: 2.24
-15:03:31,552 experiment INFO Epoch 17 in 12.88 sec
-15:03:33,897 experiment INFO Test set loss, accuracy (%): (0.22, 94.02)
-15:03:34,114 experiment INFO Train set loss, accuracy (%): (0.24, 93.64)
-15:03:44,14 experiment INFO For delta=1e-05, the current epsilon is: 2.31
-15:03:44,14 experiment INFO Epoch 18 in 12.46 sec
-15:03:46,367 experiment INFO Test set loss, accuracy (%): (0.21, 94.31)
-15:03:46,585 experiment INFO Train set loss, accuracy (%): (0.23, 93.77)
-15:03:56,528 experiment INFO For delta=1e-05, the current epsilon is: 2.37
-15:03:56,529 experiment INFO Epoch 19 in 12.51 sec
-15:03:59,490 experiment INFO Test set loss, accuracy (%): (0.21, 94.31)
-15:03:59,702 experiment INFO Train set loss, accuracy (%): (0.23, 94.01)
-15:04:09,530 experiment INFO For delta=1e-05, the current epsilon is: 2.44
-15:04:11,821 experiment INFO Epoch 20 in 15.29 sec
+15:27:42,428 tensorflow DEBUG Falling back to TensorFlow client; we recommended you install the Cloud TPU client directly with pip install cloud-tpu-client.
+15:27:42,911 h5py._conv DEBUG Creating converter from 7 to 5
+15:27:42,911 h5py._conv DEBUG Creating converter from 5 to 7
+15:27:42,911 h5py._conv DEBUG Creating converter from 7 to 5
+15:27:42,911 h5py._conv DEBUG Creating converter from 5 to 7
+15:27:46,565 experiment INFO Running Experiment
+15:27:47,195 experiment INFO Train set shape: (60000, 784), (60000, 10)
+15:27:48,168 tensorflow WARNING Note that RandomUniformInt inside pfor op may not give same output as inside a sequential loop.
+15:27:48,238 tensorflow WARNING Note that RandomUniform inside pfor op may not give same output as inside a sequential loop.
+15:27:48,339 tensorflow WARNING Note that RandomUniformInt inside pfor op may not give same output as inside a sequential loop.
+15:27:48,405 tensorflow WARNING Note that RandomUniform inside pfor op may not give same output as inside a sequential loop.
+15:27:48,443 tensorflow WARNING Note that RandomUniformInt inside pfor op may not give same output as inside a sequential loop.
+15:27:48,509 tensorflow WARNING Note that RandomUniform inside pfor op may not give same output as inside a sequential loop.
+15:27:48,547 tensorflow WARNING Note that RandomUniformInt inside pfor op may not give same output as inside a sequential loop.
+15:27:48,613 tensorflow WARNING Note that RandomUniform inside pfor op may not give same output as inside a sequential loop.
+15:27:54,875 experiment INFO Augmented train set shape: (60000, 4, 784), (60000, 4, 10)
+15:27:54,875 experiment INFO Augmented train images in 7.68 sec
+15:27:54,880 absl INFO Unable to initialize backend 'tpu_driver': NOT_FOUND: Unable to find driver in registry given worker: 
+15:27:54,882 absl INFO Unable to initialize backend 'rocm': NOT_FOUND: Could not find registered platform with name: "rocm". Available platform names are: CUDA Host Interpreter
+15:27:54,882 absl INFO Unable to initialize backend 'tpu': module 'jaxlib.xla_extension' has no attribute 'get_tpu_client'
+15:27:55,275 experiment INFO Init batch shape: (4096, 28, 28, 1)
+15:28:02,231 experiment INFO Starting training...
+15:28:23,499 experiment INFO Test set loss, accuracy (%): (0.67, 78.10)
+15:28:28,175 experiment INFO Train set loss, accuracy (%): (0.70, 76.93)
+15:28:38,911 experiment INFO For delta=1e-05, the current epsilon is: 0.79
+15:28:38,911 experiment INFO Epoch 1 in 36.68 sec
+15:28:43,256 experiment INFO Test set loss, accuracy (%): (0.43, 85.96)
+15:28:43,560 experiment INFO Train set loss, accuracy (%): (0.46, 85.19)
+15:28:53,403 experiment INFO For delta=1e-05, the current epsilon is: 0.92
+15:28:53,404 experiment INFO Epoch 2 in 14.49 sec
+15:28:57,738 experiment INFO Test set loss, accuracy (%): (0.35, 88.56)
+15:28:58,42 experiment INFO Train set loss, accuracy (%): (0.38, 87.97)
+15:29:07,831 experiment INFO For delta=1e-05, the current epsilon is: 1.04
+15:29:07,831 experiment INFO Epoch 3 in 14.43 sec
+15:29:12,235 experiment INFO Test set loss, accuracy (%): (0.32, 89.90)
+15:29:12,536 experiment INFO Train set loss, accuracy (%): (0.34, 89.58)
+15:29:22,384 experiment INFO For delta=1e-05, the current epsilon is: 1.15
+15:29:22,384 experiment INFO Epoch 4 in 14.55 sec
+15:29:26,680 experiment INFO Test set loss, accuracy (%): (0.29, 90.86)
+15:29:26,985 experiment INFO Train set loss, accuracy (%): (0.32, 90.52)
+15:29:36,789 experiment INFO For delta=1e-05, the current epsilon is: 1.25
+15:29:36,789 experiment INFO Epoch 5 in 14.41 sec
+15:29:41,285 experiment INFO Test set loss, accuracy (%): (0.27, 91.45)
+15:29:41,591 experiment INFO Train set loss, accuracy (%): (0.30, 91.30)
+15:29:51,439 experiment INFO For delta=1e-05, the current epsilon is: 1.35
+15:29:51,439 experiment INFO Epoch 6 in 14.65 sec
+15:29:55,597 experiment INFO Test set loss, accuracy (%): (0.26, 92.11)
+15:29:55,902 experiment INFO Train set loss, accuracy (%): (0.28, 91.91)
+15:30:05,828 experiment INFO For delta=1e-05, the current epsilon is: 1.45
+15:30:05,829 experiment INFO Epoch 7 in 14.39 sec
+15:30:10,349 experiment INFO Test set loss, accuracy (%): (0.25, 92.76)
+15:30:10,653 experiment INFO Train set loss, accuracy (%): (0.27, 92.37)
+15:30:20,512 experiment INFO For delta=1e-05, the current epsilon is: 1.54
+15:30:20,512 experiment INFO Epoch 8 in 14.68 sec
+15:30:24,710 experiment INFO Test set loss, accuracy (%): (0.24, 92.82)
+15:30:25,12 experiment INFO Train set loss, accuracy (%): (0.26, 92.65)
+15:30:34,830 experiment INFO For delta=1e-05, the current epsilon is: 1.63
+15:30:34,830 experiment INFO Epoch 9 in 14.32 sec
+15:30:39,298 experiment INFO Test set loss, accuracy (%): (0.23, 93.23)
+15:30:39,599 experiment INFO Train set loss, accuracy (%): (0.25, 93.07)
+15:30:49,358 experiment INFO For delta=1e-05, the current epsilon is: 1.72
+15:30:49,358 experiment INFO Epoch 10 in 14.53 sec
+15:30:53,537 experiment INFO Test set loss, accuracy (%): (0.22, 93.53)
+15:30:53,844 experiment INFO Train set loss, accuracy (%): (0.24, 93.31)
+15:31:03,699 experiment INFO For delta=1e-05, the current epsilon is: 1.80
+15:31:03,700 experiment INFO Epoch 11 in 14.34 sec
+15:31:08,109 experiment INFO Test set loss, accuracy (%): (0.21, 93.94)
+15:31:08,411 experiment INFO Train set loss, accuracy (%): (0.23, 93.59)
+15:31:18,254 experiment INFO For delta=1e-05, the current epsilon is: 1.88
+15:31:18,254 experiment INFO Epoch 12 in 14.55 sec
+15:31:22,445 experiment INFO Test set loss, accuracy (%): (0.21, 94.05)
+15:31:22,748 experiment INFO Train set loss, accuracy (%): (0.22, 93.79)
+15:31:32,559 experiment INFO For delta=1e-05, the current epsilon is: 1.96
+15:31:32,559 experiment INFO Epoch 13 in 14.30 sec
+15:31:37,57 experiment INFO Test set loss, accuracy (%): (0.20, 94.27)
+15:31:37,360 experiment INFO Train set loss, accuracy (%): (0.22, 93.97)
+15:31:47,248 experiment INFO For delta=1e-05, the current epsilon is: 2.03
+15:31:47,249 experiment INFO Epoch 14 in 14.69 sec
+15:31:51,448 experiment INFO Test set loss, accuracy (%): (0.20, 94.36)
+15:31:51,751 experiment INFO Train set loss, accuracy (%): (0.22, 94.20)
+15:32:01,612 experiment INFO For delta=1e-05, the current epsilon is: 2.10
+15:32:01,612 experiment INFO Epoch 15 in 14.36 sec
+15:32:05,776 experiment INFO Test set loss, accuracy (%): (0.19, 94.54)
+15:32:06,81 experiment INFO Train set loss, accuracy (%): (0.21, 94.36)
+15:32:15,898 experiment INFO For delta=1e-05, the current epsilon is: 2.17
+15:32:15,898 experiment INFO Epoch 16 in 14.29 sec
+15:32:20,496 experiment INFO Test set loss, accuracy (%): (0.19, 94.69)
+15:32:20,803 experiment INFO Train set loss, accuracy (%): (0.21, 94.52)
+15:32:30,635 experiment INFO For delta=1e-05, the current epsilon is: 2.24
+15:32:30,635 experiment INFO Epoch 17 in 14.74 sec
+15:32:34,804 experiment INFO Test set loss, accuracy (%): (0.19, 94.82)
+15:32:35,110 experiment INFO Train set loss, accuracy (%): (0.20, 94.69)
+15:32:45,23 experiment INFO For delta=1e-05, the current epsilon is: 2.31
+15:32:45,23 experiment INFO Epoch 18 in 14.39 sec
+15:32:49,232 experiment INFO Test set loss, accuracy (%): (0.18, 94.94)
+15:32:49,537 experiment INFO Train set loss, accuracy (%): (0.20, 94.77)
+15:32:59,302 experiment INFO For delta=1e-05, the current epsilon is: 2.37
+15:32:59,302 experiment INFO Epoch 19 in 14.28 sec
+15:33:04,32 experiment INFO Test set loss, accuracy (%): (0.18, 95.04)
+15:33:04,339 experiment INFO Train set loss, accuracy (%): (0.20, 94.90)
+15:33:14,164 experiment INFO For delta=1e-05, the current epsilon is: 2.44
+15:33:16,333 experiment INFO Epoch 20 in 17.03 sec
