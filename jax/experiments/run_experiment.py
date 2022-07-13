@@ -1,5 +1,6 @@
 from sys import path
 path.append('.')
+print(path)
 
 from common import log
 logger = log.get_logger('main')
