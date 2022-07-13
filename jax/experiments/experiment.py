@@ -71,7 +71,7 @@ Example invocations:
 # TODO: add virtual gradient accumulation
 
 from sys import path
-path.append('.')
+path.append('../')
 
 from common import log
 logger = log.get_logger('experiment')

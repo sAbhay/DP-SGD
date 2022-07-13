@@ -1,6 +1,5 @@
 from sys import path
 path.append('../')
-print(path)
 
 from common import log
 logger = log.get_logger('main')
@@ -8,7 +7,7 @@ logger = log.get_logger('main')
 from absl import app
 from absl import flags
 
-from .experiment import experiment
+from experiment import experiment
 
 FLAGS = flags.FLAGS
 
