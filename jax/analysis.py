@@ -6,7 +6,7 @@ import seaborn as sns
 import os
 
 
-NORM_DIR = r'norms'
+NORM_DIR = r'experiments/norms'
 
 def get_hyperparameter_strings(norm_dir):
     norm_files = [f for f in os.listdir(NORM_DIR) if os.path.isfile(os.path.join(NORM_DIR, f))]
