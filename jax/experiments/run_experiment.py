@@ -41,11 +41,13 @@ flags.DEFINE_boolean('random_crop', True, "Random crop augmentation")
 
 
 def main(_):
+    logger.info(FLAGS)
     experiment(FLAGS)
 
 
 if __name__ == '__main__':
     try:
+        logger.info(FLAGS)
         app.run(main)
     except Exception as e:
         logger.error(e, exc_info=True)
