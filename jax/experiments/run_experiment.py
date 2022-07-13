@@ -1,8 +1,8 @@
-# from sys import path
-# path.append('../')
-# print(path)
+from sys import path
+path.append('../')
+print(path)
 
-from ..common import log
+from common import log
 logger = log.get_logger('main')
 
 from absl import app
