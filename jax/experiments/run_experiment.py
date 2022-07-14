@@ -40,7 +40,7 @@ flags.DEFINE_boolean('random_flip', True, "Random flip augmentation")
 flags.DEFINE_boolean('random_crop', True, "Random crop augmentation")
 
 
-def main():
+def main(_):
     log.info(dict(FLAGS))
     experiment(FLAGS)
 
