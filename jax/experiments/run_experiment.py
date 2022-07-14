@@ -41,7 +41,7 @@ flags.DEFINE_boolean('random_crop', True, "Random crop augmentation")
 
 
 def main(_):
-    log.info(dict(FLAGS))
+    logger.info(dict(FLAGS))
     experiment(FLAGS)
 
 
