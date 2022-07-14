@@ -40,13 +40,14 @@ flags.DEFINE_boolean('random_flip', True, "Random flip augmentation")
 flags.DEFINE_boolean('random_crop', True, "Random crop augmentation")
 
 
-def main(argv=None):
+def main():
+    log.info(dict(FLAGS))
     experiment(FLAGS)
 
 
 if __name__ == '__main__':
     try:
-        app.run(main, argv=FLAGS)
+        app.run(main)
     except Exception as e:
         logger.error(e, exc_info=True)
         raise e
