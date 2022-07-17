@@ -247,9 +247,14 @@ def experiment():
     def clipped_grad(params, l2_norm_clip, single_example_batch):
       """Evaluate gradient for a single-example batch and clip its grad norm."""
       if FLAGS.augmult > 0:
-          grads = vmap(grad(loss), (None, 0))(params, single_example_batch)
+          def single_aug_grad(params, single_aug_batch):
+            aug_grads = grad(loss)(params, single_aug_batch)
+            nonempty_aug_grads, _ = tree_flatten(grads)
+            aug_grad_norm = jnp.linalg.norm([jnp.linalg.norm(neg.ravel()) for neg in nonempty_aug_grads])
+            return aug_grads, aug_grad_norm
+          grads, aug_norms = vmap(single_aug_grad, (None, 0))(params, single_example_batch)
           nonempty_grads, tree_def = tree_flatten(grads)
-          aug_norms = jnp.linalg.norm(jnp.hstack([jnp.linalg.norm(g, axis=0) for g in nonempty_grads]), axis=0).tolist()
+          # aug_norms = jnp.linalg.norm(jnp.hstack([jnp.linalg.norm(g, axis=0) for g in nonempty_grads]), axis=0).tolist()
           nonempty_grads = [g.mean(0) for g in nonempty_grads]
       else:
           grads = grad(loss)(params, single_example_batch)
