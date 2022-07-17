@@ -252,7 +252,7 @@ def experiment():
             nonempty_aug_grads, _ = tree_flatten(aug_grads)
             aug_grad_norm = jnp.linalg.norm([jnp.linalg.norm(neg.ravel()) for neg in nonempty_aug_grads])
             return aug_grads, aug_grad_norm
-          grads, aug_norms = vmap(single_aug_grad, (None, 0))(params, single_example_batch)
+          grads, total_aug_norms = vmap(single_aug_grad, (None, 0))(params, single_example_batch)
           nonempty_grads, tree_def = tree_flatten(grads)
           # aug_norms = jnp.linalg.norm(jnp.hstack([jnp.linalg.norm(g, axis=0) for g in nonempty_grads]), axis=0).tolist()
           nonempty_grads = [g.mean(0) for g in nonempty_grads]
@@ -263,14 +263,14 @@ def experiment():
           [jnp.linalg.norm(neg.ravel()) for neg in nonempty_grads])
       divisor = jnp.maximum(total_grad_norm / l2_norm_clip, 1.)
       normalized_nonempty_grads = [g / divisor for g in nonempty_grads]
-      return tree_unflatten(tree_def, normalized_nonempty_grads), total_grad_norm, aug_norms
+      return tree_unflatten(tree_def, normalized_nonempty_grads), total_grad_norm, total_aug_norms.tolist()
 
 
     def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
                      batch_size):
       """Return differentially private gradients for params, evaluated on batch."""
       # logger.info("Batch shape: {}".format(batch[0].shape, batch[1].shape))
-      clipped_grads, total_grad_norm, aug_norms = vmap(clipped_grad, (None, None, 0))(params, l2_norm_clip, batch)
+      clipped_grads, total_grad_norm, total_aug_norms = vmap(clipped_grad, (None, None, 0))(params, l2_norm_clip, batch)
       clipped_grads_flat, grads_treedef = tree_flatten(clipped_grads)
       aggregated_clipped_grads = [g.sum(0) for g in clipped_grads_flat]
       rngs = random.split(rng, len(aggregated_clipped_grads))
@@ -279,7 +279,7 @@ def experiment():
           for r, g in zip(rngs, aggregated_clipped_grads)]
       normalized_noised_aggregated_clipped_grads = [
           g / batch_size for g in noised_aggregated_clipped_grads]
-      return tree_unflatten(grads_treedef, normalized_noised_aggregated_clipped_grads), total_grad_norm, aug_norms
+      return tree_unflatten(grads_treedef, normalized_noised_aggregated_clipped_grads), total_grad_norm, total_aug_norms
 
 
     def non_private_grad(params, batch, batch_size):
@@ -331,7 +331,7 @@ def experiment():
     def private_update(rng, i, opt_state, batch, add_params):
         params = get_params(opt_state)
         rng = random.fold_in(rng, i)  # get new key for new random numbers
-        private_grads, total_grad_norm, aug_norms = private_grad(params, batch, rng, FLAGS.l2_norm_clip,
+        private_grads, total_grad_norm, total_aug_norms = private_grad(params, batch, rng, FLAGS.l2_norm_clip,
                      FLAGS.noise_multiplier, FLAGS.batch_size)
         opt_state = opt_update(
             i, private_grads, opt_state)
@@ -340,7 +340,7 @@ def experiment():
         # logger.info(f"Average params: {avg_params}, \n Grads: {private_grads}")
         # logger.info("Optimization state: {}".format(opt_state))
         opt_state = set_params(avg_params, opt_state)
-        return opt_state, total_grad_norm, aug_norms
+        return opt_state, total_grad_norm, total_aug_norms
 
     # _, init_params = init_random_params(key, (-1, 28, 28, 1))
     opt_state = opt_init(init_params)
@@ -360,7 +360,7 @@ def experiment():
         for _ in range(num_batches):
           next_batch = next(batches)
           if FLAGS.dpsgd:
-            opt_state, total_grad_norm, aug_norms = private_update(
+            opt_state, total_grad_norm, total_aug_norms = private_update(
                 key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
           else:
             opt_state, total_grad_norm = update(
@@ -369,7 +369,7 @@ def experiment():
           # print('Grad norm', len(total_grad_norm), 'Correct', len(correct))
           epoch_grad_norms += zip(total_grad_norm.tolist(), correct.tolist(), logits.tolist())
           if FLAGS.augmult > 0:
-            epoch_aug_norms += zip(correct.tolist(), aug_norms.tolist())
+            epoch_aug_norms += zip(correct.tolist(), total_aug_norms.tolist())
         param_norms.append(float(params_norm(get_params(opt_state))))
 
         grad_norms.append(epoch_grad_norms)
