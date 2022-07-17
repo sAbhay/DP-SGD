@@ -97,7 +97,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     print("Saved grad norms vs max logit hist")
 
 
-PLOTS_DIR = r'C:\Users\abhay\Documents\P-Lambda\plots'
+PLOTS_DIR = 'plots'
 
 if __name__ == '__main__':
     # hyperparameter_strings = get_hyperparameter_strings(NORM_DIR)

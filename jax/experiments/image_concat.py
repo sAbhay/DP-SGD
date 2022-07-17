@@ -1,6 +1,6 @@
 import os
 from PIL import Image, ImageOps
-from jax.experiments.analysis import NORM_DIR, get_hyperparameter_strings, PLOTS_DIR
+from analysis import NORM_DIR, get_hyperparameter_strings, PLOTS_DIR
 
 
 def concat_images(image_paths, size, shape=None):
