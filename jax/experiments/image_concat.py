@@ -26,13 +26,13 @@ def concat_images(image_paths, size, shape=None):
 
 
 def make_single_plot(hyperparameter_string, plot_dir):
-    folder = rf'{plot_dir}\{hyperparameter_string}'
+    folder = os.path.join(plot_dir, hyperparameter_string)
     image_paths = [os.path.join(folder, f)
                    for f in os.listdir(folder) if f.endswith('.png')]
 
     # Create and save image grid
     image = concat_images(image_paths, (640, 480), (2, 2))
-    image.save(rf'{plot_dir}\all\{hyperparameter_string}.png', 'PNG')
+    image.save(os.path.join(plot_dir, 'all', f'{hyperparameter_string}.png'), 'PNG')
 
 
 if __name__ == '__main__':

@@ -27,11 +27,11 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     print(f"Plotting {hyperparams_string}")
     # hyperparams_string = "dpsgd_loss=cross-entropy,lr=0.25,op=True,nm=1.3,l2nc=1.5"
 
-    plot_dir = rf'{plot_dir}\{hyperparams_string}'
+    plot_dir = os.path.join(plot_dir, hyperparams_string)
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
 
-    with open(rf'{norm_dir}\grad_norms_{hyperparams_string}.pkl', 'rb') as f:
+    with open(os.path.join(norm_dir, 'grad_norms_{hyperparams_string}.pkl'), 'rb') as f:
         epoch_norms = pickle.load(f)
     # print(epoch_norms[0])
 
@@ -42,7 +42,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
         norms[i] = tuple([norm[0], norm[1], norm[2]] + list(norm[3]))
     # print(norms[0])
 
-    with open(rf'{norm_dir}\param_norms_{hyperparams_string}.pkl', 'rb') as f:
+    with open(os.path.join(norm_dir, f'param_norms_{hyperparams_string}.pkl'), 'rb') as f:
         param_norms = pickle.load(f)
     for i, param_norm in enumerate(param_norms):
         param_norms[i] = (i, param_norm)
@@ -62,13 +62,13 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
         hist(column='norm', by=['epoch', 'accurate'], legend=False)
     # ax = sns.histplot(data=sample_df[(sample_df['epoch'] == 0) | (sample_df['epoch'] == 19)],
     #                   x='norm', stat='count', hue='accurate', by=)
-    plt.savefig(rf'{plot_dir}\epoch_20_grad_norms_accuracy.png')
+    plt.savefig(os.path.join(plot_dir, 'epoch_20_grad_norms_accuracy.png'))
     plt.close()
     print("Saved Epoch 20 grad norms hist at", plot_dir)
 
     ax = sns.histplot(data=sample_df, x='epoch', y='norm', hue='accurate')
     sns.move_legend(ax, "upper left")
-    plt.savefig(rf'{plot_dir}\grad_norms_accuracy.png')
+    plt.savefig(os.path.join(plot_dir, 'grad_norms_accuracy.png'))
     plt.close()
     print("Saved grad norms hist")
 
@@ -77,7 +77,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     epoch_df['expected_grad_norm'] = sample_df.groupby(['epoch']).mean()['norm']
     sns.lineplot(x='epoch', y='value', hue='variable',
                  data=pd.melt(epoch_df[['epoch', 'param_norm', 'expected_grad_norm']], ['epoch']))
-    plt.savefig(rf'{plot_dir}\grad_norms_param_norms.png')
+    plt.savefig(rf'{plot_dir}/grad_norms_param_norms.png')
     plt.close()
     print("Saved grad and param norms plot")
 
@@ -92,7 +92,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     plt.text(0, 0.55, 'R(norm, max logit) given correct classification: {:.3f}'.format(r_value_classified),
              size='small')
     plt.text(0, 0.5, 'R(norm, max logit) given misclassification: {:.3f}'.format(r_value_misclassified), size='small')
-    plt.savefig(rf'{plot_dir}\grad_norms_max_logit.png')
+    plt.savefig(f'{plot_dir}/grad_norms_max_logit.png')
     plt.close()
     print("Saved grad norms vs max logit hist")
 

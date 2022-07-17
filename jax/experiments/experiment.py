@@ -140,6 +140,8 @@ flags.DEFINE_boolean('random_flip', True, "Random flip augmentation")
 flags.DEFINE_boolean('random_crop', True, "Random crop augmentation")
 flags.DEFINE_string('norm_dir', 'norms', "Experiment data save directory")
 flags.DEFINE_string('plot_dir', 'plots', "Experiment plots save directory")
+flags.DEFINE_boolean('train', True, "Train")
+flags.DEFINE_string('hyperparam_string', None, "Hyperparam string if not training")
 
 def experiment():
     logger.info("Running Experiment")
