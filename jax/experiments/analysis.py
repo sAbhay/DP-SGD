@@ -47,6 +47,11 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     for i, param_norm in enumerate(param_norms):
         param_norms[i] = (i, param_norm)
 
+    with open(os.path.join(norm_dir, f'stats_{hyperparams_string}.pkl'), 'rb') as f:
+        stats = pickle.load(f)
+    for i, epoch_stats in enumerate(stats):
+        stats[i] = (i, *epoch_stats)
+
     cols = ['epoch', 'norm', 'accurate']
     logit_cols = [f'{i}_logit' for i in range(0, 10)]
     columns = cols + logit_cols
@@ -76,25 +81,33 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     epoch_df = pd.DataFrame(param_norms, columns=cols)
     epoch_df['expected_grad_norm'] = sample_df.groupby(['epoch']).mean()['norm']
     sns.lineplot(x='epoch', y='value', hue='variable',
-                 data=pd.melt(epoch_df[['epoch', 'param_norm', 'expected_grad_norm']], ['epoch']))
-    plt.savefig(rf'{plot_dir}/grad_norms_param_norms.png')
+                 data=pd.melt(epoch_df[['epoch', 'param_norm', 'average_grad_norm']], ['epoch']))
+    plt.savefig(os.path.join(plot_dir, 'grad_norms_param_norms.png'))
     plt.close()
     print("Saved grad and param norms plot")
 
-    sample_df = sample_df[sample_df['epoch'] == 19]
-    temp_df = sample_df[sample_df['accurate'] == True]
-    slope, intercept, r_value_classified, p_value, std_err = scipy.stats.linregress(temp_df['norm'],
-                                                                                    temp_df['max_logit'])
-    temp_df = sample_df[sample_df['accurate'] == False]
-    slope, intercept, r_value_misclassified, p_value, std_err = scipy.stats.linregress(temp_df['norm'],
-                                                                                       temp_df['max_logit'])
-    sns.scatterplot(data=sample_df, x='norm', y='max_logit', hue='epoch', style='accurate')
-    plt.text(0, 0.55, 'R(norm, max logit) given correct classification: {:.3f}'.format(r_value_classified),
-             size='small')
-    plt.text(0, 0.5, 'R(norm, max logit) given misclassification: {:.3f}'.format(r_value_misclassified), size='small')
-    plt.savefig(f'{plot_dir}/grad_norms_max_logit.png')
+    cols = ['epoch', 'train_loss', 'train_acc', 'test_loss', 'test_acc', 'eps']
+    stats_df = pd.DataFrame(stats, columns=cols)
+    sns.lineplot(x='epoch', y='value', hue='variable',
+                 data=pd.melt(stats_df, ['epoch']))
+    plt.savefig(os.path.join(plot_dir, 'performance_stats.png'))
     plt.close()
-    print("Saved grad norms vs max logit hist")
+    print("Saved performance stats plot")
+
+    # sample_df = sample_df[sample_df['epoch'] == 19]
+    # temp_df = sample_df[sample_df['accurate'] == True]
+    # slope, intercept, r_value_classified, p_value, std_err = scipy.stats.linregress(temp_df['norm'],
+    #                                                                                 temp_df['max_logit'])
+    # temp_df = sample_df[sample_df['accurate'] == False]
+    # slope, intercept, r_value_misclassified, p_value, std_err = scipy.stats.linregress(temp_df['norm'],
+    #                                                                                    temp_df['max_logit'])
+    # sns.scatterplot(data=sample_df, x='norm', y='max_logit', hue='epoch', style='accurate')
+    # plt.text(0, 0.55, 'R(norm, max logit) given correct classification: {:.3f}'.format(r_value_classified),
+    #          size='small')
+    # plt.text(0, 0.5, 'R(norm, max logit) given misclassification: {:.3f}'.format(r_value_misclassified), size='small')
+    # plt.savefig(f'{plot_dir}/grad_norms_max_logit.png')
+    # plt.close()
+    # print("Saved grad norms vs max logit hist")
 
 
 PLOTS_DIR = 'plots'
