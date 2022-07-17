@@ -106,8 +106,8 @@ from absl import app
 from absl import flags
 from os import path as ospath
 
-from .analysis import make_plots
-from .image_concat import make_single_plot
+from analysis import make_plots
+from image_concat import make_single_plot
 
 FLAGS = flags.FLAGS
 
