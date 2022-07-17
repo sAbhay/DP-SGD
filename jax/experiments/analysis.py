@@ -52,6 +52,16 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     for i, epoch_stats in enumerate(stats):
         stats[i] = (i, *epoch_stats)
 
+    if "aug=0" not in hyperparams_string:
+        aug_norms = []
+        with open(os.path.join(norm_dir, f'aug_norms_{hyperparams_string}.pkl'), 'rb') as f:
+            epoch_aug_norms = pickle.load(f)
+        for epoch in range(len(epoch_aug_norms)):
+            aug_norms += [(epoch,) + v for v in epoch_aug_norms[epoch]]
+        for i, norm in enumerate(aug_norms):
+            aug_norms[i] = tuple([norm[0], norm[1], *norm[2]])
+        n_augs = len(*aug_norms[0][2])
+
     cols = ['epoch', 'norm', 'accurate']
     logit_cols = [f'{i}_logit' for i in range(0, 10)]
     columns = cols + logit_cols
@@ -93,6 +103,17 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     plt.savefig(os.path.join(plot_dir, 'performance_stats.png'))
     plt.close()
     print("Saved performance stats plot")
+
+    if "aug=0" not in hyperparams_string:
+        norm_cols = [f'aug_norm_{i}' for i in range(n_augs)]
+        cols = ['epoch', 'accurate'] + norm_cols
+        aug_df = pd.DataFrame(aug_norms, columns=cols)
+        aug_df_combined = pd.melt(aug_df, id_vars=['epoch', 'accurate'], value_vars=norm_cols, value_name='norm')
+        ax = aug_df_combined[(aug_df_combined['epoch'] == 0) | (aug_df_combined['epoch'] == 19)][['epoch', 'norm', 'accurate']]. \
+            hist(column='norm', by=['epoch', 'accurate'], legend=False)
+        plt.savefig(os.path.join(plot_dir, 'epoch_1_20_aug_grad_norms_accuracy.png'))
+        plt.close()
+        print("Saved Epoch 1, 20 aug grad norms hist at", plot_dir)
 
     # sample_df = sample_df[sample_df['epoch'] == 19]
     # temp_df = sample_df[sample_df['accurate'] == True]

@@ -20,6 +20,8 @@ def concat_images(image_paths, size, shape=None):
         for col in range(shape[1]):
             offset = width * col, height * row
             idx = row * shape[1] + col
+            if idx >= len(images):
+                continue
             image.paste(images[idx], offset)
 
     return image
@@ -31,7 +33,7 @@ def make_single_plot(hyperparameter_string, plot_dir):
                    for f in os.listdir(folder) if f.endswith('.png')]
 
     # Create and save image grid
-    image = concat_images(image_paths, (640, 480), (2, 2))
+    image = concat_images(image_paths, (640, 480), (2, 3))
     image.save(os.path.join(plot_dir, 'all', f'{hyperparameter_string}.png'), 'PNG')
 
 

@@ -364,7 +364,7 @@ def experiment():
           # print('Grad norm', len(total_grad_norm), 'Correct', len(correct))
           epoch_grad_norms += zip(total_grad_norm.tolist(), correct.tolist(), logits.tolist())
           if FLAGS.augmult > 0:
-            epoch_aug_norms += zip(aug_norms.tolist())
+            epoch_aug_norms += zip(correct.tolist(), aug_norms.tolist())
         param_norms.append(float(params_norm(get_params(opt_state))))
 
         grad_norms.append(epoch_grad_norms)
