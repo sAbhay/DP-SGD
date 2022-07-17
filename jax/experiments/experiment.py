@@ -249,7 +249,7 @@ def experiment():
       if FLAGS.augmult > 0:
           def single_aug_grad(params, single_aug_batch):
             aug_grads = grad(loss)(params, single_aug_batch)
-            nonempty_aug_grads, _ = tree_flatten(grads)
+            nonempty_aug_grads, _ = tree_flatten(aug_grads)
             aug_grad_norm = jnp.linalg.norm([jnp.linalg.norm(neg.ravel()) for neg in nonempty_aug_grads])
             return aug_grads, aug_grad_norm
           grads, aug_norms = vmap(single_aug_grad, (None, 0))(params, single_example_batch)
