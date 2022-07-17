@@ -1,7 +1,6 @@
 import os
-import random
 from PIL import Image, ImageOps
-from analysis import NORM_DIR, get_hyperparameter_strings, PLOTS_DIR
+from jax.experiments.analysis import NORM_DIR, get_hyperparameter_strings, PLOTS_DIR
 
 
 def concat_images(image_paths, size, shape=None):
@@ -26,15 +25,19 @@ def concat_images(image_paths, size, shape=None):
     return image
 
 
-hyperparameter_strings = get_hyperparameter_strings(NORM_DIR)
-
-while len(hyperparameter_strings) > 0:
-    hyperparameter_string = hyperparameter_strings.pop()
-    folder = rf'{PLOTS_DIR}\{hyperparameter_string}'
+def make_single_plot(hyperparameter_string, plot_dir):
+    folder = rf'{plot_dir}\{hyperparameter_string}'
     image_paths = [os.path.join(folder, f)
                    for f in os.listdir(folder) if f.endswith('.png')]
 
-
     # Create and save image grid
     image = concat_images(image_paths, (640, 480), (2, 2))
-    image.save(rf'{PLOTS_DIR}\all\{hyperparameter_string}.png', 'PNG')
+    image.save(rf'{plot_dir}\all\{hyperparameter_string}.png', 'PNG')
+
+
+if __name__ == '__main__':
+    hyperparameter_strings = get_hyperparameter_strings(NORM_DIR)
+
+    while len(hyperparameter_strings) > 0:
+        hyperparameter_string = hyperparameter_strings.pop()
+        make_single_plot(hyperparameter_string, PLOTS_DIR)
