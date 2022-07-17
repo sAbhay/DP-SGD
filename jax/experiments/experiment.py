@@ -253,6 +253,7 @@ def experiment():
             aug_grad_norm = jnp.linalg.norm([jnp.linalg.norm(neg.ravel()) for neg in nonempty_aug_grads])
             return aug_grads, aug_grad_norm
           grads, total_aug_norms = vmap(single_aug_grad, (None, 0))(params, single_example_batch)
+          logger.info(f"Total aug norms: {total_aug_norms}")
           nonempty_grads, tree_def = tree_flatten(grads)
           # aug_norms = jnp.linalg.norm(jnp.hstack([jnp.linalg.norm(g, axis=0) for g in nonempty_grads]), axis=0).tolist()
           nonempty_grads = [g.mean(0) for g in nonempty_grads]
@@ -263,7 +264,7 @@ def experiment():
           [jnp.linalg.norm(neg.ravel()) for neg in nonempty_grads])
       divisor = jnp.maximum(total_grad_norm / l2_norm_clip, 1.)
       normalized_nonempty_grads = [g / divisor for g in nonempty_grads]
-      return tree_unflatten(tree_def, normalized_nonempty_grads), total_grad_norm, total_aug_norms.tolist()
+      return tree_unflatten(tree_def, normalized_nonempty_grads), total_grad_norm, total_aug_norms
 
 
     def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
