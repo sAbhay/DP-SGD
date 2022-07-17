@@ -31,7 +31,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
 
-    with open(os.path.join(norm_dir, 'grad_norms_{hyperparams_string}.pkl'), 'rb') as f:
+    with open(os.path.join(norm_dir, f'grad_norms_{hyperparams_string}.pkl'), 'rb') as f:
         epoch_norms = pickle.load(f)
     # print(epoch_norms[0])
 
