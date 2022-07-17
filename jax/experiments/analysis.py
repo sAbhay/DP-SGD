@@ -79,7 +79,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
 
     cols = ['epoch', 'param_norm']
     epoch_df = pd.DataFrame(param_norms, columns=cols)
-    epoch_df['expected_grad_norm'] = sample_df.groupby(['epoch']).mean()['norm']
+    epoch_df['average_grad_norm'] = sample_df.groupby(['epoch']).mean()['norm']
     sns.lineplot(x='epoch', y='value', hue='variable',
                  data=pd.melt(epoch_df[['epoch', 'param_norm', 'average_grad_norm']], ['epoch']))
     plt.savefig(os.path.join(plot_dir, 'grad_norms_param_norms.png'))
