@@ -393,7 +393,7 @@ def experiment():
             eps = None
             logger.info('Trained with vanilla non-private SGD optimizer')
 
-        stats.append((train_loss, train_acc, test_loss, test_acc, eps))
+        stats.append((train_loss.item(), train_acc.item(), test_loss.item(), test_acc.item(), eps.item()))
 
         if epoch == FLAGS.epochs:
             if not FLAGS.dpsgd:
