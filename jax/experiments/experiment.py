@@ -141,7 +141,7 @@ flags.DEFINE_boolean('random_crop', True, "Random crop augmentation")
 flags.DEFINE_string('norm_dir', 'norms', "Experiment data save directory")
 flags.DEFINE_string('plot_dir', 'plots', "Experiment plots save directory")
 flags.DEFINE_boolean('train', True, "Train")
-flags.DEFINE_string('hyperparam_string', None, "Hyperparam string if not training")
+flags.DEFINE_string('hyperparams_string', None, "Hyperparam string if not training")
 
 def experiment():
     logger.info("Running Experiment")
@@ -414,7 +414,10 @@ def experiment():
     return hyperparams_string
 
 def main(_):
-    hyperparams_string = experiment()
+    if FLAGS.train:
+        hyperparams_string = experiment()
+    else:
+        hyperparams_string = FLAGS.hyperparams_string
     make_plots(hyperparams_string, FLAGS.plot_dir, FLAGS.norm_dir)
     make_single_plot(hyperparams_string, FLAGS.plot_dir)
 
