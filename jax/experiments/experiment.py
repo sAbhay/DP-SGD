@@ -246,17 +246,11 @@ def experiment():
 
     def clipped_grad(params, l2_norm_clip, single_example_batch):
       """Evaluate gradient for a single-example batch and clip its grad norm."""
-      # logger.info("Single example batch: {}".format(single_example_batch[0].shape, single_example_batch[1].shape))
       if FLAGS.augmult > 0:
-          # def _single_augmult_grad(params, single_example_augmult):
-          #     logger.info(f"Single example augmult batch: {single_example_augmult[0].shape}, {single_example_augmult[1].shape}")
-          #     return grad(loss)(params, single_example_augmult)
           grads = vmap(grad(loss), (None, 0))(params, single_example_batch)
           nonempty_grads, tree_def = tree_flatten(grads)
-          # logger.info("Number of grads: {}, grads: {}".format(len(nonempty_grads), nonempty_grads))
-          # logger.info("Grad unwrapped: {}".format(*nonempty_grads[0]))
+          aug_norms = jnp.linalg.norm(jnp.hstack([jnp.linalg.norm(g, axis=0) for g in nonempty_grads]), axis=0).tolist()
           nonempty_grads = [g.mean(0) for g in nonempty_grads]
-          # logger.info("Number of grads: {}, grads: {}".format(len(nonempty_grads), nonempty_grads))
       else:
           grads = grad(loss)(params, single_example_batch)
           nonempty_grads, tree_def = tree_flatten(grads)
@@ -264,14 +258,14 @@ def experiment():
           [jnp.linalg.norm(neg.ravel()) for neg in nonempty_grads])
       divisor = jnp.maximum(total_grad_norm / l2_norm_clip, 1.)
       normalized_nonempty_grads = [g / divisor for g in nonempty_grads]
-      return tree_unflatten(tree_def, normalized_nonempty_grads), total_grad_norm
+      return tree_unflatten(tree_def, normalized_nonempty_grads), total_grad_norm, aug_norms
 
 
     def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
                      batch_size):
       """Return differentially private gradients for params, evaluated on batch."""
       # logger.info("Batch shape: {}".format(batch[0].shape, batch[1].shape))
-      clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0))(params, l2_norm_clip, batch)
+      clipped_grads, total_grad_norm, aug_norms = vmap(clipped_grad, (None, None, 0))(params, l2_norm_clip, batch)
       clipped_grads_flat, grads_treedef = tree_flatten(clipped_grads)
       aggregated_clipped_grads = [g.sum(0) for g in clipped_grads_flat]
       rngs = random.split(rng, len(aggregated_clipped_grads))
@@ -280,7 +274,7 @@ def experiment():
           for r, g in zip(rngs, aggregated_clipped_grads)]
       normalized_noised_aggregated_clipped_grads = [
           g / batch_size for g in noised_aggregated_clipped_grads]
-      return tree_unflatten(grads_treedef, normalized_noised_aggregated_clipped_grads), total_grad_norm
+      return tree_unflatten(grads_treedef, normalized_noised_aggregated_clipped_grads), total_grad_norm, aug_norms
 
 
     def non_private_grad(params, batch, batch_size):
@@ -332,7 +326,7 @@ def experiment():
     def private_update(rng, i, opt_state, batch, add_params):
         params = get_params(opt_state)
         rng = random.fold_in(rng, i)  # get new key for new random numbers
-        private_grads, total_grad_norm = private_grad(params, batch, rng, FLAGS.l2_norm_clip,
+        private_grads, total_grad_norm, aug_norms = private_grad(params, batch, rng, FLAGS.l2_norm_clip,
                      FLAGS.noise_multiplier, FLAGS.batch_size)
         opt_state = opt_update(
             i, private_grads, opt_state)
@@ -341,13 +335,14 @@ def experiment():
         # logger.info(f"Average params: {avg_params}, \n Grads: {private_grads}")
         # logger.info("Optimization state: {}".format(opt_state))
         opt_state = set_params(avg_params, opt_state)
-        return opt_state, total_grad_norm
+        return opt_state, total_grad_norm, aug_norms
 
     # _, init_params = init_random_params(key, (-1, 28, 28, 1))
     opt_state = opt_init(init_params)
     itercount = itertools.count()
 
     grad_norms = []
+    aug_norms = []
     param_norms = []
     stats = []
     steps_per_epoch = 60000 // FLAGS.batch_size
@@ -356,10 +351,11 @@ def experiment():
     for epoch in range(1, FLAGS.epochs + 1):
         start_time = time.time()
         epoch_grad_norms = []
+        epoch_aug_norms = []
         for _ in range(num_batches):
           next_batch = next(batches)
           if FLAGS.dpsgd:
-            opt_state, total_grad_norm = private_update(
+            opt_state, total_grad_norm, aug_norms = private_update(
                 key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
           else:
             opt_state, total_grad_norm = update(
@@ -367,9 +363,12 @@ def experiment():
           acc, correct, logits = accuracy(get_params(opt_state), shape_as_image(*next_batch, augmult=FLAGS.augmult, flatten_augmult=True))
           # print('Grad norm', len(total_grad_norm), 'Correct', len(correct))
           epoch_grad_norms += zip(total_grad_norm.tolist(), correct.tolist(), logits.tolist())
+          if FLAGS.augmult > 0:
+            epoch_aug_norms += zip(aug_norms.tolist())
         param_norms.append(float(params_norm(get_params(opt_state))))
 
         grad_norms.append(epoch_grad_norms)
+        aug_norms.append(epoch_aug_norms)
 
         # evaluate test accuracy
         params = get_params(opt_state)
@@ -408,6 +407,9 @@ def experiment():
                 pickle.dump(param_norms, f)
             with open(ospath.join(FLAGS.norm_dir, f'stats_{hyperparams_string}.pkl'), 'wb') as f:
                 pickle.dump(stats, f)
+            if FLAGS.augmult > 0:
+                with open(ospath.join(FLAGS.norm_dir, f'aug_norms_{hyperparams_string}.pkl'), 'wb') as f:
+                    pickle.dump(aug_norms, f)
 
         epoch_time = time.time() - start_time
         logger.info('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
