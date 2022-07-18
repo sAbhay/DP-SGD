@@ -88,8 +88,9 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     plt.close()
     logger.info("Saved Epoch 20 grad norms hist at {}".format(plot_dir))
 
-    ax = sns.histplot(data=sample_df, x='epoch', y='norm', hue='accurate').set_title('Per sample gradient norms')
+    ax = sns.histplot(data=sample_df, x='epoch', y='norm', hue='accurate')
     sns.move_legend(ax, "upper left")
+    plt.suptitle('Per sample gradient norms')
     plt.savefig(os.path.join(plot_dir, 'grad_norms_accuracy.png'))
     plt.close()
     logger.info("Saved grad norms hist")
@@ -98,7 +99,8 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     epoch_df = pd.DataFrame(param_norms, columns=cols)
     epoch_df['average_grad_norm'] = sample_df.groupby(['epoch']).mean()['norm']
     sns.lineplot(x='epoch', y='value', hue='variable',
-                 data=pd.melt(epoch_df[['epoch', 'param_norm', 'average_grad_norm']], ['epoch'])).set_title('Average gradient and parameter norms by epoch')
+                 data=pd.melt(epoch_df[['epoch', 'param_norm', 'average_grad_norm']], ['epoch']))
+    plt.suptitle('Average gradient and parameter norms by epoch')
     plt.savefig(os.path.join(plot_dir, 'grad_norms_param_norms.png'))
     plt.close()
     logger.info("Saved grad and param norms plot")
@@ -106,7 +108,8 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     cols = ['epoch', 'train_loss', 'train_acc', 'test_loss', 'test_acc', 'eps']
     stats_df = pd.DataFrame(stats, columns=cols)
     sns.lineplot(x='epoch', y='value', hue='variable',
-                 data=pd.melt(stats_df, ['epoch'])).set_title('Performance Stats')
+                 data=pd.melt(stats_df, ['epoch']))
+    plt.suptitle('Performance Stats')
     plt.savefig(os.path.join(plot_dir, 'performance_stats.png'))
     plt.close()
     logger.info("Saved performance stats plot")
