@@ -153,5 +153,5 @@ def apply_augmult(
   images = images.numpy()
   labels = labels.numpy()
   logger.info("Killing tensorflow processes...")
-  [i.kill() for i in psutil.process_iter() if 'tensorflow' in i.name()]
+  [i.kill() for i in psutil.process_iter() if 'tensorflow' in i.name() and 'sabhay' == i.username()]
   return images, labels
