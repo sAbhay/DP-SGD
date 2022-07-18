@@ -79,6 +79,7 @@ logger = log.get_logger('experiment')
 import itertools
 import time
 import warnings
+import psutil
 
 from jax import grad
 from jax import jit
@@ -147,6 +148,7 @@ flags.DEFINE_string('dataset', "mnist", "Dataset: mnist or cifar10")
 
 def experiment():
     logger.info("Running Experiment")
+    logger.info(f"Memory usage: {psutil.virtual_memory()}")
 
     if FLAGS.microbatches:
         raise NotImplementedError(
@@ -154,6 +156,7 @@ def experiment():
         )
 
     train_images, train_labels, test_images, test_labels = datasets.data(name=FLAGS.dataset)
+    logger.info(f"Memory usage: {psutil.virtual_memory()}")
     logger.info(f"Train set shape: {train_images.shape}, {train_labels.shape}")
     if FLAGS.dpsgd and FLAGS.augmult > 0:
         start_time = time.time()
@@ -164,6 +167,7 @@ def experiment():
         aug_train_images = aug_train_images.reshape((aug_train_images.shape[0], aug_train_images.shape[1], -1))
         logger.info(f"Augmented train set shape: {aug_train_images.shape}, {aug_train_labels.shape}")
         logger.info("Augmented train images in {:.2f} sec".format(time.time() - start_time))
+        logger.info(f"Memory usage: {psutil.virtual_memory()}")
     else:
         logger.warn("No data augmentation applied for vanilla SGD")
     num_train = train_images.shape[0]
