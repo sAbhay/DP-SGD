@@ -147,7 +147,7 @@ def apply_augmult(
         batch_size: int = 1,
 ) -> Tuple[np.ndarray, np.ndarray]:
   ret_images = np.zeros((images.shape[0], augmult, images.shape[1]))
-  ret_labels = np.zeros((labels.shape, augmult, labels.shape[1]))
+  ret_labels = np.zeros((labels.shape[0], augmult, labels.shape[1]))
   num_batches = int(np.ceil(images.shape[0] / batch_size))
   def apply_augmult_partial(args):
     images, labels = args
