@@ -135,7 +135,7 @@ flags.DEFINE_float('ema_coef', 0.999, "EMA parameter averaging coefficient")
 flags.DEFINE_integer('ema_start_step', 0, "EMA start step")
 flags.DEFINE_integer('polyak_start_step', 0, "Polyak start step")
 flags.DEFINE_boolean('param_averaging', True, "Parameter averaging")
-flags.DEFINE_string('image_shape', '28x28x1', "Augmult image shape")
+# flags.DEFINE_string('image_shape', '28x28x1', "Augmult image shape")
 flags.DEFINE_integer('augmult', 0, "Number of augmentation multipliers")
 flags.DEFINE_boolean('random_flip', True, "Random flip augmentation")
 flags.DEFINE_boolean('random_crop', True, "Random crop augmentation")
@@ -143,6 +143,7 @@ flags.DEFINE_string('norm_dir', 'norms', "Experiment data save directory")
 flags.DEFINE_string('plot_dir', 'plots', "Experiment plots save directory")
 flags.DEFINE_boolean('train', True, "Train")
 flags.DEFINE_string('hyperparams_string', None, "Hyperparam string if not training")
+flags.DEFINE_string('dataset', "mnist", "Dataset: mnist or cifar10")
 
 def experiment():
     logger.info("Running Experiment")
@@ -152,11 +153,11 @@ def experiment():
             'Microbatches < batch size not currently supported'
         )
 
-    train_images, train_labels, test_images, test_labels = datasets.mnist()
+    train_images, train_labels, test_images, test_labels = datasets.data(name=FLAGS.dataset)
     logger.info(f"Train set shape: {train_images.shape}, {train_labels.shape}")
     if FLAGS.dpsgd and FLAGS.augmult > 0:
         start_time = time.time()
-        image_size = [int(dim) for dim in FLAGS.image_shape.split("x")]
+        image_size = datasets.IMAGE_SHAPE[FLAGS.dataset]
         aug_train_images, aug_train_labels = datasets.apply_augmult(train_images, train_labels,
                                                             image_size=image_size, augmult=FLAGS.augmult,
                                                             random_flip=FLAGS.random_flip, random_crop=FLAGS.random_crop)
@@ -178,15 +179,16 @@ def experiment():
                 batch_idx = perm[i * FLAGS.batch_size:(i + 1) * FLAGS.batch_size]
                 yield train_images[batch_idx], train_labels[batch_idx]
 
-    def shape_as_image(images, labels, dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True):
+    def shape_as_image(images, labels, dataset=FLAGS.dataset, dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True):
         # logger.info(f"Preshaped images shape: {images.shape}")
-        target_shape = (-1, 1, 28, 28, 1) if dummy_dim else (-1, 28, 28, 1)
+        image_shape = datasets.IMAGE_SHAPE[dataset]
+        target_shape = (-1, 1, *image_shape) if dummy_dim else (-1, *image_shape)
         if flatten_augmult:
             if augmult > 0:
                 # logger.info(f"Preshaped labels shape: {labels.shape}")
                 labels = jnp.reshape(labels, (-1, *labels.shape[2:]))
         elif augmult > 0:
-            target_shape = (-1, augmult, 1, 28, 28, 1) if dummy_dim else (-1, augmult, 28, 28, 1)
+            target_shape = (-1, augmult, 1, *image_shape) if dummy_dim else (-1, augmult, *image_shape)
         return jnp.reshape(images, target_shape), labels
 
     if FLAGS.dpsgd and FLAGS.augmult > 0:

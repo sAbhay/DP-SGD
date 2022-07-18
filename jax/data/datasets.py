@@ -25,8 +25,14 @@ import urllib.request
 import numpy as np
 from .augmult import apply_augmult
 
+from cifar10_web import cifar10
+
 
 _DATA = "/tmp/jax_example_data/"
+IMAGE_SHAPE = {
+    "mnist": (28, 28, 1),
+    "cifar10": (32, 32, 3)
+}
 
 
 def _download(url, filename):
@@ -92,6 +98,15 @@ def mnist(permute_train=False):
         train_labels = train_labels[perm]
 
     return train_images, train_labels, test_images, test_labels
+
+
+def data(name="mnist", permute_train=False):
+    if name == "mnist":
+        return mnist(permute_train)
+    elif name == "cifar10":
+        return cifar10(path=os.path.join(_DATA, "cifar10"))
+    else:
+        return NotImplementedError("Only 'mnist' and 'cifar10' are supported")
 
 
 def augmult_images(images, labels, *, image_size, augmult, random_flip, random_crop):
