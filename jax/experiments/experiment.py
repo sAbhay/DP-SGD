@@ -335,7 +335,6 @@ def experiment():
         rng = random.fold_in(rng, i)  # get new key for new random numbers
         private_grads, total_grad_norm, total_aug_norms = private_grad(params, batch, rng, FLAGS.l2_norm_clip,
                      FLAGS.noise_multiplier, FLAGS.batch_size)
-        total_aug_norms = asarray(total_aug_norms).tolist()
         opt_state = opt_update(
             i, private_grads, opt_state)
         params = get_params(opt_state)
@@ -372,6 +371,7 @@ def experiment():
           # print('Grad norm', len(total_grad_norm), 'Correct', len(correct))
           epoch_grad_norms += zip(total_grad_norm.tolist(), correct.tolist(), logits.tolist())
           if FLAGS.augmult > 0:
+            logger.info(f"Aug norms list: {total_aug_norms.tolist()}")
             epoch_aug_norms += zip(correct.tolist(), total_aug_norms.tolist())
         param_norms.append(float(params_norm(get_params(opt_state))))
 
