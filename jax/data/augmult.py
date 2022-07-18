@@ -161,8 +161,7 @@ def apply_augmult(
     batch_images_tf = tf.convert_to_tensor(images[batch_idx])
     batch_labels_tf = tf.convert_to_tensor(labels[batch_idx])
     batch_images_tf, batch_labels_tf = tf.vectorized_map(apply_augmult_partial, (batch_images_tf, batch_labels_tf))
-    batch_images_tf = batch_images_tf.reshape((batch_images_tf.shape[0], batch_images_tf.shape[1], -1))
     # logger.info(f"augmult images: {images.shape}, labels: {labels.shape}, image: {images[0][:10]}, label: {labels[0]}")
-    ret_images[batch_idx] = batch_images_tf.numpy()
+    ret_images[batch_idx] = batch_images_tf.numpy().reshape((batch_images_tf.shape[0], batch_images_tf.shape[1], -1))
     ret_labels[batch_idx] = batch_labels_tf.numpy()
   return images, labels
