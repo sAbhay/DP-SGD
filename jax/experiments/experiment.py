@@ -90,6 +90,7 @@ import jax.numpy as jnp
 import haiku as hk
 
 import numpy.random as npr
+from numpy import asarray
 
 # https://github.com/tensorflow/privacy
 from tensorflow_privacy.privacy.analysis.rdp_accountant import compute_rdp
@@ -253,7 +254,7 @@ def experiment():
             aug_grad_norm = jnp.linalg.norm([jnp.linalg.norm(neg.ravel()) for neg in nonempty_aug_grads])
             return aug_grads, aug_grad_norm
           grads, total_aug_norms = vmap(single_aug_grad, (None, 0))(params, single_example_batch)
-          logger.info(f"Total aug norms: {total_aug_norms}")
+          # logger.info(f"Total aug norms: {total_aug_norms}")
           nonempty_grads, tree_def = tree_flatten(grads)
           # aug_norms = jnp.linalg.norm(jnp.hstack([jnp.linalg.norm(g, axis=0) for g in nonempty_grads]), axis=0).tolist()
           nonempty_grads = [g.mean(0) for g in nonempty_grads]
@@ -334,6 +335,7 @@ def experiment():
         rng = random.fold_in(rng, i)  # get new key for new random numbers
         private_grads, total_grad_norm, total_aug_norms = private_grad(params, batch, rng, FLAGS.l2_norm_clip,
                      FLAGS.noise_multiplier, FLAGS.batch_size)
+        total_aug_norms = asarray(total_aug_norms).tolist()
         opt_state = opt_update(
             i, private_grads, opt_state)
         params = get_params(opt_state)
