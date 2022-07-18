@@ -60,7 +60,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
             aug_norms += [(epoch,) + v for v in epoch_aug_norms[epoch]]
         for i, norm in enumerate(aug_norms):
             aug_norms[i] = tuple([norm[0], norm[1], *norm[2]])
-        n_augs = len(aug_norms[0][2])
+        n_augs = len(aug_norms[0])-2
 
     cols = ['epoch', 'norm', 'accurate']
     logit_cols = [f'{i}_logit' for i in range(0, 10)]
