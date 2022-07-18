@@ -36,7 +36,12 @@ import numpy as np
 import tensorflow as tf
 gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus:
-  tf.config.experimental.set_memory_growth(gpu, True)
+  # tf.config.experimental.set_memory_growth(gpu, True)
+  try:
+    tf.config.experimental.set_virtual_device_configuration(gpu, [
+      tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024)])
+  except RuntimeError as e:
+    logger.error(e)
 
 def apply_augmult_tf(
     image: tf.Tensor,
@@ -152,6 +157,6 @@ def apply_augmult(
   # logger.info(f"augmult images: {images.shape}, labels: {labels.shape}, image: {images[0][:10]}, label: {labels[0]}")
   images = images.numpy()
   labels = labels.numpy()
-  logger.info("Killing tensorflow processes...")
-  [i.kill() for i in psutil.process_iter() if 'tensorflow' in i.name() and 'sabhay' == i.username()]
+  # logger.info("Killing tensorflow processes...")
+  # [i.kill() for i in psutil.process_iter() if 'tensorflow' in i.name() and 'sabhay' == i.username()]
   return images, labels

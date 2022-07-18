@@ -153,7 +153,7 @@ flags.DEFINE_string('dataset', "mnist", "Dataset: mnist or cifar10")
 def log_memory_usage():
     logger.info(f"RAM usage: {psutil.virtual_memory()}")
     mem_res = nvidia_smi.nvmlDeviceGetMemoryInfo(handle)
-    logger.info(f'GPU usage: {mem_res.used / (1024 ** 3)} (GiB), {100 * (mem_res.used / mem_res.total):.3f}%')
+    logger.info(f'GPU usage: {100 * (mem_res.used / mem_res.total):.3f}%')
 
 def experiment():
     logger.info("Running Experiment")
