@@ -146,8 +146,8 @@ def apply_augmult(
         pad: Optional[int] = None,
         batch_size: int = 1,
 ) -> Tuple[np.ndarray, np.ndarray]:
-  ret_images = np.zeros(images.shape)
-  ret_labels = np.zeros(labels.shape)
+  ret_images = np.zeros((images.shape[0], augmult, images.shape[1]))
+  ret_labels = np.zeros((labels.shape, augmult, labels.shape[1]))
   num_batches = int(np.ceil(images.shape[0] / batch_size))
   def apply_augmult_partial(args):
     images, labels = args
@@ -161,6 +161,7 @@ def apply_augmult(
     batch_images_tf = tf.convert_to_tensor(images[batch_idx])
     batch_labels_tf = tf.convert_to_tensor(labels[batch_idx])
     batch_images_tf, batch_labels_tf = tf.vectorized_map(apply_augmult_partial, (batch_images_tf, batch_labels_tf))
+    batch_images_tf = batch_images_tf.reshape((batch_images_tf.shape[0], batch_images_tf.shape[1], -1))
     # logger.info(f"augmult images: {images.shape}, labels: {labels.shape}, image: {images[0][:10]}, label: {labels[0]}")
     ret_images[batch_idx] = batch_images_tf.numpy()
     ret_labels[batch_idx] = batch_labels_tf.numpy()
