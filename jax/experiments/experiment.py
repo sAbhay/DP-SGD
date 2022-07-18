@@ -150,10 +150,14 @@ flags.DEFINE_boolean('train', True, "Train")
 flags.DEFINE_string('hyperparams_string', None, "Hyperparam string if not training")
 flags.DEFINE_string('dataset', "mnist", "Dataset: mnist or cifar10")
 
+def log_memory_usage():
+    logger.info(f"RAM usage: {psutil.virtual_memory()}")
+    mem_res = nvidia_smi.nvmlDeviceGetMemoryInfo(handle)
+    logger.info(f'GPU usage: {mem_res.used / (1024 ** 2)} (GiB), {100 * (mem_res.used / mem_res.total):.3f}%')
+
 def experiment():
     logger.info("Running Experiment")
-    logger.info(f"RAM usage: {psutil.virtual_memory()}")
-    logger.info(f"GPU usage: {dict(nvidia_smi.nvmlDeviceGetMemoryInfo(handle)._asdict())}")
+    log_memory_usage()
 
     if FLAGS.microbatches:
         raise NotImplementedError(
@@ -162,8 +166,7 @@ def experiment():
 
     train_images, train_labels, test_images, test_labels = datasets.data(name=FLAGS.dataset)
     logger.info(f"Train set shape: {train_images.shape}, {train_labels.shape}")
-    logger.info(f"RAM usage: {psutil.virtual_memory()}")
-    logger.info(f"GPU usage: {dict(nvidia_smi.nvmlDeviceGetMemoryInfo(handle)._asdict())}")
+    log_memory_usage()
     if FLAGS.dpsgd and FLAGS.augmult > 0:
         start_time = time.time()
         image_size = datasets.IMAGE_SHAPE[FLAGS.dataset]
@@ -173,8 +176,7 @@ def experiment():
         aug_train_images = aug_train_images.reshape((aug_train_images.shape[0], aug_train_images.shape[1], -1))
         logger.info(f"Augmented train set shape: {aug_train_images.shape}, {aug_train_labels.shape}")
         logger.info("Augmented train images in {:.2f} sec".format(time.time() - start_time))
-        logger.info(f"RAM usage: {psutil.virtual_memory()}")
-        logger.info(f"GPU usage: {dict(nvidia_smi.nvmlDeviceGetMemoryInfo(handle)._asdict())}")
+        log_memory_usage()
     else:
         logger.warn("No data augmentation applied for vanilla SGD")
     num_train = train_images.shape[0]
