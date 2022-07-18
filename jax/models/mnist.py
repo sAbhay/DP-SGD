@@ -2,7 +2,7 @@ from .layers import WSConv2D
 import haiku as hk
 import jax
 
-def get_mnist_model_fn(overparameterised: bool, groups: int):
+def get_mnist_model_fn(overparameterised=True, groups=8):
     mult = 1
     if overparameterised:
         mult = 2

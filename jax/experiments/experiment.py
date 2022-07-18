@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""JAX efficiently trains a differentially private conv net on MNIST.
+"""JAX efficiently trains a differentially private conv net on MNIST or CIFAR10.
 
 This script contains a JAX implementation of Differentially Private Stochastic
 Gradient Descent (https://arxiv.org/abs/1607.00133). DPSGD requires clipping
@@ -101,7 +101,7 @@ from tensorflow_privacy.privacy.analysis.rdp_accountant import get_privacy_spent
 import pickle
 
 from data import datasets
-import models.mnist
+import models.models as models
 from optim import sgdavg
 from common import averaging
 
@@ -216,7 +216,14 @@ def experiment():
     opt_init, opt_update, get_params, set_params = sgdavg.sgd(FLAGS.learning_rate)
 
     rng = random.PRNGKey(42)
-    model_fn = models.mnist.get_mnist_model_fn(FLAGS.overparameterised, FLAGS.groups)
+    if FLAGS.dataset == "mnist":
+        model_kwargs = {'overparameterised': FLAGS.overparameterised, 'groups': FLAGS.groups}
+    elif FLAGS.dataset == "cifar10":
+        model_kwargs = {'groups': FLAGS.groups}
+    else:
+        ValueError(f"Unknown dataset: {FLAGS.dataset}")
+
+    model_fn = models.get_model_fn(FLAGS.dataset, model_kwargs)
     model = hk.transform(model_fn, apply_rng=True)
 
     init_batch = shape_as_image(*next(batches), dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True)[0]
