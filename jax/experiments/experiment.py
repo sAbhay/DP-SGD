@@ -79,7 +79,9 @@ logger = log.get_logger('experiment')
 import itertools
 import time
 import warnings
+
 import psutil
+import nvidia_smi
 
 from jax import grad
 from jax import jit
@@ -91,7 +93,6 @@ import jax.numpy as jnp
 import haiku as hk
 
 import numpy.random as npr
-from numpy import asarray
 
 # https://github.com/tensorflow/privacy
 from tensorflow_privacy.privacy.analysis.rdp_accountant import compute_rdp
@@ -110,6 +111,9 @@ from os import path as ospath
 
 from analysis import make_plots
 from image_concat import make_single_plot
+
+nvidia_smi.nvmlInit()
+handle = nvidia_smi.nvmlDeviceGetHandleByIndex(0)
 
 FLAGS = flags.FLAGS
 
@@ -148,7 +152,8 @@ flags.DEFINE_string('dataset', "mnist", "Dataset: mnist or cifar10")
 
 def experiment():
     logger.info("Running Experiment")
-    logger.info(f"Memory usage: {psutil.virtual_memory()}")
+    logger.info(f"RAM usage: {psutil.virtual_memory()}")
+    logger.info(f"GPU usage: {nvidia_smi.nvmlDeviceGetMemoryInfo(handle)}")
 
     if FLAGS.microbatches:
         raise NotImplementedError(
@@ -156,8 +161,9 @@ def experiment():
         )
 
     train_images, train_labels, test_images, test_labels = datasets.data(name=FLAGS.dataset)
-    logger.info(f"Memory usage: {psutil.virtual_memory()}")
     logger.info(f"Train set shape: {train_images.shape}, {train_labels.shape}")
+    logger.info(f"RAM usage: {psutil.virtual_memory()}")
+    logger.info(f"GPU usage: {nvidia_smi.nvmlDeviceGetMemoryInfo(handle)}")
     if FLAGS.dpsgd and FLAGS.augmult > 0:
         start_time = time.time()
         image_size = datasets.IMAGE_SHAPE[FLAGS.dataset]
@@ -167,7 +173,8 @@ def experiment():
         aug_train_images = aug_train_images.reshape((aug_train_images.shape[0], aug_train_images.shape[1], -1))
         logger.info(f"Augmented train set shape: {aug_train_images.shape}, {aug_train_labels.shape}")
         logger.info("Augmented train images in {:.2f} sec".format(time.time() - start_time))
-        logger.info(f"Memory usage: {psutil.virtual_memory()}")
+        logger.info(f"RAM usage: {psutil.virtual_memory()}")
+        logger.info(f"GPU usage: {nvidia_smi.nvmlDeviceGetMemoryInfo(handle)}")
     else:
         logger.warn("No data augmentation applied for vanilla SGD")
     num_train = train_images.shape[0]
