@@ -108,11 +108,18 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     cols = ['epoch', 'train_loss', 'train_acc', 'test_loss', 'test_acc', 'eps']
     stats_df = pd.DataFrame(stats, columns=cols)
     sns.lineplot(x='epoch', y='value', hue='variable',
-                 data=pd.melt(stats_df, ['epoch']))
+                 data=pd.melt(stats_df[['epoch', 'train_loss', 'test_loss', 'eps']], ['epoch']))
     plt.suptitle('Performance Stats')
     plt.savefig(os.path.join(plot_dir, 'performance_stats.png'))
     plt.close()
     logger.info("Saved performance stats plot")
+
+    sns.lineplot(x='epoch', y='value', hue='variable',
+                 data=pd.melt(stats_df[['epoch', 'train_acc', 'test_acc']], ['epoch']))
+    plt.suptitle('Accuracy Stats')
+    plt.savefig(os.path.join(plot_dir, 'accuracy_stats.png'))
+    plt.close()
+    logger.info("Saved accuracy stats plot")
 
     if "aug=0" not in hyperparams_string:
         norm_cols = [f'aug_norm_{i}' for i in range(n_augs)]
