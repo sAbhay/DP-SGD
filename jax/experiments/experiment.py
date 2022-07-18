@@ -247,6 +247,7 @@ def experiment():
 
     def clipped_grad(params, l2_norm_clip, single_example_batch):
       """Evaluate gradient for a single-example batch and clip its grad norm."""
+      total_aug_norms = None
       if FLAGS.augmult > 0:
           def single_aug_grad(params, single_aug_batch):
             aug_grads = grad(loss)(params, single_aug_batch)
