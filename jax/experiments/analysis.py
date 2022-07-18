@@ -1,3 +1,9 @@
+from sys import path as syspath
+syspath.append('../')
+
+from common import log
+logger = log.get_logger('plotting')
+
 import pandas as pd
 import pickle
 import matplotlib.pyplot as plt
@@ -24,7 +30,7 @@ def get_hyperparameter_strings(norm_dir):
 
 
 def make_plots(hyperparams_string, plot_dir, norm_dir):
-    print(f"Plotting {hyperparams_string}")
+    logger.info(f"Plotting {hyperparams_string}")
     # hyperparams_string = "dpsgd_loss=cross-entropy,lr=0.25,op=True,nm=1.3,l2nc=1.5"
 
     plot_dir = os.path.join(plot_dir, hyperparams_string)
@@ -79,13 +85,13 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     #                   x='norm', stat='count', hue='accurate', by=)
     plt.savefig(os.path.join(plot_dir, 'epoch_20_grad_norms_accuracy.png'))
     plt.close()
-    print("Saved Epoch 20 grad norms hist at", plot_dir)
+    logger.info("Saved Epoch 20 grad norms hist at {}".format(plot_dir))
 
     ax = sns.histplot(data=sample_df, x='epoch', y='norm', hue='accurate')
     sns.move_legend(ax, "upper left")
     plt.savefig(os.path.join(plot_dir, 'grad_norms_accuracy.png'))
     plt.close()
-    print("Saved grad norms hist")
+    logger.info("Saved grad norms hist")
 
     cols = ['epoch', 'param_norm']
     epoch_df = pd.DataFrame(param_norms, columns=cols)
@@ -94,7 +100,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
                  data=pd.melt(epoch_df[['epoch', 'param_norm', 'average_grad_norm']], ['epoch']))
     plt.savefig(os.path.join(plot_dir, 'grad_norms_param_norms.png'))
     plt.close()
-    print("Saved grad and param norms plot")
+    logger.info("Saved grad and param norms plot")
 
     cols = ['epoch', 'train_loss', 'train_acc', 'test_loss', 'test_acc', 'eps']
     stats_df = pd.DataFrame(stats, columns=cols)
@@ -102,7 +108,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
                  data=pd.melt(stats_df, ['epoch']))
     plt.savefig(os.path.join(plot_dir, 'performance_stats.png'))
     plt.close()
-    print("Saved performance stats plot")
+    logger.info("Saved performance stats plot")
 
     if "aug=0" not in hyperparams_string:
         norm_cols = [f'aug_norm_{i}' for i in range(n_augs)]
@@ -113,7 +119,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
             hist(column='norm', by=['epoch', 'accurate'], legend=False)
         plt.savefig(os.path.join(plot_dir, 'epoch_1_20_aug_grad_norms_accuracy.png'))
         plt.close()
-        print("Saved Epoch 1, 20 aug grad norms hist at", plot_dir)
+        logger.info("Saved Epoch 1, 20 aug grad norms hist at", plot_dir)
 
     # sample_df = sample_df[sample_df['epoch'] == 19]
     # temp_df = sample_df[sample_df['accurate'] == True]
