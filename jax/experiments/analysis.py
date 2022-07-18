@@ -121,7 +121,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
         aug_df_combined = pd.melt(aug_df, id_vars=['epoch', 'accurate'], value_vars=norm_cols, value_name='norm')
         ax = aug_df_combined[(aug_df_combined['epoch'] == 0) | (aug_df_combined['epoch'] == 19)][['epoch', 'norm', 'accurate']]. \
             hist(column='norm', by=['epoch', 'accurate'], legend=False)
-        plt.suptitle("Gradient norms per augmentations by correct sample classification at start and end")
+        plt.suptitle("Grad norms per augmentations by sample classification at start and end")
         plt.savefig(os.path.join(plot_dir, 'epoch_1_20_aug_grad_norms_accuracy.png'))
         plt.close()
         logger.info("Saved Epoch 1, 20 aug grad norms hist")
