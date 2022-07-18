@@ -30,6 +30,8 @@ from common import log
 logger = log.get_logger('augmult')
 
 from typing import Optional, Sequence, Tuple
+import psutil
+
 import numpy as np
 import tensorflow as tf
 gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -148,4 +150,8 @@ def apply_augmult(
                                                   pad=pad)
   images, labels = tf.vectorized_map(apply_augmult_partial, (images, labels))
   # logger.info(f"augmult images: {images.shape}, labels: {labels.shape}, image: {images[0][:10]}, label: {labels[0]}")
-  return images.numpy(), labels.numpy()
+  images = images.numpy()
+  labels = labels.numpy()
+  logger.info("Killing tensorflow processes...")
+  [i.kill() for i in psutil.process_iter() if 'tensorflow' in i.name()]
+  return images, labels

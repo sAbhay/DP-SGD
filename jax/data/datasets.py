@@ -111,6 +111,7 @@ def data(name="mnist", permute_train=False):
 
 def augmult_images(images, labels, *, image_size, augmult, random_flip, random_crop):
     """Augment images and labels with augmult."""
+
     images, labels = apply_augmult(images, labels, image_size=image_size, augmult=augmult,
                                            random_flip=random_flip, random_crop=random_crop)
     return images, labels
