@@ -121,7 +121,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
         ax.set_title("Gradient norms per augmentations by correct sample classification at start and end")
         plt.savefig(os.path.join(plot_dir, 'epoch_1_20_aug_grad_norms_accuracy.png'))
         plt.close()
-        logger.info("Saved Epoch 1, 20 aug grad norms hist at", plot_dir)
+        logger.info("Saved Epoch 1, 20 aug grad norms hist")
 
     # sample_df = sample_df[sample_df['epoch'] == 19]
     # temp_df = sample_df[sample_df['accurate'] == True]
