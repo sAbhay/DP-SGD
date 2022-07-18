@@ -30,7 +30,6 @@ from common import log
 logger = log.get_logger('augmult')
 
 from typing import Optional, Sequence, Tuple
-import psutil
 
 import numpy as np
 import tensorflow as tf
@@ -145,18 +144,24 @@ def apply_augmult(
         random_crop: bool,
         crop_size: Optional[Sequence[int]] = None,
         pad: Optional[int] = None,
+        batch_size: int = 1,
 ) -> Tuple[np.ndarray, np.ndarray]:
-  images = tf.convert_to_tensor(images)
-  labels = tf.convert_to_tensor(labels)
+  ret_images = np.zeros(images.shape)
+  ret_labels = np.zeros(labels.shape)
+  num_batches = int(np.ceil(images.shape[0] / batch_size))
   def apply_augmult_partial(args):
     images, labels = args
     return apply_augmult_tf(images, labels, image_size=image_size, augmult=augmult,
                                                   random_flip=random_flip, random_crop=random_crop, crop_size=crop_size,
                                                   pad=pad)
-  images, labels = tf.vectorized_map(apply_augmult_partial, (images, labels))
-  # logger.info(f"augmult images: {images.shape}, labels: {labels.shape}, image: {images[0][:10]}, label: {labels[0]}")
-  images = images.numpy()
-  labels = labels.numpy()
-  # logger.info("Killing tensorflow processes...")
-  # [i.kill() for i in psutil.process_iter() if 'tensorflow' in i.name() and 'sabhay' == i.username()]
+  for i in range(num_batches):
+    batch_idx = range(i * batch_size, (i + 1) * batch_size)
+    if i == num_batches - 1:
+      batch_idx = range(i * batch_size, images.shape[0])
+    batch_images_tf = tf.convert_to_tensor(images[batch_idx])
+    batch_labels_tf = tf.convert_to_tensor(labels[batch_idx])
+    batch_images_tf, batch_labels_tf = tf.vectorized_map(apply_augmult_partial, (batch_images_tf, batch_labels_tf))
+    # logger.info(f"augmult images: {images.shape}, labels: {labels.shape}, image: {images[0][:10]}, label: {labels[0]}")
+    ret_images[batch_idx] = batch_images_tf.numpy()
+    ret_labels[batch_idx] = batch_labels_tf.numpy()
   return images, labels

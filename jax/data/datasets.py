@@ -109,9 +109,10 @@ def data(name="mnist", permute_train=False):
         return NotImplementedError("Only 'mnist' and 'cifar10' are supported")
 
 
-def augmult_images(images, labels, *, image_size, augmult, random_flip, random_crop):
+def augmult_images(images, labels, *, image_size, augmult, random_flip, random_crop, batch_size):
     """Augment images and labels with augmult."""
-
+    if batch_size is None:
+        batch_size = images.shape[0]
     images, labels = apply_augmult(images, labels, image_size=image_size, augmult=augmult,
-                                           random_flip=random_flip, random_crop=random_crop)
+                                           random_flip=random_flip, random_crop=random_crop, batch_size=batch_size)
     return images, labels

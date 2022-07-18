@@ -149,6 +149,7 @@ flags.DEFINE_string('plot_dir', 'plots', "Experiment plots save directory")
 flags.DEFINE_boolean('train', True, "Train")
 flags.DEFINE_string('hyperparams_string', None, "Hyperparam string if not training")
 flags.DEFINE_string('dataset', "mnist", "Dataset: mnist or cifar10")
+flags.DEFINE_integer('augmult_batch_size', None, "Augmult batch size")
 
 def log_memory_usage():
     logger.info(f"RAM usage: {psutil.virtual_memory()}")
@@ -172,7 +173,8 @@ def experiment():
         image_size = datasets.IMAGE_SHAPE[FLAGS.dataset]
         aug_train_images, aug_train_labels = datasets.apply_augmult(train_images, train_labels,
                                                             image_size=image_size, augmult=FLAGS.augmult,
-                                                            random_flip=FLAGS.random_flip, random_crop=FLAGS.random_crop)
+                                                            random_flip=FLAGS.random_flip, random_crop=FLAGS.random_crop,
+                                                            batch_size=FLAGS.augmult_batch_size)
         aug_train_images = aug_train_images.reshape((aug_train_images.shape[0], aug_train_images.shape[1], -1))
         logger.info(f"Augmented train set shape: {aug_train_images.shape}, {aug_train_labels.shape}")
         logger.info("Augmented train images in {:.2f} sec".format(time.time() - start_time))
