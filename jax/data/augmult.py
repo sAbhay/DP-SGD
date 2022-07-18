@@ -164,4 +164,4 @@ def apply_augmult(
     # logger.info(f"augmult images: {images.shape}, labels: {labels.shape}, image: {images[0][:10]}, label: {labels[0]}")
     ret_images[batch_idx] = batch_images_tf.numpy().reshape((batch_images_tf.shape[0], batch_images_tf.shape[1], -1))
     ret_labels[batch_idx] = batch_labels_tf.numpy()
-  return images, labels
+  return ret_images, ret_labels
