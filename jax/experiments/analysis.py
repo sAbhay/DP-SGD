@@ -81,13 +81,14 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     # ax = df.hist(column=['norm'], by=['epoch'], sharey=True, sharex=True)
     ax = sample_df[(sample_df['epoch'] == 0) | (sample_df['epoch'] == 19)][['epoch', 'norm', 'accurate']]. \
         hist(column='norm', by=['epoch', 'accurate'], legend=False)
+    ax.set_title('Gradient norms by correct sample classification at start and end')
     # ax = sns.histplot(data=sample_df[(sample_df['epoch'] == 0) | (sample_df['epoch'] == 19)],
     #                   x='norm', stat='count', hue='accurate', by=)
     plt.savefig(os.path.join(plot_dir, 'epoch_20_grad_norms_accuracy.png'))
     plt.close()
     logger.info("Saved Epoch 20 grad norms hist at {}".format(plot_dir))
 
-    ax = sns.histplot(data=sample_df, x='epoch', y='norm', hue='accurate')
+    ax = sns.histplot(data=sample_df, x='epoch', y='norm', hue='accurate').set_title('Per sample gradient norms')
     sns.move_legend(ax, "upper left")
     plt.savefig(os.path.join(plot_dir, 'grad_norms_accuracy.png'))
     plt.close()
@@ -97,7 +98,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     epoch_df = pd.DataFrame(param_norms, columns=cols)
     epoch_df['average_grad_norm'] = sample_df.groupby(['epoch']).mean()['norm']
     sns.lineplot(x='epoch', y='value', hue='variable',
-                 data=pd.melt(epoch_df[['epoch', 'param_norm', 'average_grad_norm']], ['epoch']))
+                 data=pd.melt(epoch_df[['epoch', 'param_norm', 'average_grad_norm']], ['epoch'])).set_title('Average gradient and parameter norms by epoch')
     plt.savefig(os.path.join(plot_dir, 'grad_norms_param_norms.png'))
     plt.close()
     logger.info("Saved grad and param norms plot")
@@ -105,7 +106,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     cols = ['epoch', 'train_loss', 'train_acc', 'test_loss', 'test_acc', 'eps']
     stats_df = pd.DataFrame(stats, columns=cols)
     sns.lineplot(x='epoch', y='value', hue='variable',
-                 data=pd.melt(stats_df, ['epoch']))
+                 data=pd.melt(stats_df, ['epoch'])).set_title('Performance Stats')
     plt.savefig(os.path.join(plot_dir, 'performance_stats.png'))
     plt.close()
     logger.info("Saved performance stats plot")
@@ -117,6 +118,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
         aug_df_combined = pd.melt(aug_df, id_vars=['epoch', 'accurate'], value_vars=norm_cols, value_name='norm')
         ax = aug_df_combined[(aug_df_combined['epoch'] == 0) | (aug_df_combined['epoch'] == 19)][['epoch', 'norm', 'accurate']]. \
             hist(column='norm', by=['epoch', 'accurate'], legend=False)
+        ax.set_title("Gradient norms per augmentations by correct sample classification at start and end")
         plt.savefig(os.path.join(plot_dir, 'epoch_1_20_aug_grad_norms_accuracy.png'))
         plt.close()
         logger.info("Saved Epoch 1, 20 aug grad norms hist at", plot_dir)
