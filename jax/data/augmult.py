@@ -34,7 +34,7 @@ from typing import Optional, Sequence, Tuple
 import numpy as np
 
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '4'
 import tensorflow as tf
 gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus:
