@@ -22,8 +22,8 @@ import haiku as hk
 import haiku.initializers as hk_init
 import jax.numpy as jnp
 
-import activations
-import layers
+import .activations
+import .layers
 
 
 class WideResNet(hk.Module):
