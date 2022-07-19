@@ -136,7 +136,7 @@ class WideResNet(hk.Module):
 
 def get_cifar_model_fn(
       num_classes: int = 10,
-      depth: int = 16,
+      depth: int = 6,
       width: int = 4,
       dropout_rate: float = 0.0,
       use_skip_init: bool = False,
