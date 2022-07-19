@@ -101,7 +101,7 @@ from tensorflow_privacy.privacy.analysis.rdp_accountant import get_privacy_spent
 import pickle
 
 from data import datasets
-import models.all as models
+import models.models as models
 from optim import sgdavg
 from common import averaging
 

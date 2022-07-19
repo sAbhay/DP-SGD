@@ -1,5 +1,5 @@
-from mnist import get_mnist_model_fn
-from cifar import get_cifar_model_fn
+from .mnist import get_mnist_model_fn
+from .cifar import get_cifar_model_fn
 
 def get_model_fn(model_type: str, model_kwargs):
     if model_type == 'mnist':
