@@ -428,7 +428,7 @@ def experiment():
         test_loss = loss(params, shape_as_image(test_images, test_labels, augmult=0))
         logger.info('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             test_loss, 100 * test_acc))
-        train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels, augmult=0), splits=5)
+        train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels, augmult=0), splits=10)
         train_loss = loss(params, shape_as_image(train_images, train_labels, augmult=0))
         logger.info('Train set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             train_loss, 100 * train_acc))
