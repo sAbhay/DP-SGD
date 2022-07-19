@@ -146,9 +146,9 @@ def get_cifar_model_fn(
       activation: str = 'relu',
       groups: int = 16,
 ):
-    def cifar_model_fn(features, is_training, **_):
+    def cifar_model_fn(features, **_):
         module = WideResNet(num_classes=num_classes, depth=depth, width=width, dropout_rate=dropout_rate,
                             use_skip_init=use_skip_init, use_skip_paths=use_skip_paths, which_conv=which_conv,
                             which_norm=which_norm, activation=activation, groups=groups)
-        return module(features, is_training)
+        return module(features)
     return cifar_model_fn

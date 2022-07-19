@@ -229,24 +229,29 @@ def experiment():
     init_batch = shape_as_image(*next(batches), dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True)[0]
     logger.info(f"Init batch shape: {init_batch.shape}")
     init_params = model.init(key, init_batch)
-    def predict(params, inputs):
-        predictions = model.apply(params, None, inputs)
+    def predict(params, inputs, is_training=False):
+        if FLAGS.dataset == "mnist":
+            predictions = model.apply(params, None, inputs)
+        elif FLAGS.dataset == "cifar10":
+            predictions = model.apply(params, inputs, is_training)
+        else:
+            return ValueError(f"Unknown dataset: {FLAGS.dataset}")
         return predictions
 
     # jconfig.update('jax_platform_name', 'cpu')
 
-    def ce_loss(params, batch):
+    def ce_loss(params, batch, is_training=False):
       inputs, targets = batch
-      logits = predict(params, inputs)
+      logits = predict(params, inputs, is_training=is_training)
       logits = nn.log_softmax(logits, axis=-1)  # log normalize
       return -jnp.mean(jnp.mean(jnp.sum(logits * targets, axis=-1), axis=0))  # cross entropy loss
 
-    def hinge_loss(params, batch):
+    def hinge_loss(params, batch, is_training=False):
         inputs, targets = batch
         if len(targets.shape) == 1:
             targets = targets.reshape(1, -1)
         target_class = jnp.argmax(targets, axis=-1)
-        scores = predict(params, inputs)
+        scores = predict(params, inputs, is_training=is_training)
         target_class_scores = jnp.choose(target_class, scores.T, mode='wrap')[:, jnp.newaxis]
         return jnp.mean(jnp.mean(jnp.sum(jnp.maximum(0, 1+scores-target_class_scores)-1, axis=-1), axis=0))
 
@@ -258,10 +263,10 @@ def experiment():
     else:
         raise ValueError("Undefined loss")
 
-    def accuracy(params, batch):
+    def accuracy(params, batch, is_training=False):
       inputs, targets = batch
       target_class = jnp.argmax(targets, axis=-1)
-      logits = predict(params, inputs)
+      logits = predict(params, inputs, is_training=is_training)
       predicted_class = jnp.argmax(logits, axis=-1)
       # logits_list = logits.tolist()
       # print(logits_list[0])
@@ -273,7 +278,7 @@ def experiment():
       total_aug_norms = None
       if FLAGS.augmult > 0:
           def single_aug_grad(params, single_aug_batch):
-            aug_grads = grad(loss)(params, single_aug_batch)
+            aug_grads = grad(loss)(params, single_aug_batch, is_training=True)
             nonempty_aug_grads, _ = tree_flatten(aug_grads)
             aug_grad_norm = jnp.linalg.norm([jnp.linalg.norm(neg.ravel()) for neg in nonempty_aug_grads])
             return aug_grads, aug_grad_norm
@@ -283,7 +288,7 @@ def experiment():
           # aug_norms = jnp.linalg.norm(jnp.hstack([jnp.linalg.norm(g, axis=0) for g in nonempty_grads]), axis=0).tolist()
           nonempty_grads = [g.mean(0) for g in nonempty_grads]
       else:
-          grads = grad(loss)(params, single_example_batch)
+          grads = grad(loss)(params, single_example_batch, is_training=True)
           nonempty_grads, tree_def = tree_flatten(grads)
       total_grad_norm = jnp.linalg.norm(
           [jnp.linalg.norm(neg.ravel()) for neg in nonempty_grads])
@@ -327,7 +332,7 @@ def experiment():
 
     def grads_with_norm(params, l2_norm_clip, single_example_batch):
       """Evaluate gradient for a single-example batch and clip its grad norm."""
-      grads = grad(loss)(params, single_example_batch)
+      grads = grad(loss)(params, single_example_batch, is_training=True)
       nonempty_grads, tree_def = tree_flatten(grads)
       total_grad_norm = jnp.linalg.norm(
           [jnp.linalg.norm(neg.ravel()) for neg in nonempty_grads])
