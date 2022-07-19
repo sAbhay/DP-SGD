@@ -276,8 +276,9 @@ def experiment():
       split_size = int(batch[0].shape[0] / splits)
       assert (batch[0].shape[0] % splits) == 0
       for i in range(splits):
-        inputs, targets = batch[i * split_size:(i + 1) * split_size]
-        logger.info(f"Inputs shape: {inputs.shape}")
+        inputs = batch[0][i * split_size:(i + 1) * split_size]
+        targets = batch[1][i * split_size:(i + 1) * split_size]
+        # logger.info(f"Inputs shape: {inputs.shape}")
         target_class = jnp.argmax(targets, axis=-1)
         logits = predict(params, inputs, is_training=False)
         predicted_class = jnp.argmax(logits, axis=-1)
@@ -431,7 +432,7 @@ def experiment():
         logger.info('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             test_loss, 100 * test_acc))
         log_memory_usage()
-        train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels, augmult=0), splits=10)
+        train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels, augmult=0), splits=5)
         train_loss = loss(params, shape_as_image(train_images, train_labels, augmult=0))
         logger.info('Train set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             train_loss, 100 * train_acc))
