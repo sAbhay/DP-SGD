@@ -236,7 +236,7 @@ def experiment():
         if FLAGS.dataset == "mnist":
             predictions = model.apply(params, None, inputs)
         elif FLAGS.dataset == "cifar10":
-            predictions = model.apply(params, inputs, is_training)
+            predictions = model.apply(params, None, inputs, is_training)
         else:
             return ValueError(f"Unknown dataset: {FLAGS.dataset}")
         return predictions
