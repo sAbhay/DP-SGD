@@ -277,6 +277,7 @@ def experiment():
       assert (batch[0].shape[0] % splits) == 0
       for i in range(splits):
         inputs, targets = batch[i * split_size:(i + 1) * split_size]
+        logger.info(f"Inputs shape: {inputs.shape}")
         target_class = jnp.argmax(targets, axis=-1)
         logits = predict(params, inputs, is_training=False)
         predicted_class = jnp.argmax(logits, axis=-1)
@@ -396,7 +397,7 @@ def experiment():
     aug_norms = []
     param_norms = []
     stats = []
-    steps_per_epoch = 60000 // FLAGS.batch_size
+    steps_per_epoch = train_images.shape[0] // FLAGS.batch_size
     add_params = {'ema': get_params(opt_state), 'polyak': get_params(opt_state)}
     logger.info('Starting training...')
     for epoch in range(1, FLAGS.epochs + 1):
@@ -439,7 +440,7 @@ def experiment():
         # determine privacy loss so far
         if FLAGS.dpsgd:
             delta = 1e-5
-            num_examples = 60000
+            num_examples = train_images.shape[0]
             eps = compute_epsilon(epoch * steps_per_epoch, num_examples, delta)
             logger.info(
                 'For delta={:.0e}, the current epsilon is: {:.2f}'.format(delta, eps))
