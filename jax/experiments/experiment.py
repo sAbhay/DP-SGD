@@ -421,6 +421,7 @@ def experiment():
 
         grad_norms.append(epoch_grad_norms)
         aug_norms.append(epoch_aug_norms)
+        log_memory_usage()
 
         # evaluate test accuracy
         params = get_params(opt_state)
@@ -428,10 +429,12 @@ def experiment():
         test_loss = loss(params, shape_as_image(test_images, test_labels, augmult=0))
         logger.info('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             test_loss, 100 * test_acc))
+        log_memory_usage()
         train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels, augmult=0), splits=10)
         train_loss = loss(params, shape_as_image(train_images, train_labels, augmult=0))
         logger.info('Train set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             train_loss, 100 * train_acc))
+        log_memory_usage()
 
         # determine privacy loss so far
         if FLAGS.dpsgd:
