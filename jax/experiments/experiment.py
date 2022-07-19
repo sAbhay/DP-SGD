@@ -228,7 +228,10 @@ def experiment():
 
     init_batch = shape_as_image(*next(batches), dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True)[0]
     logger.info(f"Init batch shape: {init_batch.shape}")
-    init_params = model.init(key, init_batch)
+    init_args = [init_batch]
+    if FLAGS.dataset == "cifar10":
+        init_args.append(True)
+    init_params = model.init(key, *init_args)
     def predict(params, inputs, is_training=False):
         if FLAGS.dataset == "mnist":
             predictions = model.apply(params, None, inputs)
