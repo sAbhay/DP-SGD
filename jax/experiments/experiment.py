@@ -71,6 +71,9 @@ Example invocations:
 # TODO: add virtual gradient accumulation
 
 from sys import path as syspath
+
+import jax.numpy
+
 syspath.append('../')
 
 from common import log
@@ -266,14 +269,23 @@ def experiment():
     else:
         raise ValueError("Undefined loss")
 
-    def accuracy(params, batch, is_training=False):
-      inputs, targets = batch
-      target_class = jnp.argmax(targets, axis=-1)
-      logits = predict(params, inputs, is_training=is_training)
-      predicted_class = jnp.argmax(logits, axis=-1)
-      # logits_list = logits.tolist()
-      # print(logits_list[0])
-      return jnp.mean(predicted_class == target_class), predicted_class == target_class, logits
+    def accuracy(params, batch, splits=1):
+      acc = 0
+      correct = []
+      all_logits = []
+      split_size = int(batch[0].shape[0] / splits)
+      assert (batch[0].shape[0] % splits) == 0
+      for i in range(splits):
+        inputs, targets = batch[i * split_size:(i + 1) * split_size]
+        target_class = jnp.argmax(targets, axis=-1)
+        logits = predict(params, inputs, is_training=False)
+        predicted_class = jnp.argmax(logits, axis=-1)
+        # logits_list = logits.tolist()
+        # print(logits_list[0])
+        acc += jnp.mean(predicted_class == target_class)
+        correct.append(predicted_class == target_class)
+        all_logits.append(logits)
+      return acc / splits, jnp.vstack(correct), jnp.vstack(all_logits)
 
 
     def clipped_grad(params, l2_norm_clip, single_example_batch):
@@ -416,7 +428,7 @@ def experiment():
         test_loss = loss(params, shape_as_image(test_images, test_labels, augmult=0))
         logger.info('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             test_loss, 100 * test_acc))
-        train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels, augmult=0))
+        train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels, augmult=0), splits=5)
         train_loss = loss(params, shape_as_image(train_images, train_labels, augmult=0))
         logger.info('Train set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             train_loss, 100 * train_acc))
