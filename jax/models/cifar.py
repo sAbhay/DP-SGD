@@ -22,15 +22,15 @@ import haiku as hk
 import haiku.initializers as hk_init
 import jax.numpy as jnp
 
-import .activations
-import .layers
+from .activations import activations_dict
+from .layers import WSConv2D
 
 
 class WideResNet(hk.Module):
   """A Module defining a Wide ResNet."""
 
   CONV_MODULES = {
-      'WSConv2D': layers.WSConv2D,
+      'WSConv2D': WSConv2D,
       'Conv2D': hk.Conv2D,
   }
 
@@ -67,7 +67,7 @@ class WideResNet(hk.Module):
     self.use_skip_paths = use_skip_paths
     self.dropout_rate = dropout_rate
     self.resnet_blocks = (depth - 4) // 6
-    self.activation = activations.activations_dict[activation]
+    self.activation = activations_dict[activation]
 
   @hk.transparent
   def apply_skip_init(self, net, name):
