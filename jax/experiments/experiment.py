@@ -278,7 +278,7 @@ def experiment():
       for i in range(splits):
         inputs = batch[0][i * split_size:(i + 1) * split_size]
         targets = batch[1][i * split_size:(i + 1) * split_size]
-        logger.info(f"Inputs shape: {inputs.shape}")
+        # logger.info(f"Inputs shape: {inputs.shape}")
         target_class = jnp.argmax(targets, axis=-1)
         logits = predict(params, inputs, is_training=False)
         predicted_class = jnp.argmax(logits, axis=-1)
