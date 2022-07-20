@@ -416,7 +416,7 @@ def experiment():
                 key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
           acc, correct, logits = accuracy(get_params(opt_state), shape_as_image(*next_batch, augmult=FLAGS.augmult, flatten_augmult=True))
           # print('Grad norm', len(total_grad_norm), 'Correct', len(correct))
-          logger.info("Grad norm: {}, Correct: {}, Logits: {}".format(total_grad_norm.shape, correct.shape, logits.shape))
+          # logger.info("Grad norm: {}, Correct: {}, Logits: {}".format(total_grad_norm.shape, correct.shape, logits.shape))
           epoch_grad_norms += zip(total_grad_norm.tolist(), correct.tolist(), logits.tolist())
           if FLAGS.augmult > 0:
             # logger.info(f"Aug norms list: {total_aug_norms.tolist()}")
