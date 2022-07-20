@@ -153,6 +153,8 @@ flags.DEFINE_boolean('train', True, "Train")
 flags.DEFINE_string('hyperparams_string', None, "Hyperparam string if not training")
 flags.DEFINE_string('dataset', "mnist", "Dataset: mnist or cifar10")
 flags.DEFINE_integer('augmult_batch_size', None, "Augmult batch size")
+flags.DEFINE_string('model', "cnn", "Model: cnn or wideresnet")
+flags.DEFINE_integer('depth', 6, "Depth of wideresnet")
 
 def log_memory_usage():
     logger.info(f"RAM usage: {psutil.virtual_memory()}")
@@ -219,29 +221,29 @@ def experiment():
     opt_init, opt_update, get_params, set_params = sgdavg.sgd(FLAGS.learning_rate)
 
     rng = random.PRNGKey(42)
-    if FLAGS.dataset == "mnist":
+    if FLAGS.model == "cnn":
         model_kwargs = {'overparameterised': FLAGS.overparameterised, 'groups': FLAGS.groups}
-    elif FLAGS.dataset == "cifar10":
-        model_kwargs = {'groups': FLAGS.groups}
+    elif FLAGS.model == "wideresnet":
+        model_kwargs = {'groups': FLAGS.groups, 'depth': FLAGS.depth}
     else:
-        ValueError(f"Unknown dataset: {FLAGS.dataset}")
+        ValueError(f"Unknown model: {FLAGS.model}")
 
-    model_fn = models.get_model_fn(FLAGS.dataset, model_kwargs)
+    model_fn = models.get_model_fn(FLAGS.model, model_kwargs)
     model = hk.transform(model_fn, apply_rng=True)
 
     init_batch = shape_as_image(*next(batches), dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True)[0]
     logger.info(f"Init batch shape: {init_batch.shape}")
     init_args = [init_batch]
-    if FLAGS.dataset == "cifar10":
+    if FLAGS.model == "wideresnet":
         init_args.append(True)
     init_params = model.init(key, *init_args)
     def predict(params, inputs, is_training=False):
-        if FLAGS.dataset == "mnist":
+        if FLAGS.model == "cnn":
             predictions = model.apply(params, None, inputs)
-        elif FLAGS.dataset == "cifar10":
+        elif FLAGS.model == "wideresnet":
             predictions = model.apply(params, None, inputs, is_training)
         else:
-            return ValueError(f"Unknown dataset: {FLAGS.dataset}")
+            return ValueError(f"Unknown model: {FLAGS.model}")
         return predictions
 
     # jconfig.update('jax_platform_name', 'cpu')
@@ -456,9 +458,9 @@ def experiment():
 
         if epoch == FLAGS.epochs:
             if not FLAGS.dpsgd:
-                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_data={FLAGS.dataset},loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step},pa={FLAGS.param_averaging}"
+                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_data={FLAGS.dataset},model={FLAGS.model},depth={FLAGS.depth},loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step},pa={FLAGS.param_averaging}"
             else:
-                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_data={FLAGS.dataset},loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step},pa={FLAGS.param_averaging},aug={FLAGS.augmult},rf={FLAGS.random_flip},rc={FLAGS.random_crop}"
+                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_data={FLAGS.dataset},model={FLAGS.model},depth={FLAGS.depth},loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step},pa={FLAGS.param_averaging},aug={FLAGS.augmult},rf={FLAGS.random_flip},rc={FLAGS.random_crop}"
             with open(ospath.join(FLAGS.norm_dir, f'grad_norms_{hyperparams_string}.pkl'), 'wb') as f:
                 # logger.info("grad norms: {}".format(grad_norms[-1][0:100]))
                 pickle.dump(grad_norms, f)
