@@ -285,7 +285,7 @@ def experiment():
         # logits_list = logits.tolist()
         # print(logits_list[0])
         acc += jnp.mean(predicted_class == target_class)
-        logger.info("pred class: {}, target class: {}, correct: {}".format(predicted_class.shape, target_class.shape, (predicted_class == target_class).shape))
+        # logger.info("pred class: {}, target class: {}, correct: {}".format(predicted_class.shape, target_class.shape, (predicted_class == target_class).shape))
         correct.append(predicted_class == target_class)
         all_logits.append(logits)
       return acc / splits, jnp.squeeze(jnp.vstack(correct)), jnp.vstack(all_logits)
