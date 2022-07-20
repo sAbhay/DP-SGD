@@ -72,7 +72,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     logit_cols = [f'{i}_logit' for i in range(0, 10)]
     columns = cols + logit_cols
     sample_df = pd.DataFrame(norms, columns=columns)
-    logger.log(f"sample df : {sample_df}")
+    logger.info(f"sample df : {sample_df}")
     sample_df[logit_cols] = pd.DataFrame(scipy.special.softmax(sample_df[logit_cols].to_numpy(dtype=float), axis=1),
                                          columns=logit_cols)
     sample_df["max_logit"] = sample_df[logit_cols].max(axis=1)
