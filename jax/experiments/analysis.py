@@ -76,18 +76,14 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     sample_df[logit_cols] = pd.DataFrame(scipy.special.softmax(sample_df[logit_cols].to_numpy(dtype=float), axis=1),
                                          columns=logit_cols)
     sample_df["max_logit"] = sample_df[logit_cols].max(axis=1)
-    # print(sample_df)
+    last_epoch = sample_df['epoch'].max()
 
-    # print(len(df[df['epoch']==0]), len(df[(df['epoch']==0) & (df['accurate']==0)]), len(df[(df['epoch']==0) & (df['accurate']==1)]), len(df[df['epoch']==10]))
-    # ax = df.hist(column=['norm'], by=['epoch'], sharey=True, sharex=True)
-    ax = sample_df[(sample_df['epoch'] == 0) | (sample_df['epoch'] == 19)][['epoch', 'norm', 'accurate']]. \
+    sample_df[(sample_df['epoch'] == 0) | (sample_df['epoch'] == last_epoch)][['epoch', 'norm', 'accurate']]. \
         hist(column='norm', by=['epoch', 'accurate'], legend=False)
     plt.suptitle('Gradient norms by correct sample classification at start and end')
-    # ax = sns.histplot(data=sample_df[(sample_df['epoch'] == 0) | (sample_df['epoch'] == 19)],
-    #                   x='norm', stat='count', hue='accurate', by=)
-    plt.savefig(os.path.join(plot_dir, 'epoch_20_grad_norms_accuracy.png'))
+    plt.savefig(os.path.join(plot_dir, 'final_epoch_grad_norms_accuracy.png'))
     plt.close()
-    logger.info("Saved Epoch 20 grad norms hist at {}".format(plot_dir))
+    logger.info("Saved final epoch grad norms hist at {}".format(plot_dir))
 
     ax = sns.histplot(data=sample_df, x='epoch', y='norm', hue='accurate')
     sns.move_legend(ax, "upper left")
@@ -127,12 +123,12 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
         cols = ['epoch', 'accurate'] + norm_cols
         aug_df = pd.DataFrame(aug_norms, columns=cols)
         aug_df_combined = pd.melt(aug_df, id_vars=['epoch', 'accurate'], value_vars=norm_cols, value_name='norm')
-        ax = aug_df_combined[(aug_df_combined['epoch'] == 0) | (aug_df_combined['epoch'] == 19)][['epoch', 'norm', 'accurate']]. \
+        aug_df_combined[(aug_df_combined['epoch'] == 0) | (aug_df_combined['epoch'] == last_epoch)][['epoch', 'norm', 'accurate']]. \
             hist(column='norm', by=['epoch', 'accurate'], legend=False)
         plt.suptitle("Grad norms per augmentations by sample classification at start and end")
-        plt.savefig(os.path.join(plot_dir, 'epoch_1_20_aug_grad_norms_accuracy.png'))
+        plt.savefig(os.path.join(plot_dir, 'epoch_1_final_aug_grad_norms_accuracy.png'))
         plt.close()
-        logger.info("Saved Epoch 1, 20 aug grad norms hist")
+        logger.info("Saved Epoch 1, final aug grad norms hist")
 
     # sample_df = sample_df[sample_df['epoch'] == 19]
     # temp_df = sample_df[sample_df['accurate'] == True]
