@@ -337,7 +337,7 @@ def experiment():
         return tree_unflatten(grads_treedef, aggregated_grads), total_grad_norm
 
 
-    def compute_epsilon(steps, num_examples=60000, target_delta=1e-5):
+    def compute_epsilon(steps, num_examples=train_images.shape[0], target_delta=1e-5):
       if num_examples * target_delta > 1.:
         warnings.warn('Your delta might be too high.')
       q = FLAGS.batch_size / float(num_examples)
