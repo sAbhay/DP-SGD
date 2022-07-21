@@ -1,3 +1,9 @@
+from sys import path as syspath
+syspath.append('../')
+
+from common import log
+logger = log.get_logger('plot_concat')
+
 import os
 from PIL import Image, ImageOps, ImageDraw, ImageFont
 from analysis import NORM_DIR, get_hyperparameter_strings, PLOTS_DIR
@@ -56,12 +62,11 @@ def make_single_plot(hyperparameter_string, plot_dir):
     # Create and save image grid
     image = concat_images(image_paths, (640, 480), (2, 3))
     title_plot(image, hyperparameter_string)
-    title_plot(image, hyperparameter_string)
     image.save(os.path.join(plot_dir, 'all', f'{hyperparameter_string}.png'), 'PNG')
 
-def title_plot(img, hyperparam_string):
-    img = ImageOps.expand(img, border=45, fill=(255, 255, 255))
-    draw = ImageDraw.Draw(img)
+def title_plot(image, hyperparam_string):
+    image = ImageOps.expand(image, border=45, fill=(255, 255, 255))
+    draw = ImageDraw.Draw(image)
 
     splits = hyperparam_string.split('_')
     title = splits[0] + "with "
@@ -70,6 +75,7 @@ def title_plot(img, hyperparam_string):
         k, v = split.split('=')
         if k in {"dataset", "model", "depth", "batch_size", "grp", "ws", "pa", "aug"}:
             title += HYPERPARAMETER_STRING_FORMS[k] + "=" + v + " "
+    logger.log("title: {}".format(title))
 
     draw.text((0, 0), title, (0, 0, 0), font=ImageFont.load_default())
 
