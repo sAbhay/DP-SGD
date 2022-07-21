@@ -75,7 +75,7 @@ def title_plot(image, hyperparam_string):
         k, v = split.split('=')
         if k in {"dataset", "model", "depth", "batch_size", "grp", "ws", "pa", "aug"}:
             title += HYPERPARAMETER_STRING_FORMS[k] + "=" + v + " "
-    logger.log("title: {}".format(title))
+    logger.info("title: {}".format(title))
 
     draw.text((0, 0), title, (0, 0, 0), font=ImageFont.load_default())
 
