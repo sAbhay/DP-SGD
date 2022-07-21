@@ -155,6 +155,7 @@ flags.DEFINE_string('dataset', "mnist", "Dataset: mnist or cifar10")
 flags.DEFINE_integer('augmult_batch_size', None, "Augmult batch size")
 flags.DEFINE_string('model', "cnn", "Model: cnn or wideresnet")
 flags.DEFINE_integer('depth', 6, "Depth of wideresnet")
+flags.DEFINE_integer('checkpoint', 20, "Checkpoint interval in epochs")
 
 def log_memory_usage():
     logger.info(f"RAM usage: {psutil.virtual_memory()}")
@@ -456,11 +457,11 @@ def experiment():
 
         stats.append((train_loss.item(), train_acc.item(), test_loss.item(), test_acc.item(), eps.item()))
 
-        if epoch == FLAGS.epochs:
+        if ((epoch + 1) % FLAGS.checkpoint) == 0:
             if not FLAGS.dpsgd:
-                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_data={FLAGS.dataset},model={FLAGS.model},depth={FLAGS.depth},loss={FLAGS.loss},epochs={FLAGS.epochs},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step},pa={FLAGS.param_averaging}"
+                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_data={FLAGS.dataset},model={FLAGS.model},depth={FLAGS.depth},loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step},pa={FLAGS.param_averaging}"
             else:
-                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_data={FLAGS.dataset},model={FLAGS.model},depth={FLAGS.depth},loss={FLAGS.loss},epochs={FLAGS.epochs},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step},pa={FLAGS.param_averaging},aug={FLAGS.augmult},rf={FLAGS.random_flip},rc={FLAGS.random_crop}"
+                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_data={FLAGS.dataset},model={FLAGS.model},depth={FLAGS.depth},loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step},pa={FLAGS.param_averaging},aug={FLAGS.augmult},rf={FLAGS.random_flip},rc={FLAGS.random_crop}"
             with open(ospath.join(FLAGS.norm_dir, f'grad_norms_{hyperparams_string}.pkl'), 'wb') as f:
                 # logger.info("grad norms: {}".format(grad_norms[-1][0:100]))
                 pickle.dump(grad_norms, f)
