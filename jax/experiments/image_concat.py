@@ -62,7 +62,6 @@ def make_single_plot(hyperparameter_string, plot_dir):
 def title_plot(img, hyperparam_string):
     img = ImageOps.expand(img, border=45, fill=(255, 255, 255))
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("FONTS/arial.ttf", 24)
 
     splits = hyperparam_string.split('_')
     title = splits[0] + "with "
@@ -72,7 +71,7 @@ def title_plot(img, hyperparam_string):
         if k in {"dataset", "model", "depth", "batch_size", "grp", "ws", "pa", "aug"}:
             title += HYPERPARAMETER_STRING_FORMS[k] + "=" + v + " "
 
-    draw.text((0, 0), title, (0, 0, 0), font=font)
+    draw.text((0, 0), title, (0, 0, 0), font=ImageFont.load_default())
 
 
 if __name__ == '__main__':
