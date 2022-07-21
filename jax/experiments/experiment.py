@@ -387,11 +387,10 @@ def experiment():
                      FLAGS.noise_multiplier, FLAGS.batch_size)
         opt_state = opt_update(
             i, private_grads, opt_state)
-        params = get_params(opt_state)
-        avg_params = average_params(params, add_params, i)
-        # logger.info(f"Average params: {avg_params}, \n Grads: {private_grads}")
-        # logger.info("Optimization state: {}".format(opt_state))
-        opt_state = set_params(avg_params, opt_state)
+        if FLAGS.param_averaging:
+            params = get_params(opt_state)
+            avg_params = average_params(params, add_params, i)
+            opt_state = set_params(avg_params, params)
         return opt_state, total_grad_norm, total_aug_norms
 
     # _, init_params = init_random_params(key, (-1, 28, 28, 1))
