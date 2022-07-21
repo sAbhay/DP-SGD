@@ -1,6 +1,27 @@
 import os
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageDraw, ImageFont
 from analysis import NORM_DIR, get_hyperparameter_strings, PLOTS_DIR
+
+HYPERPARAMETER_STRING_FORMS = {
+    "dataset": "Dataset",
+    "model": "Model",
+    "depth": "Depth",
+    "loss": "Loss",
+    "lr": "Learning rate",
+    "batch_size": "Batch size",
+    "op": "Overparameterised",
+    "nm": "Noise multiplier",
+    "l2nc": "L2 norm clip",
+    "grp": "Groups",
+    "ws": "Weight standardisation",
+    "pa": "Parameter averaging",
+    "ess": "EMA start step",
+    "pss": "Polyak start step",
+    "mu": "EMA coefficient",
+    "aug": "Augmentations",
+    "rf": "Random flip",
+    "rc": "Random crop",
+}
 
 
 def concat_images(image_paths, size, shape=None):
@@ -34,7 +55,24 @@ def make_single_plot(hyperparameter_string, plot_dir):
 
     # Create and save image grid
     image = concat_images(image_paths, (640, 480), (2, 3))
+    title_plot(image, hyperparameter_string)
+    title_plot(image, hyperparameter_string)
     image.save(os.path.join(plot_dir, 'all', f'{hyperparameter_string}.png'), 'PNG')
+
+def title_plot(img, hyperparam_string):
+    img = ImageOps.expand(img, border=45, fill=(255, 255, 255))
+    draw = ImageDraw.Draw(img)
+    font = ImageFont.truetype("FONTS/arial.ttf", 24)
+
+    splits = hyperparam_string.split('_')
+    title = splits[0] + "with "
+    splits = splits[1].split(',')
+    for split in splits:
+        k, v = split.split('=')
+        if k in {"dataset", "model", "depth", "batch_size", "grp", "ws", "pa", "aug"}:
+            title += HYPERPARAMETER_STRING_FORMS[k] + "=" + v + " "
+
+    draw.text((0, 0), title, (0, 0, 0), font=font)
 
 
 if __name__ == '__main__':
