@@ -67,9 +67,10 @@ def make_single_plot(hyperparameter_string, plot_dir):
 def title_plot(image, hyperparam_string):
     image = ImageOps.expand(image, border=45, fill=(255, 255, 255))
     draw = ImageDraw.Draw(image)
+    font = ImageFont.truetype("../arial.ttf", 24)
 
     splits = hyperparam_string.split('_')
-    title = splits[0] + "with "
+    title = splits[0] + " with "
     splits = splits[1].split(',')
     for split in splits:
         k, v = split.split('=')
@@ -77,7 +78,7 @@ def title_plot(image, hyperparam_string):
             title += HYPERPARAMETER_STRING_FORMS[k] + "=" + v + " "
     logger.info("title: {}".format(title))
 
-    draw.text((0, 0), title, (0, 0, 0), font=ImageFont.load_default())
+    draw.text((0, 0), title, (0, 0, 0), font=font)
 
 
 if __name__ == '__main__':
