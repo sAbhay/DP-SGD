@@ -223,7 +223,7 @@ def experiment():
 
     rng = random.PRNGKey(42)
     if FLAGS.model == "cnn":
-        model_kwargs = {'overparameterised': FLAGS.overparameterised, 'groups': FLAGS.groups, 'ws': FLAGS.ws}
+        model_kwargs = {'overparameterised': FLAGS.overparameterised, 'groups': FLAGS.groups, 'ws': FLAGS.weight_standardisation}
     elif FLAGS.model == "wideresnet":
         model_kwargs = {'groups': FLAGS.groups, 'depth': FLAGS.depth}
     else:
