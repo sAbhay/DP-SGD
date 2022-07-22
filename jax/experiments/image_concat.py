@@ -80,7 +80,7 @@ def title_plot(image, hyperparam_string):
 
     w, h = draw.textsize(title, font=font)
     W, H = image.size
-    draw.text(((W - w) / 2, (H - h) / 2), title, fill="black")
+    draw.text(((W - w) / 2, 10), title, fill="black", font=font)
     return image
 
 
