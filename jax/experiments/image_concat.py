@@ -61,7 +61,7 @@ def make_single_plot(hyperparameter_string, plot_dir):
 
     # Create and save image grid
     image = concat_images(image_paths, (640, 480), (2, 3))
-    title_plot(image, hyperparameter_string)
+    image = title_plot(image, hyperparameter_string)
     image.save(os.path.join(plot_dir, 'all', f'{hyperparameter_string}.png'), 'PNG')
 
 def title_plot(image, hyperparam_string):
@@ -79,6 +79,7 @@ def title_plot(image, hyperparam_string):
     logger.info("title: {}".format(title))
 
     draw.text((0, 0), title, (0, 0, 0), font=font)
+    return image
 
 
 if __name__ == '__main__':
