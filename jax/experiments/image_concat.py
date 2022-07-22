@@ -14,7 +14,7 @@ HYPERPARAMETER_STRING_FORMS = {
     "depth": "Depth",
     "loss": "Loss",
     "lr": "Learning rate",
-    "batch_size": "Batch size",
+    "bs": "Batch size",
     "op": "Overparameterised",
     "nm": "Noise multiplier",
     "l2nc": "L2 norm clip",
@@ -67,7 +67,7 @@ def make_single_plot(hyperparameter_string, plot_dir):
 def title_plot(image, hyperparam_string):
     image = ImageOps.expand(image, border=75, fill='white')
     draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype("../arial.ttf", 30)
+    font = ImageFont.truetype("../arial.ttf", 25)
 
     splits = hyperparam_string.split('_')
     title = splits[0] + " with "
