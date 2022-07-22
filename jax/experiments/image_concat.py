@@ -78,7 +78,9 @@ def title_plot(image, hyperparam_string):
             title += HYPERPARAMETER_STRING_FORMS[k] + "=" + v + " "
     logger.info("title: {}, image size: {}".format(title, image.size))
 
-    draw.text((10, 10), title, (0, 0, 0), font=font)
+    w, h = draw.textsize(title, font=font)
+    W, H = image.size
+    draw.text(((W - w) / 2, (H - h) / 2), title, fill="black")
     return image
 
 
