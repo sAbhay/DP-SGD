@@ -74,7 +74,7 @@ def title_plot(image, hyperparam_string):
     splits = splits[1].split(',')
     for split in splits:
         k, v = split.split('=')
-        if k in {"dataset", "model", "depth", "batch_size", "grp", "ws", "pa", "aug"}:
+        if k in {"dataset", "model", "depth", "bs", "grp", "ws", "pa", "aug"}:
             title += HYPERPARAMETER_STRING_FORMS[k] + "=" + v + " "
     logger.info("title: {}, image size: {}".format(title, image.size))
 
