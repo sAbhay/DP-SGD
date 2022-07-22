@@ -376,7 +376,7 @@ def experiment():
         if FLAGS.param_averaging:
             params = get_params(opt_state)
             avg_params = average_params(params, add_params, i)
-            opt_state = set_params(avg_params, params)
+            opt_state = set_params(avg_params, opt_state)
         return opt_state, total_grad_norm
 
     @jit
@@ -390,7 +390,7 @@ def experiment():
         if FLAGS.param_averaging:
             params = get_params(opt_state)
             avg_params = average_params(params, add_params, i)
-            opt_state = set_params(avg_params, params)
+            opt_state = set_params(avg_params, opt_state)
         return opt_state, total_grad_norm, total_aug_norms
 
     # _, init_params = init_random_params(key, (-1, 28, 28, 1))
