@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import scipy.special
 import seaborn as sns
 import os
+import shutil
 
 
 NORM_DIR = r'norms'
@@ -34,8 +35,10 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     # hyperparams_string = "dpsgd_loss=cross-entropy,lr=0.25,op=True,nm=1.3,l2nc=1.5"
 
     plot_dir = os.path.join(plot_dir, hyperparams_string)
-    if not os.path.exists(plot_dir):
-        os.makedirs(plot_dir)
+    if os.path.exists(plot_dir):
+        shutil.rmtree(plot_dir)
+    os.makedirs(plot_dir)
+
 
     with open(os.path.join(norm_dir, f'grad_norms_{hyperparams_string}.pkl'), 'rb') as f:
         epoch_norms = pickle.load(f)
