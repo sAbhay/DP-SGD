@@ -65,9 +65,9 @@ def make_single_plot(hyperparameter_string, plot_dir):
     image.save(os.path.join(plot_dir, 'all', f'{hyperparameter_string}.png'), 'PNG')
 
 def title_plot(image, hyperparam_string):
-    image = ImageOps.expand(image, border=45, fill=(255, 255, 255))
+    image = ImageOps.expand(image, border=100, fill=255)
     draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype("../arial.ttf", 24)
+    font = ImageFont.truetype("../arial.ttf", 72)
 
     splits = hyperparam_string.split('_')
     title = splits[0] + " with "
@@ -76,9 +76,9 @@ def title_plot(image, hyperparam_string):
         k, v = split.split('=')
         if k in {"dataset", "model", "depth", "batch_size", "grp", "ws", "pa", "aug"}:
             title += HYPERPARAMETER_STRING_FORMS[k] + "=" + v + " "
-    logger.info("title: {}".format(title))
+    logger.info("title: {}, image size: {}".format(title, image.size))
 
-    draw.text((0, 0), title, (0, 0, 0), font=font)
+    draw.text((10, 10), title, (0, 0, 0), font=font)
     return image
 
 
