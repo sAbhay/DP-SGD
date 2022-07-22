@@ -65,9 +65,9 @@ def make_single_plot(hyperparameter_string, plot_dir):
     image.save(os.path.join(plot_dir, 'all', f'{hyperparameter_string}.png'), 'PNG')
 
 def title_plot(image, hyperparam_string):
-    image = ImageOps.expand(image, border=100, fill=255)
+    image = ImageOps.expand(image, border=75, fill='white')
     draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype("../arial.ttf", 72)
+    font = ImageFont.truetype("../arial.ttf", 50)
 
     splits = hyperparam_string.split('_')
     title = splits[0] + " with "
