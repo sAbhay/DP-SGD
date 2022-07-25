@@ -88,13 +88,6 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     plt.close()
     logger.info("Saved final epoch grad norms hist at {}".format(plot_dir))
 
-    ax = sns.histplot(data=sample_df, x='epoch', y='norm', hue='accurate')
-    sns.move_legend(ax, "upper left")
-    plt.suptitle('Per sample gradient norms')
-    plt.savefig(os.path.join(plot_dir, 'grad_norms_accuracy.png'))
-    plt.close()
-    logger.info("Saved grad norms hist")
-
     cols = ['epoch', 'param_norm']
     epoch_df = pd.DataFrame(param_norms, columns=cols)
     epoch_df['average_grad_norm'] = sample_df.groupby(['epoch']).mean()['norm']
@@ -120,6 +113,13 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     plt.savefig(os.path.join(plot_dir, 'accuracy_stats.png'))
     plt.close()
     logger.info("Saved accuracy stats plot")
+
+    # ax = sns.histplot(data=sample_df, x='epoch', y='norm', hue='accurate')
+    # sns.move_legend(ax, "upper left")
+    # plt.suptitle('Per sample gradient norms')
+    # plt.savefig(os.path.join(plot_dir, 'grad_norms_accuracy.png'))
+    # plt.close()
+    # logger.info("Saved grad norms hist")
 
     if "aug=0" not in hyperparams_string:
         norm_cols = [f'aug_norm_{i}' for i in range(n_augs)]
