@@ -1,3 +1,9 @@
+from sys import path as syspath
+syspath.append('../')
+
+from common import log
+logger = log.get_logger('cnn')
+
 from .layers import WSConv2D
 import haiku as hk
 import jax
@@ -63,7 +69,8 @@ def get_mnist_model_fn(overparameterised=True, groups=8, weight_standardisation=
         layers.append(hk.Flatten())
         layers.append(hk.Linear(32))
         layers.append(jax.nn.relu)
-        layers.append(hk.Linear(10))
+        layers.append(hk.Linear(output_classes))
+        logger.info("Layers: %s", layers)
         model = hk.Sequential(layers)
         return model(features)
     return mnist_model_fn_seq
