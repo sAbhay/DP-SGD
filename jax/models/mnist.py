@@ -12,7 +12,7 @@ import functools
 class CNN(hk.Module):
     def __init__(self, overparameterised=True, groups=8, weight_standardisation=True, depth=2, output_classes=10):
         super(CNN, self).__init__()
-        self.multiplier = 2 if overparameterised else 2
+        self.multiplier = 2 if overparameterised else 1
         self.groups = groups
         if weight_standardisation:
             self.conv_fn = WSConv2D
@@ -26,13 +26,13 @@ class CNN(hk.Module):
         self.norm_fn = functools.partial(self.norm_fn, groups=groups)
 
     def __call__(self, features, **_):
+        net = features
         for i in range(self.depth - 2):
-            if i == 0:
-                net = self.conv_fn(16*self.multiplier*(2**i), (4, 4), padding='SAME', stride=(2, 2), name='conv_%d' % i)(features)
-            else:
-                net = self.conv_fn(16*self.multiplier*(2**i), (4, 4), padding='SAME', stride=(2, 2), name='conv_%d' % i)(net)
+            net = self.conv_fn(16*self.multiplier*(2**i), (4, 4), padding='SAME', stride=(2, 2), name='conv_%d' % i)(net)
+            logger.info(f"{i} post conv")
+            logger.info(f"{net}")
             net = jax.nn.relu(net),
-            logger.info(f"{i}")
+            logger.info(f"{i} post relu")
             logger.info(f"{net}")
             if self.groups > 0:
                 net = self.norm_fn()(net)
