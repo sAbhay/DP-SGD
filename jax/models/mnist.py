@@ -2,7 +2,7 @@ from .layers import WSConv2D
 import haiku as hk
 import jax
 
-class CNN():
+class CNN(hk.Moduleg):
     def __init__(self, overparameterised=True, groups=8, weight_standardisation=True, depth=2, output_classes=10):
         self.multiplier = 2 if overparameterised else 2
         self.groups = groups
