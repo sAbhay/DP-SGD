@@ -32,7 +32,7 @@ class CNN(hk.Module):
             net = jax.nn.relu(net)
             logger.info(f"after conv {i} and relu")
             logger.info(f"net: {net.shape}")
-            net = hk.MaxPool(2, 1, padding='VALID')(net)
+            net = hk.MaxPool(2, 1, padding='SAME')(net)
             logger.info(f"after maxpool")
             logger.info(f"net: {net.shape}")
             if self.groups > 0:
