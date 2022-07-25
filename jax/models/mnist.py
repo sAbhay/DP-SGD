@@ -19,7 +19,7 @@ class CNN(hk.Module):
         else:
             self.conv_fn = hk.Conv2D
         self.depth = depth
-        assert (depth > 3), "Depth must be at least 3"
+        assert (depth >= 3), "Depth must be at least 3"
         self.groups = groups
         self.output_classes = output_classes
         self.norm_fn = getattr(hk, 'GroupNorm')
