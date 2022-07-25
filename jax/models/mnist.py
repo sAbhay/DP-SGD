@@ -31,7 +31,7 @@ class CNN(hk.Module):
             net = self.conv_fn(16*self.multiplier*(2**i), (4, 4), padding='SAME', stride=(2, 2), name='conv_%d' % i)(net)
             net = jax.nn.relu(net),
             logger.info(f"{i}")
-            logger.info(f"{net.shapeg}")
+            logger.info(f"{net}")
             if self.groups > 0:
                 net = self.norm_fn()(net)
             net = hk.MaxPool(2, 1, padding='VALID')(net)
