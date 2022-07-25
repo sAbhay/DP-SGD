@@ -27,15 +27,15 @@ class CNN(hk.Module):
         for i in range(self.depth // 2 - 1):
             net = self.conv_fn(16*self.multiplier, (8, 8), padding='SAME', stride=(2, 2), name='conv_%d' % i)(net)
             net = jax.nn.relu(net),
-            net = hk.MaxPool(2, 1, padding='VALID')(net)
-        if self.groups > 0:
-            net = hk.GroupNorm(self.groups)(net)
-            net = jax.nn.relu(net),
-            net = hk.MaxPool(2, 1, padding='VALID')(net)
+            if self.groups > 0:
+                net = hk.GroupNorm(self.groups)(net)
+        net = hk.MaxPool(2, 1, padding='VALID')(net)
         for i in range(self.depth // 2 - 1):
             net = self.conv_fn(32*self.multiplier, (4, 4), padding='SAME', stride=(2, 2), name='conv_%d' % (i+self.depth//2))(net)
-        if self.groups > 0:
-            net = hk.GroupNorm(self.groups)(net)
+            net = jax.nn.relu(net),
+            if self.groups > 0:
+                net = hk.GroupNorm(self.groups)(net)
+        net = hk.MaxPool(2, 1, padding='VALID')(net)
         net = hk.Flatten()(net)
         net = hk.Linear(32)(net)
         net = jax.nn.relu(net)
@@ -73,4 +73,4 @@ def get_mnist_model_fn(overparameterised=True, groups=8, weight_standardisation=
         # logger.info("Layers: %s", layers)
         model = hk.Sequential(layers)
         return model(features)
-    return mnist_model_fn_seq
+    return mnist_model_fn
