@@ -34,10 +34,10 @@ class CNN(hk.Module):
             if self.groups > 0:
                 net = self.norm_fn()(net)
         logger.info(f"after conv")
+        logger.info(f"net: {net.shape}")
+        net = hk.MaxPool(2, 1, padding='VALID')(net)
+        logger.info(f"after maxpool")
         logger.info(f"net: {net}")
-        # net = hk.MaxPool(2, 1, padding='VALID')(net)
-        # logger.info(f"after maxpool")
-        # logger.info(f"net: {net}")
         net = hk.Flatten()(net)
         logger.info(f"after flatten")
         logger.info(f"net: {net}")
