@@ -27,7 +27,7 @@ class CNN():
             net = hk.GroupNorm(self.groups)(net)
         net = hk.Flatten()(net)
         net = hk.Linear(32)(net)
-        net = jax.nn.relu(net)
+        net = jax.nn.relu()(net)
         net = hk.Linear(self.output_classes)(net)
         return net
 
