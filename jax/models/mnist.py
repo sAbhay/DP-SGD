@@ -55,4 +55,4 @@ def get_mnist_model_fn(overparameterised=True, groups=8, weight_standardisation=
         layers.append(hk.Linear(output_classes))
         model = hk.Sequential(layers)
         return model(features)
-    return mnist_model_fn
+    return mnist_model_fn_seq
