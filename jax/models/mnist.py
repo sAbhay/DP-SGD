@@ -2,7 +2,7 @@ from .layers import WSConv2D
 import haiku as hk
 import jax
 
-class CNN(hk.Moduleg):
+class CNN(hk.Module):
     def __init__(self, overparameterised=True, groups=8, weight_standardisation=True, depth=2, output_classes=10):
         self.multiplier = 2 if overparameterised else 2
         self.groups = groups
@@ -33,7 +33,25 @@ class CNN(hk.Moduleg):
 
 
 def get_mnist_model_fn(overparameterised=True, groups=8, weight_standardisation=True, depth=2, output_classes=10):
+    multiplier = 2 if overparameterised else 2
+    if weight_standardisation:
+        conv_fn = WSConv2D
+    else:
+        conv_fn = hk.Conv2D
+    layers = []
+    for i in range(depth // 2 - 1):
+        layers.append(conv_fn(16*multiplier, (8, 8), padding='SAME', stride=(2, 2), name='conv_%d' % i))
+    for i in range(depth // 2 - 1):
+        layers.append(conv_fn(32*multiplier, (4, 4), padding='SAME', stride=(2, 2), name='conv_%d' % (i+depth//2)))
+    layers.append(hk.Flatten())
+    layers.append(hk.Linear(32))
+    layers.append(jax.nn.relu)
+    layers.append(hk.Linear(output_classes))
+
     def mnist_model_fn(features, **_):
         model = CNN(overparameterised, groups, weight_standardisation, depth, output_classes)
+        return model(features)
+    def mnist_model_fn_seq(features, **_):
+        model = hk.Sequential(layers)
         return model(features)
     return mnist_model_fn
