@@ -241,7 +241,6 @@ def experiment():
     init_params = model.init(key, *init_args)
     # logger.info("Model init params: {}".format(init_params))
 
-    @jit
     def predict(params, inputs, is_training=False):
         if FLAGS.model == "cnn":
             predictions = model.apply(params, None, inputs)
