@@ -27,18 +27,12 @@ class CNN(hk.Module):
 
     def __call__(self, features, **_):
         net = features
-        for i in range(self.depth // 2 - 1):
-            net = self.conv_fn(16*self.multiplier, (8, 8), padding='SAME', stride=(2, 2), name='conv_%d' % i)(net)
+        for i in range(self.depth - 2):
+            net = self.conv_fn(16*self.multiplier*(2**i), (4, 4), padding='SAME', stride=(2, 2), name='conv_%d' % i)(net)
             net = jax.nn.relu(net),
             if self.groups > 0:
                 net = self.norm_fn()(net)
-        net = hk.MaxPool(2, 1, padding='VALID')(net)
-        for i in range(self.depth // 2 - 1):
-            net = self.conv_fn(32*self.multiplier, (4, 4), padding='SAME', stride=(2, 2), name='conv_%d' % (i+self.depth//2))(net)
-            net = jax.nn.relu(net),
-            if self.groups > 0:
-                net = self.norm_fn(net)
-        net = hk.MaxPool(2, 1, padding='VALID')(net)
+            net = hk.MaxPool(2, 1, padding='VALID')(net)
         net = hk.Flatten()(net)
         net = hk.Linear(32)(net)
         net = jax.nn.relu(net)
