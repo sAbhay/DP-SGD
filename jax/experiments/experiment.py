@@ -491,7 +491,11 @@ def main(_):
             else:
                 hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_data={FLAGS.dataset},model={FLAGS.model},depth={FLAGS.depth},loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step},pa={FLAGS.param_averaging},aug={FLAGS.augmult},rf={FLAGS.random_flip},rc={FLAGS.random_crop}"
 
-    make_plots(hyperparams_string, FLAGS.plot_dir, FLAGS.norm_dir)
+    try:
+        make_plots(hyperparams_string, FLAGS.plot_dir, FLAGS.norm_dir)
+    except Exception as e:
+        logger.error(e, exc_info=True)
+        raise e
     make_single_plot(hyperparams_string, FLAGS.plot_dir)
 
 
