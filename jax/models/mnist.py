@@ -25,7 +25,7 @@ class CNN():
             net = self.conv_fn(32*self.multiplier, (4, 4), padding='SAME', stride=(2, 2), name='conv_%d' % (i+self.depth//2))(net)
         if self.groups > 0:
             net = hk.GroupNorm(self.groups)(net)
-        net = hk.Flatten(net)
+        net = hk.Flatten()(net)
         net = hk.Linear(32)(net)
         net = jax.nn.relu(net)
         net = hk.Linear(self.output_classes)(net)
