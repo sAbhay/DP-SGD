@@ -230,7 +230,12 @@ def experiment():
     else:
         ValueError(f"Unknown model: {FLAGS.model}")
 
-    model_fn = models.get_model_fn(FLAGS.model, model_kwargs)
+    # model_fn = models.get_model_fn(FLAGS.model, model_kwargs)
+    def model_fn(images):
+        net = hk.nets.ResNet50(10,
+                               resnet_v2=FLAGS.model_resnet_v2,
+                               bn_config={'decay_rate': FLAGS.model_bn_decay})
+        return net(images, is_training=True)
     model = hk.transform(model_fn, apply_rng=True)
 
     init_batch = shape_as_image(*next(batches), dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True)[0]
