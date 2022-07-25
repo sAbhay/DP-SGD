@@ -230,17 +230,12 @@ def experiment():
     else:
         ValueError(f"Unknown model: {FLAGS.model}")
 
-    # model_fn = models.get_model_fn(FLAGS.model, model_kwargs)
-    def model_fn(images):
-        net = hk.nets.ResNet50(10,
-                               resnet_v2=FLAGS.model_resnet_v2,
-                               bn_config={'decay_rate': FLAGS.model_bn_decay})
-        return net(images, is_training=True)
+    model_fn = models.get_model_fn(FLAGS.model, model_kwargs)
     model = hk.transform(model_fn, apply_rng=True)
 
     init_batch = shape_as_image(*next(batches), dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True)[0]
     logger.info(f"Init batch shape: {init_batch.shape}")
-    init_args = [init_batch, True]
+    init_args = [init_batch]
     if FLAGS.model == "wideresnet":
         init_args.append(True)
     init_params = model.init(key, *init_args)
@@ -386,7 +381,7 @@ def experiment():
             opt_state = set_params(avg_params, opt_state)
         return opt_state, total_grad_norm
 
-    # @jit
+    @jit
     def private_update(rng, i, opt_state, batch, add_params):
         params = get_params(opt_state)
         rng = random.fold_in(rng, i)  # get new key for new random numbers
