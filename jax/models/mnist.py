@@ -22,7 +22,7 @@ class CNN():
         if self.groups > 0:
             net = hk.GroupNorm(self.groups)(net)
         for i in range(self.depth // 2):
-            net = self.conv_fn(32*self.multiplier, (4, 4), padding='SAME', stride=(2, 2), name='conv_%d' % i)(net)
+            net = self.conv_fn(32*self.multiplier, (4, 4), padding='SAME', stride=(2, 2), name='conv_%d' % (i+self.depth//2))(net)
         if self.groups > 0:
             net = hk.GroupNorm(self.groups)(net)
         net = hk.Flatten(net)
