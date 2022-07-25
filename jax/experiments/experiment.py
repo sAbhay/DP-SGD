@@ -276,7 +276,6 @@ def experiment():
     else:
         raise ValueError("Undefined loss")
 
-    @jit
     def accuracy(params, batch, splits=1):
       acc = 0
       correct = []
