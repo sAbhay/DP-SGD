@@ -30,11 +30,17 @@ class CNN(hk.Module):
         for i in range(self.depth - 2):
             net = self.conv_fn(32*self.multiplier, (4, 4), padding='SAME', stride=(2, 2), name='conv_%d' % i)(net)
             net = jax.nn.relu(net)
-            logger.info(f"{i}")
+            # logger.info(f"{i}")
             if self.groups > 0:
                 net = self.norm_fn()(net)
+        logger.info(f"after conv")
+        logger.info(f"net: {net}")
         net = hk.MaxPool(2, 1, padding='VALID')(net)
+        logger.info(f"after maxpool")
+        logger.info(f"net: {net}")
         net = hk.Flatten()(net)
+        logger.info(f"after flatten")
+        logger.info(f"net: {net}")
         net = hk.Linear(32)(net)
         net = jax.nn.relu(net)
         net = hk.Linear(self.output_classes)(net)
