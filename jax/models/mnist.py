@@ -28,7 +28,7 @@ class CNN(hk.Module):
     def __call__(self, features, **_):
         net = features
         for i in range(self.depth - 2):
-            net = self.conv_fn(16*self.multiplier, (4, 4), padding='SAME', stride=(1, 1), name='conv_%d' % i)(net)
+            net = self.conv_fn(16*self.multiplier, (8, 8), padding='SAME', stride=(1, 1), name='conv_%d' % i)(net)
             net = jax.nn.relu(net)
             # logger.info(f"after conv {i} and relu")
             # logger.info(f"net: {net.shape}")
