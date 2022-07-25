@@ -53,13 +53,13 @@ def get_mnist_model_fn(overparameterised=True, groups=8, weight_standardisation=
             layers.append(jax.nn.relu)
             if groups > 0:
                 layers.append(hk.GroupNorm(groups))
-            layers.append(hk.MaxPool(2, 1, padding='VALID'))  # matches stax
+        layers.append(hk.MaxPool(2, 1, padding='VALID'))  # matches stax
         for i in range(depth // 2 - 1):
             layers.append(conv_fn(32 * multiplier, (4, 4), padding='SAME', stride=(2, 2), name='conv_%d' % (i + depth // 2)))
             layers.append(jax.nn.relu)
             if groups > 0:
                 layers.append(hk.GroupNorm(groups))
-            layers.append(hk.MaxPool(2, 1, padding='VALID'))  # matches stax
+        layers.append(hk.MaxPool(2, 1, padding='VALID'))  # matches stax
         layers.append(hk.Flatten())
         layers.append(hk.Linear(32))
         layers.append(jax.nn.relu)
