@@ -63,7 +63,7 @@ def get_mnist_model_fn(overparameterised=True, groups=8, weight_standardisation=
         layers.append(hk.Flatten())
         layers.append(hk.Linear(32))
         layers.append(jax.nn.relu)
-        layers.append(hk.Linear(output_classes))
+        layers.append(hk.Linear(10))
         model = hk.Sequential(layers)
         return model(features)
     return mnist_model_fn_seq
