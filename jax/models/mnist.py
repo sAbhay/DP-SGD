@@ -54,4 +54,4 @@ def get_mnist_model_fn(overparameterised=True, groups=8, weight_standardisation=
     def mnist_model_fn_seq(features, **_):
         model = hk.Sequential(layers)
         return model(features)
-    return mnist_model_fn
+    return mnist_model_fn_seq
