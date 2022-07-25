@@ -4,6 +4,7 @@ import jax
 
 class CNN(hk.Module):
     def __init__(self, overparameterised=True, groups=8, weight_standardisation=True, depth=2, output_classes=10):
+        super(CNN, self).__init__()
         self.multiplier = 2 if overparameterised else 2
         self.groups = groups
         if weight_standardisation:
