@@ -240,6 +240,8 @@ def experiment():
         init_args.append(True)
     init_params = model.init(key, *init_args)
     logger.info("Model init params: {}".format(init_params))
+
+    @jit
     def predict(params, inputs, is_training=False):
         if FLAGS.model == "cnn":
             predictions = model.apply(params, None, inputs)
@@ -274,6 +276,7 @@ def experiment():
     else:
         raise ValueError("Undefined loss")
 
+    @jit
     def accuracy(params, batch, splits=1):
       acc = 0
       correct = []
@@ -380,6 +383,7 @@ def experiment():
             opt_state = set_params(avg_params, opt_state)
         return opt_state, total_grad_norm
 
+    @jit
     def private_update(rng, i, opt_state, batch, add_params):
         params = get_params(opt_state)
         rng = random.fold_in(rng, i)  # get new key for new random numbers
