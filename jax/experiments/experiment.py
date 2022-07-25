@@ -370,7 +370,6 @@ def experiment():
         # logger.info("Params count:", sum([len(p.ravel()) for p in nonempty_params]))
         return total_params_norm
 
-    @jit
     def update(_, i, opt_state, batch, add_params):
         params = get_params(opt_state)
         grads, total_grad_norm = non_private_grad(params, batch, FLAGS.batch_size)
@@ -381,7 +380,6 @@ def experiment():
             opt_state = set_params(avg_params, opt_state)
         return opt_state, total_grad_norm
 
-    @jit
     def private_update(rng, i, opt_state, batch, add_params):
         params = get_params(opt_state)
         rng = random.fold_in(rng, i)  # get new key for new random numbers
