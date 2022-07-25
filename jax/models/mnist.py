@@ -7,6 +7,7 @@ logger = log.get_logger('cnn')
 from .layers import WSConv2D
 import haiku as hk
 import jax
+import functools
 
 class CNN(hk.Module):
     def __init__(self, overparameterised=True, groups=8, weight_standardisation=True, depth=2, output_classes=10):
@@ -21,6 +22,8 @@ class CNN(hk.Module):
         assert (depth % 2 == 0) and (depth > 3), "Depth must be even and at least 4"
         self.groups = groups
         self.output_classes = output_classes
+        self.norm_fn = getattr(hk, 'GroupNorm')
+        self.norm_fn = functools.partial(self.norm_fn, groups=groups)
 
     def __call__(self, features, **_):
         net = features
@@ -28,13 +31,13 @@ class CNN(hk.Module):
             net = self.conv_fn(16*self.multiplier, (8, 8), padding='SAME', stride=(2, 2), name='conv_%d' % i)(net)
             net = jax.nn.relu(net),
             if self.groups > 0:
-                net = hk.GroupNorm(self.groups)(net)
+                net = self.norm_fn()(net)
         net = hk.MaxPool(2, 1, padding='VALID')(net)
         for i in range(self.depth // 2 - 1):
             net = self.conv_fn(32*self.multiplier, (4, 4), padding='SAME', stride=(2, 2), name='conv_%d' % (i+self.depth//2))(net)
             net = jax.nn.relu(net),
             if self.groups > 0:
-                net = hk.GroupNorm(self.groups)(net)
+                net = self.norm_fn(net)
         net = hk.MaxPool(2, 1, padding='VALID')(net)
         net = hk.Flatten()(net)
         net = hk.Linear(32)(net)
