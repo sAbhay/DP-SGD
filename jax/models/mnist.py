@@ -11,17 +11,17 @@ class CNN():
         else:
             self.conv_fn = hk.Conv2D
         self.depth = depth
-        assert ((depth-1) % 2 == 0) and (depth > 2), "Depth must be odd and greater than 2"
+        assert (depth % 2 == 0) and (depth > 3), "Depth must be even and at least 4"
         self.groups = groups
         self.output_classes = output_classes
 
     def __call__(self, features, **_):
         net = features
-        for i in range(self.depth // 2):
+        for i in range(self.depth // 2 - 1):
             net = self.conv_fn(16*self.multiplier, (8, 8), padding='SAME', stride=(2, 2), name='conv_%d' % i)(net)
         if self.groups > 0:
             net = hk.GroupNorm(self.groups)(net)
-        for i in range(self.depth // 2):
+        for i in range(self.depth // 2 - 1):
             net = self.conv_fn(32*self.multiplier, (4, 4), padding='SAME', stride=(2, 2), name='conv_%d' % (i+self.depth//2))(net)
         if self.groups > 0:
             net = hk.GroupNorm(self.groups)(net)
