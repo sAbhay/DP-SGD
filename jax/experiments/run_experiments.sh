@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source ../../../miniconda/etc/profile.d/conda.sh
+source ../../../miniconda3/etc/profile.d/conda.sh
 conda activate jax-privacy-dm
 
 for i in 3 4 6 8 10 12 14 16
