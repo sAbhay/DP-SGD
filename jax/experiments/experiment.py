@@ -154,7 +154,7 @@ flags.DEFINE_string('hyperparams_string', None, "Hyperparam string if not traini
 flags.DEFINE_string('dataset', "mnist", "Dataset: mnist or cifar10")
 flags.DEFINE_integer('augmult_batch_size', None, "Augmult batch size")
 flags.DEFINE_string('model', "cnn", "Model: cnn or wideresnet")
-flags.DEFINE_integer('depth', 6, "Depth of wideresnet")
+flags.DEFINE_integer('depth', 6, "Network depth")
 flags.DEFINE_integer('checkpoint', 20, "Checkpoint interval in epochs")
 
 def log_memory_usage():
@@ -480,9 +480,13 @@ def experiment():
     return hyperparams_string
 
 def main(_):
+    hyperparams_string = None
     if FLAGS.train:
-        hyperparams_string = experiment()
-    else:
+        try:
+            hyperparams_string = experiment()
+        except KeyboardInterrupt:
+            logger.warn("Experiment interrupted by user, saving plots")
+    if hyperparams_string is None:
         if FLAGS.hyperparams_string is not None:
             hyperparams_string = FLAGS.hyperparams_string
         else:
