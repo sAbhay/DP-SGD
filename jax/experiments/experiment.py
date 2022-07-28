@@ -91,7 +91,6 @@ from jax import jit
 from jax import random
 from jax import vmap
 from jax import nn
-from jax import devices
 from jax.tree_util import tree_flatten, tree_unflatten
 import jax.numpy as jnp
 import haiku as hk
@@ -115,6 +114,9 @@ from os import path as ospath
 
 from analysis import make_plots
 from image_concat import make_single_plot
+
+nvidia_smi.nvmlInit()
+handle = nvidia_smi.nvmlDeviceGetHandleByIndex(0)
 
 FLAGS = flags.FLAGS
 
@@ -155,15 +157,10 @@ flags.DEFINE_string('model', "cnn", "Model: cnn or wideresnet")
 flags.DEFINE_integer('depth', 6, "Network depth")
 flags.DEFINE_integer('checkpoint', 20, "Checkpoint interval in epochs")
 
-num_gpus = len(devices('gpu'))
-nvidia_smi.nvmlInit()
-handles = [nvidia_smi.nvmlDeviceGetHandleByIndex(i) for i in range(num_gpus)]
-
 def log_memory_usage():
     logger.info(f"RAM usage: {psutil.virtual_memory()}")
-    for i, handle in enumerate(handles):
-        mem_res = nvidia_smi.nvmlDeviceGetMemoryInfo(handle)
-        logger.info(f'GPU {i+1} usage: {100 * (mem_res.used / mem_res.total):.3f}%')
+    mem_res = nvidia_smi.nvmlDeviceGetMemoryInfo(handle)
+    logger.info(f'GPU usage: {100 * (mem_res.used / mem_res.total):.3f}%')
 
 def experiment():
     logger.info("Running Experiment")
