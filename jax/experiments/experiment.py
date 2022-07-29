@@ -236,8 +236,8 @@ def experiment():
     init_batch = shape_as_image(*next(batches), dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True)[0]
     logger.info(f"Init batch shape: {init_batch.shape}")
     init_args = [init_batch]
-    if FLAGS.model == "wideresnet":
-        init_args.append(True)
+    # if FLAGS.model == "wideresnet":
+    #     init_args.append(True)
     init_params = model.init(key, *init_args)
     logger.info("Model init params: {}".format(init_params))
 
