@@ -109,7 +109,7 @@ class WideResNet(hk.Module):
         net += skip
     return net
 
-  def __call__(self, inputs, is_training):
+  def __call__(self, inputs):
     net = self.conv_fn(16, name='First_conv', kernel_shape=(3, 3))(inputs)
     net = self.residual_block(
         net, width=16 * self.width, strides=(1, 1), name='Block_1')
@@ -122,10 +122,6 @@ class WideResNet(hk.Module):
     net = self.norm_fn(name='Final_norm')(net)
 
     net = jnp.mean(net, axis=[1, 2], dtype=jnp.float32)
-
-    if self.dropout_rate > 0.0:
-      dropout_rate = self.dropout_rate if is_training else 0.0
-      net = hk.dropout(hk.next_rng_key(), dropout_rate, net)
 
     return hk.Linear(
         self.num_output_classes,
@@ -146,9 +142,9 @@ def get_cifar_model_fn(
       activation: str = 'relu',
       groups: int = 16,
 ):
-    def cifar_model_fn(features, is_training, **_):
+    def cifar_model_fn(features, **_):
         module = WideResNet(num_classes=num_classes, depth=depth, width=width, dropout_rate=dropout_rate,
                             use_skip_init=use_skip_init, use_skip_paths=use_skip_paths, which_conv=which_conv,
                             which_norm=which_norm, activation=activation, groups=groups)
-        return module(features, is_training)
+        return module(features)
     return cifar_model_fn
