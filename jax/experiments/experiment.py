@@ -156,6 +156,7 @@ flags.DEFINE_integer('augmult_batch_size', None, "Augmult batch size")
 flags.DEFINE_string('model', "cnn", "Model: cnn or wideresnet")
 flags.DEFINE_integer('depth', 6, "Network depth")
 flags.DEFINE_integer('checkpoint', 20, "Checkpoint interval in epochs")
+flags.DEFINE_integer('width', 1, "Network width")
 
 def log_memory_usage():
     logger.info(f"RAM usage: {psutil.virtual_memory()}")
@@ -226,7 +227,7 @@ def experiment():
         model_kwargs = {'overparameterised': FLAGS.overparameterised, 'groups': FLAGS.groups,
                         'weight_standardisation': FLAGS.weight_standardisation, 'depth': FLAGS.depth}
     elif FLAGS.model == "wideresnet":
-        model_kwargs = {'groups': FLAGS.groups, 'depth': FLAGS.depth}
+        model_kwargs = {'groups': FLAGS.groups, 'depth': FLAGS.depth, 'width': FLAGS.width}
     else:
         ValueError(f"Unknown model: {FLAGS.model}")
 
