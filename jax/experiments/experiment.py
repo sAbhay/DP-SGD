@@ -240,7 +240,6 @@ def experiment():
     # if FLAGS.model == "wideresnet":
     #     init_args.append(True)
     init_params = model.init(key, *init_args)
-    logger.info("Model init params: {}".format(init_params))
 
     def predict(params, inputs):
         if FLAGS.model == "cnn":
@@ -397,6 +396,8 @@ def experiment():
         return opt_state, total_grad_norm, total_aug_norms
 
     # _, init_params = init_random_params(key, (-1, 28, 28, 1))
+    logger.info("Model init params: {}".format(init_params))
+    params_norm(init_params)
     opt_state = opt_init(init_params)
     itercount = itertools.count()
 
