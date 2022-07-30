@@ -121,7 +121,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     # plt.close()
     # logger.info("Saved grad norms hist")
 
-    if "aug=0" not in hyperparams_string:
+    if 'dpsgd' in hyperparams_string and "aug=0" not in hyperparams_string:
         norm_cols = [f'aug_norm_{i}' for i in range(n_augs)]
         cols = ['epoch', 'accurate'] + norm_cols
         aug_df = pd.DataFrame(aug_norms, columns=cols)

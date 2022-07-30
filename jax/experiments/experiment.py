@@ -498,7 +498,7 @@ def main(_):
 
     try:
         make_plots(hyperparams_string, FLAGS.plot_dir, FLAGS.norm_dir)
-    except Exception as e:
+    except (Exception, FileNotFoundError) as e:
         logger.error(e, exc_info=True)
         raise e
     make_single_plot(hyperparams_string, FLAGS.plot_dir)
