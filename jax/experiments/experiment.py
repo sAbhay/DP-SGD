@@ -153,7 +153,7 @@ flags.DEFINE_boolean('train', True, "Train")
 flags.DEFINE_string('hyperparams_string', None, "Hyperparam string if not training")
 flags.DEFINE_string('dataset', "mnist", "Dataset: mnist or cifar10")
 flags.DEFINE_integer('augmult_batch_size', None, "Augmult batch size")
-flags.DEFINE_string('model', "cnn", "Model: cnn or wideresnet")
+flags.DEFINE_string('model', "cnn", "Model: cnn, wideresnet, or wideresnet2")
 flags.DEFINE_integer('depth', 6, "Network depth")
 flags.DEFINE_integer('checkpoint', 20, "Checkpoint interval in epochs")
 flags.DEFINE_integer('width', 1, "Network width")
@@ -226,7 +226,7 @@ def experiment():
     if FLAGS.model == "cnn":
         model_kwargs = {'overparameterised': FLAGS.overparameterised, 'groups': FLAGS.groups,
                         'weight_standardisation': FLAGS.weight_standardisation, 'depth': FLAGS.depth}
-    elif FLAGS.model == "wideresnet":
+    elif FLAGS.model == "wideresnet" or FLAGS.model == "wideresnet2":
         model_kwargs = {'groups': FLAGS.groups, 'depth': FLAGS.depth, 'width': FLAGS.width}
     else:
         ValueError(f"Unknown model: {FLAGS.model}")
@@ -244,7 +244,7 @@ def experiment():
     def predict(params, inputs):
         if FLAGS.model == "cnn":
             predictions = model.apply(params, None, inputs)
-        elif FLAGS.model == "wideresnet":
+        elif FLAGS.model == "wideresnet" or FLAGS.model == "wideresnet2":
             predictions = model.apply(params, None, inputs)
         else:
             return ValueError(f"Unknown model: {FLAGS.model}")
