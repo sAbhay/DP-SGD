@@ -226,7 +226,7 @@ def experiment():
     if FLAGS.model == "cnn":
         model_kwargs = {'overparameterised': FLAGS.overparameterised, 'groups': FLAGS.groups,
                         'weight_standardisation': FLAGS.weight_standardisation, 'depth': FLAGS.depth}
-    elif FLAGS.model == "wideresnet":
+    elif FLAGS.model == "wideresnet" or FLAGS.model == "wideresnet2":
         model_kwargs = {'groups': FLAGS.groups, 'depth': FLAGS.depth, 'width': FLAGS.width}
     else:
         ValueError(f"Unknown model: {FLAGS.model}")
