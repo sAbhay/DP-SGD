@@ -14,7 +14,7 @@
 
 """WideResNet implementation in JAX using Haiku."""
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Callable
 
 import chex
 import haiku as hk
