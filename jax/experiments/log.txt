@@ -4085,3 +4085,121 @@
 12:05:54,793 experiment INFO GPU usage: 92.282%
 12:05:58,28 experiment INFO For delta=1e-05, the current epsilon is: 0.61
 12:05:58,29 experiment INFO Epoch 4 in 90.22 sec
+12:07:20,212 experiment INFO Test set loss, accuracy (%): (1.16, 78.48)
+12:07:25,156 experiment INFO Train set loss, accuracy (%): (1.16, 78.17)
+12:07:25,156 experiment INFO RAM usage: svmem(total=134786195456, available=116601741312, percent=13.5, used=16565125120, free=35286605824, active=45883064320, inactive=40794660864, buffers=10351116288, cached=72583348224, shared=531709952, slab=11905396736)
+12:07:25,156 experiment INFO GPU usage: 92.282%
+12:07:28,307 experiment INFO For delta=1e-05, the current epsilon is: 0.64
+12:07:28,307 experiment INFO Epoch 5 in 90.28 sec
+12:08:50,255 experiment INFO Test set loss, accuracy (%): (1.10, 80.73)
+12:08:55,202 experiment INFO Train set loss, accuracy (%): (1.10, 80.31)
+12:08:55,203 experiment INFO RAM usage: svmem(total=134786195456, available=116205854720, percent=13.8, used=16959361024, free=34889568256, active=46254923776, inactive=40796606464, buffers=10351284224, cached=72585981952, shared=533336064, slab=11906396160)
+12:08:55,203 experiment INFO GPU usage: 92.282%
+12:08:58,468 experiment INFO For delta=1e-05, the current epsilon is: 0.67
+12:08:58,468 experiment INFO Epoch 6 in 90.16 sec
+12:10:20,736 experiment INFO Test set loss, accuracy (%): (1.00, 82.42)
+12:10:25,685 experiment INFO Train set loss, accuracy (%): (1.00, 81.61)
+12:10:25,685 experiment INFO RAM usage: svmem(total=134786195456, available=116584046592, percent=13.5, used=16584937472, free=35266523136, active=45913051136, inactive=40794304512, buffers=10351456256, cached=72583278592, shared=529567744, slab=11905089536)
+12:10:25,685 experiment INFO GPU usage: 92.282%
+12:10:28,936 experiment INFO For delta=1e-05, the current epsilon is: 0.70
+12:10:28,937 experiment INFO Epoch 7 in 90.47 sec
+12:11:50,800 experiment INFO Test set loss, accuracy (%): (1.09, 82.69)
+12:11:55,749 experiment INFO Train set loss, accuracy (%): (1.09, 81.78)
+12:11:55,749 experiment INFO RAM usage: svmem(total=134786195456, available=116057886720, percent=13.9, used=17086484480, free=34738966528, active=46283636736, inactive=40819527680, buffers=10351648768, cached=72609095680, shared=554196992, slab=11911868416)
+12:11:55,749 experiment INFO GPU usage: 92.282%
+12:11:58,842 experiment INFO For delta=1e-05, the current epsilon is: 0.73
+12:11:58,843 experiment INFO Epoch 8 in 89.91 sec
+12:13:21,95 experiment INFO Test set loss, accuracy (%): (0.99, 83.90)
+12:13:26,45 experiment INFO Train set loss, accuracy (%): (0.99, 83.28)
+12:13:26,46 experiment INFO RAM usage: svmem(total=134786195456, available=116307660800, percent=13.7, used=16855265280, free=34987450368, active=46130200576, inactive=40803000320, buffers=10351828992, cached=72591650816, shared=535633920, slab=11906453504)
+12:13:26,46 experiment INFO GPU usage: 92.282%
+12:13:29,76 experiment INFO For delta=1e-05, the current epsilon is: 0.76
+12:13:29,77 experiment INFO Epoch 9 in 90.23 sec
+12:14:50,951 experiment INFO Test set loss, accuracy (%): (0.89, 85.48)
+12:14:55,903 experiment INFO Train set loss, accuracy (%): (0.89, 84.42)
+12:14:55,903 experiment INFO RAM usage: svmem(total=134786195456, available=116309884928, percent=13.7, used=16859746304, free=34988744704, active=46160289792, inactive=40796819456, buffers=10351988736, cached=72585715712, shared=528949248, slab=11906576384)
+12:14:55,904 experiment INFO GPU usage: 92.282%
+12:14:58,983 experiment INFO For delta=1e-05, the current epsilon is: 0.80
+12:14:58,984 experiment INFO Epoch 10 in 89.91 sec
+12:16:21,462 experiment INFO Test set loss, accuracy (%): (0.90, 85.69)
+12:16:26,413 experiment INFO Train set loss, accuracy (%): (0.90, 84.29)
+12:16:26,413 experiment INFO RAM usage: svmem(total=134786195456, available=116288040960, percent=13.7, used=16878092288, free=34965995520, active=46187307008, inactive=40801165312, buffers=10352156672, cached=72589950976, shared=532430848, slab=11905433600)
+12:16:26,414 experiment INFO GPU usage: 92.282%
+12:16:29,755 experiment INFO For delta=1e-05, the current epsilon is: 0.83
+12:16:29,756 experiment INFO Epoch 11 in 90.77 sec
+12:17:51,862 experiment INFO Test set loss, accuracy (%): (0.85, 86.62)
+12:17:56,815 experiment INFO Train set loss, accuracy (%): (0.85, 85.96)
+12:17:56,816 experiment INFO RAM usage: svmem(total=134786195456, available=116261449728, percent=13.7, used=16904785920, free=34938642432, active=46229786624, inactive=40801374208, buffers=10352320512, cached=72590446592, shared=532312064, slab=11906138112)
+12:17:56,816 experiment INFO GPU usage: 92.282%
+12:18:00,388 experiment INFO For delta=1e-05, the current epsilon is: 0.86
+12:18:00,389 experiment INFO Epoch 12 in 90.63 sec
+12:19:22,521 experiment INFO Test set loss, accuracy (%): (0.86, 86.90)
+12:19:27,475 experiment INFO Train set loss, accuracy (%): (0.86, 86.23)
+12:19:27,476 experiment INFO RAM usage: svmem(total=134786195456, available=116209348608, percent=13.8, used=16957001728, free=34885713920, active=46285090816, inactive=40802271232, buffers=10352467968, cached=72591011840, shared=532217856, slab=11905789952)
+12:19:27,476 experiment INFO GPU usage: 92.282%
+12:19:30,986 experiment INFO For delta=1e-05, the current epsilon is: 0.89
+12:19:30,987 experiment INFO Epoch 13 in 90.60 sec
+12:20:53,570 experiment INFO Test set loss, accuracy (%): (0.81, 87.55)
+12:20:58,521 experiment INFO Train set loss, accuracy (%): (0.81, 86.74)
+12:20:58,521 experiment INFO RAM usage: svmem(total=134786195456, available=116137259008, percent=13.8, used=17028382720, free=34813071360, active=46353592320, inactive=40803618816, buffers=10352586752, cached=72592154624, shared=532910080, slab=11905093632)
+12:20:58,521 experiment INFO GPU usage: 92.282%
+12:21:02,29 experiment INFO For delta=1e-05, the current epsilon is: 0.92
+12:21:02,30 experiment INFO Epoch 14 in 91.04 sec
+12:22:23,872 experiment INFO Test set loss, accuracy (%): (0.79, 88.02)
+12:22:28,823 experiment INFO Train set loss, accuracy (%): (0.79, 87.05)
+12:22:28,824 experiment INFO RAM usage: svmem(total=134786195456, available=116185669632, percent=13.8, used=16983535616, free=34860666880, active=46339350528, inactive=40801447936, buffers=10352705536, cached=72589287424, shared=529358848, slab=11904167936)
+12:22:28,824 experiment INFO GPU usage: 92.282%
+12:22:32,75 experiment INFO For delta=1e-05, the current epsilon is: 0.95
+12:22:32,75 experiment INFO Epoch 15 in 90.05 sec
+12:23:54,5 experiment INFO Test set loss, accuracy (%): (0.84, 87.71)
+12:23:58,966 experiment INFO Train set loss, accuracy (%): (0.84, 87.11)
+12:23:58,966 experiment INFO RAM usage: svmem(total=134786195456, available=116116951040, percent=13.9, used=17052164096, free=34790924288, active=46407430144, inactive=40802041856, buffers=10352881664, cached=72590225408, shared=529448960, slab=11903184896)
+12:23:58,967 experiment INFO GPU usage: 92.282%
+12:24:02,210 experiment INFO For delta=1e-05, the current epsilon is: 0.99
+12:24:02,211 experiment INFO Epoch 16 in 90.14 sec
+12:25:24,949 experiment INFO Test set loss, accuracy (%): (0.79, 88.29)
+12:25:29,912 experiment INFO Train set loss, accuracy (%): (0.79, 87.43)
+12:25:29,912 experiment INFO RAM usage: svmem(total=134786195456, available=116059959296, percent=13.9, used=17109139456, free=34732761088, active=46464159744, inactive=40802869248, buffers=10353008640, cached=72591286272, shared=529448960, slab=11902693376)
+12:25:29,912 experiment INFO GPU usage: 92.282%
+12:25:33,62 experiment INFO For delta=1e-05, the current epsilon is: 1.02
+12:25:33,62 experiment INFO Epoch 17 in 90.85 sec
+12:26:55,81 experiment INFO Test set loss, accuracy (%): (0.73, 89.31)
+12:27:00,44 experiment INFO Train set loss, accuracy (%): (0.73, 88.40)
+12:27:00,44 experiment INFO RAM usage: svmem(total=134786195456, available=114361589760, percent=15.2, used=18775085056, free=33033265152, active=48008486912, inactive=40835567616, buffers=10353172480, cached=72624672768, shared=561844224, slab=11911168000)
+12:27:00,44 experiment INFO GPU usage: 92.282%
+12:27:03,298 experiment INFO For delta=1e-05, the current epsilon is: 1.05
+12:27:03,298 experiment INFO Epoch 18 in 90.24 sec
+12:28:25,241 experiment INFO Test set loss, accuracy (%): (0.80, 88.91)
+12:28:30,202 experiment INFO Train set loss, accuracy (%): (0.80, 88.23)
+12:28:30,203 experiment INFO RAM usage: svmem(total=134786195456, available=115576492032, percent=14.3, used=17589633024, free=34247024640, active=46786723840, inactive=40808001536, buffers=10353381376, cached=72596156416, shared=532426752, slab=11911229440)
+12:28:30,203 experiment INFO GPU usage: 92.282%
+12:28:33,302 experiment INFO For delta=1e-05, the current epsilon is: 1.08
+12:28:33,302 experiment INFO Epoch 19 in 90.00 sec
+12:29:55,219 experiment INFO Test set loss, accuracy (%): (0.81, 88.73)
+12:30:00,181 experiment INFO Train set loss, accuracy (%): (0.81, 87.80)
+12:30:00,181 experiment INFO RAM usage: svmem(total=134786195456, available=115296329728, percent=14.5, used=17835450368, free=33965510656, active=46964224000, inactive=40842567680, buffers=10353549312, cached=72631685120, shared=566800384, slab=11915784192)
+12:30:00,181 experiment INFO GPU usage: 92.282%
+12:30:03,249 experiment INFO For delta=1e-05, the current epsilon is: 1.11
+12:30:06,628 experiment INFO Epoch 20 in 93.33 sec
+12:30:07,51 plotting INFO Plotting dpsgd_data=mnist,model=cnn,depth=10,width=4,loss=cross-entropy,lr=0.05,op=True,nm=1.3,l2nc=1.5,grp=0,bs=256,ws=False,mu=0.999,ess=0,pss=0,pa=False,aug=4,rf=True,rc=True
+12:30:17,83 plotting INFO sample df: 
+          epoch          norm  accurate    0_logit    1_logit    2_logit    3_logit   4_logit    5_logit    6_logit   7_logit    8_logit    9_logit
+0            0  3.325775e+00     False   0.000271   0.003604  -0.014300   0.011567  0.003865   0.001639   0.019247  0.001877  -0.004969  -0.006003
+1            0  2.494860e+00     False  -0.000780   0.006292  -0.014625   0.007879 -0.001429   0.003240   0.021762  0.009528  -0.007199  -0.005216
+2            0  2.657848e+00     False   0.000271   0.003604  -0.014300   0.011567  0.003865   0.001639   0.019247  0.001877  -0.004969  -0.006003
+3            0  3.343622e+00     False   0.000271   0.003604  -0.014300   0.011567  0.003865   0.001639   0.019247  0.001877  -0.004969  -0.006003
+4            0  3.119862e+00     False  -0.003788   0.005040  -0.008407   0.011212  0.002288   0.003582   0.024330  0.003076  -0.004730  -0.008382
+...        ...           ...       ...        ...        ...        ...        ...       ...        ...        ...       ...        ...        ...
+1199995     19  3.927748e-03      True  -1.858273   1.451922  58.722527  28.844666 -1.486004  31.862703  20.365604 -6.859810  22.883680   2.932747
+1199996     19  1.540925e+03      True  54.407642 -14.022866  18.992100  27.646723 -1.966151  32.912746  26.616287  3.700683  16.244535   6.392094
+1199997     19  2.747119e-12      True  58.112568  -5.523172  20.961075  26.393839 -4.924983  30.741182  31.135103  6.774227  18.793386  13.248363
+1199998     19  1.180910e-01      True  54.407642 -14.022866  18.992100  27.646723 -1.966151  32.912746  26.616287  3.700683  16.244535   6.392094
+1199999     19  1.871862e+03      True  54.407642 -14.022866  18.992100  27.646723 -1.966151  32.912746  26.616287  3.700683  16.244535   6.392094
+
+[1200000 rows x 13 columns]
+12:30:18,229 plotting INFO Saved final epoch grad norms hist at plots/dpsgd_data=mnist,model=cnn,depth=10,width=4,loss=cross-entropy,lr=0.05,op=True,nm=1.3,l2nc=1.5,grp=0,bs=256,ws=False,mu=0.999,ess=0,pss=0,pa=False,aug=4,rf=True,rc=True
+12:30:18,396 plotting INFO Saved grad and param norms plot
+12:30:18,517 plotting INFO Saved performance stats plot
+12:30:18,636 plotting INFO Saved accuracy stats plot
+12:30:19,836 plotting INFO Saved Epoch 1, final aug grad norms hist
+12:30:20,292 plot_concat INFO title: dpsgd with Model=cnn Depth=10 Groups=0 Batch size=256 Weight standardisation=False Parameter averaging=False Augmentations=4 , image size: (2070, 1110)
