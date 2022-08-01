@@ -37,7 +37,6 @@ class _WideResNetBlock(hk.Module):
       norm_args = {
           'create_offset': False,
           'create_scale': True,
-          'decay_rate': .99,
           'groups': groups,
       }
     self._bn_modules = []
@@ -101,7 +100,6 @@ class WideResNet(hk.Module):
       norm_args = {
           'create_offset': True,
           'create_scale': True,
-          'decay_rate': .99,
           'groups': groups,
       }
     self._conv = conv_fn(
