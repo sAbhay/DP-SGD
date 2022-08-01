@@ -460,7 +460,7 @@ def experiment():
 
         stats.append((train_loss.item(), train_acc.item(), test_loss.item(), test_acc.item(), eps.item() if FLAGS.dpsgd else None))
 
-        if (epoch % FLAGS.checkpoint) == 0 or epoch == FLAGS.epochs:
+        if ((epoch % FLAGS.checkpoint) == 0) or epoch == FLAGS.epochs:
             if not FLAGS.dpsgd:
                 hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_data={FLAGS.dataset},model={FLAGS.model},depth={FLAGS.depth},width={FLAGS.width},loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step},pa={FLAGS.param_averaging}"
             else:
