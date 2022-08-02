@@ -282,7 +282,7 @@ def experiment():
 
     def update(_, i, opt_state, batch, add_params):
         params = get_params(opt_state)
-        grads, total_grad_norm = up.non_private_grad(params, batch, FLAGS.batch_size)
+        grads, total_grad_norm = up.non_private_grad(params, batch, FLAGS.batch_size, loss)
         opt_state = opt_update(i, grads, opt_state)
         if FLAGS.param_averaging:
             params = get_params(opt_state)
@@ -295,7 +295,7 @@ def experiment():
         params = get_params(opt_state)
         rng = random.fold_in(rng, i)  # get new key for new random numbers
         private_grads, total_grad_norm, total_aug_norms = up.private_grad(params, batch, rng, FLAGS.l2_norm_clip,
-                     FLAGS.noise_multiplier, FLAGS.batch_size)
+                     FLAGS.noise_multiplier, FLAGS.batch_size, loss, FLAGS.augmult)
         opt_state = opt_update(
             i, private_grads, opt_state)
         if FLAGS.param_averaging:
@@ -360,7 +360,7 @@ def experiment():
         if FLAGS.dpsgd:
             delta = 1e-5
             num_examples = train_images.shape[0]
-            eps = up.compute_epsilon(epoch * steps_per_epoch, num_examples, delta)
+            eps = up.compute_epsilon(epoch * steps_per_epoch, num_examples, FLAGS.batch_size, FLAGS.noise_multiplier, delta)
             logger.info(
                 'For delta={:.0e}, the current epsilon is: {:.2f}'.format(delta, eps))
         else:
