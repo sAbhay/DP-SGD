@@ -61,7 +61,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     for i, epoch_stats in enumerate(stats):
         stats[i] = (i, *epoch_stats)
 
-    if "aug=0" not in hyperparams_string:
+    if "dpsgd" in hyperparams_string and "aug=0" not in hyperparams_string:
         aug_norms = []
         with open(os.path.join(norm_dir, f'aug_norms_{hyperparams_string}.pkl'), 'rb') as f:
             epoch_aug_norms = pickle.load(f)
