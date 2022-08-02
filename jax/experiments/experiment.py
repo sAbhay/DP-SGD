@@ -83,9 +83,6 @@ import itertools
 import time
 import warnings
 
-import psutil
-import nvidia_smi
-
 from jax import grad
 from jax import jit
 from jax import random
@@ -97,11 +94,11 @@ import haiku as hk
 
 import numpy.random as npr
 
+import nvidia_smi
+
 # https://github.com/tensorflow/privacy
 from tensorflow_privacy.privacy.analysis.rdp_accountant import compute_rdp
 from tensorflow_privacy.privacy.analysis.rdp_accountant import get_privacy_spent
-
-import pickle
 
 from data import datasets
 import models.models as models
@@ -110,15 +107,13 @@ from common import averaging
 
 from absl import app
 from absl import flags
-from os import path as ospath
 
-from analysis import make_plots
-from image_concat import make_single_plot
+from util import plot_results, checkpoint, get_hyperparameter_string, log_memory_usage
+
+FLAGS = flags.FLAGS
 
 nvidia_smi.nvmlInit()
 handle = nvidia_smi.nvmlDeviceGetHandleByIndex(0)
-
-FLAGS = flags.FLAGS
 
 flags.DEFINE_boolean(
     'dpsgd', True, 'If True, train with DP-SGD. If False, '
@@ -158,14 +153,9 @@ flags.DEFINE_integer('depth', 6, "Network depth")
 flags.DEFINE_integer('checkpoint', 20, "Checkpoint interval in epochs")
 flags.DEFINE_integer('width', 1, "Network width")
 
-def log_memory_usage():
-    logger.info(f"RAM usage: {psutil.virtual_memory()}")
-    mem_res = nvidia_smi.nvmlDeviceGetMemoryInfo(handle)
-    logger.info(f'GPU usage: {100 * (mem_res.used / mem_res.total):.3f}%')
-
 def experiment():
     logger.info("Running Experiment")
-    log_memory_usage()
+    log_memory_usage(logger, handle)
 
     if FLAGS.microbatches:
         raise NotImplementedError(
@@ -174,7 +164,7 @@ def experiment():
 
     train_images, train_labels, test_images, test_labels = datasets.data(name=FLAGS.dataset)
     logger.info(f"Train set shape: {train_images.shape}, {train_labels.shape}")
-    log_memory_usage()
+    log_memory_usage(logger, handle)
     if FLAGS.dpsgd and FLAGS.augmult > 0:
         start_time = time.time()
         image_size = datasets.IMAGE_SHAPE[FLAGS.dataset]
@@ -184,7 +174,7 @@ def experiment():
                                                             batch_size=FLAGS.augmult_batch_size)
         logger.info(f"Augmented train set shape: {aug_train_images.shape}, {aug_train_labels.shape}")
         logger.info("Augmented train images in {:.2f} sec".format(time.time() - start_time))
-        log_memory_usage()
+        log_memory_usage(logger, handle)
     else:
         logger.warn("No data augmentation applied for vanilla SGD")
     num_train = train_images.shape[0]
@@ -431,7 +421,7 @@ def experiment():
 
         grad_norms.append(epoch_grad_norms)
         aug_norms.append(epoch_aug_norms)
-        # log_memory_usage()
+        # log_memory_usage(logger, handle)
 
         # evaluate test accuracy
         params = get_params(opt_state)
@@ -439,13 +429,13 @@ def experiment():
         test_loss = loss(params, shape_as_image(test_images, test_labels, augmult=0))
         logger.info('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             test_loss, 100 * test_acc))
-        # log_memory_usage()
+        # log_memory_usage(logger, handle)
         train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels, augmult=0), splits=5)
         # train_loss = loss(params, shape_as_image(train_images, train_labels, augmult=0))
         train_loss = test_loss
         logger.info('Train set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             train_loss, 100 * train_acc))
-        log_memory_usage()
+        log_memory_usage(logger, handle)
 
         # determine privacy loss so far
         if FLAGS.dpsgd:
@@ -460,22 +450,8 @@ def experiment():
 
         stats.append((train_loss.item(), train_acc.item(), test_loss.item(), test_acc.item(), eps.item() if FLAGS.dpsgd else None))
 
-        if ((epoch % FLAGS.checkpoint) == 0) or epoch == FLAGS.epochs:
-            if not FLAGS.dpsgd:
-                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_data={FLAGS.dataset},model={FLAGS.model},depth={FLAGS.depth},width={FLAGS.width},loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step},pa={FLAGS.param_averaging}"
-            else:
-                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_data={FLAGS.dataset},model={FLAGS.model},depth={FLAGS.depth},width={FLAGS.width},loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step},pa={FLAGS.param_averaging},aug={FLAGS.augmult},rf={FLAGS.random_flip},rc={FLAGS.random_crop}"
-            with open(ospath.join(FLAGS.norm_dir, f'grad_norms_{hyperparams_string}.pkl'), 'wb') as f:
-                # logger.info("grad norms: {}".format(grad_norms[-1][0:100]))
-                pickle.dump(grad_norms, f)
-            with open(ospath.join(FLAGS.norm_dir, f'param_norms_{hyperparams_string}.pkl'), 'wb') as f:
-                # logger.info("param norms: {}".format(param_norms[-1]))
-                pickle.dump(param_norms, f)
-            with open(ospath.join(FLAGS.norm_dir, f'stats_{hyperparams_string}.pkl'), 'wb') as f:
-                pickle.dump(stats, f)
-            if FLAGS.augmult > 0:
-                with open(ospath.join(FLAGS.norm_dir, f'aug_norms_{hyperparams_string}.pkl'), 'wb') as f:
-                    pickle.dump(aug_norms, f)
+        if (epoch % FLAGS.checkpoint) == 0:
+            hyperparams_string = checkpoint(FLAGS, grad_norms, param_norms, stats, aug_norms=aug_norms, plot=True)
 
         epoch_time = time.time() - start_time
         logger.info('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
@@ -492,17 +468,9 @@ def main(_):
         if FLAGS.hyperparams_string is not None:
             hyperparams_string = FLAGS.hyperparams_string
         else:
-            if not FLAGS.dpsgd:
-                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_data={FLAGS.dataset},model={FLAGS.model},depth={FLAGS.depth},loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step},pa={FLAGS.param_averaging}"
-            else:
-                hyperparams_string = f"{'dpsgd' if FLAGS.dpsgd else 'sgd'}_data={FLAGS.dataset},model={FLAGS.model},depth={FLAGS.depth},loss={FLAGS.loss},lr={FLAGS.learning_rate},op={FLAGS.overparameterised},nm={FLAGS.noise_multiplier},l2nc={FLAGS.l2_norm_clip},grp={FLAGS.groups},bs={FLAGS.batch_size},ws={FLAGS.weight_standardisation},mu={FLAGS.ema_coef},ess={FLAGS.ema_start_step},pss={FLAGS.polyak_start_step},pa={FLAGS.param_averaging},aug={FLAGS.augmult},rf={FLAGS.random_flip},rc={FLAGS.random_crop}"
+            get_hyperparameter_string(FLAGS)
 
-    try:
-        make_plots(hyperparams_string, FLAGS.plot_dir, FLAGS.norm_dir)
-    except (Exception, FileNotFoundError) as e:
-        logger.error(e, exc_info=True)
-        raise e
-    make_single_plot(hyperparams_string, FLAGS.plot_dir)
+    plot_results(hyperparams_string, FLAGS.plot_dir, FLAGS.norm_dir)
 
 
 if __name__ == '__main__':
