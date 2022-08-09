@@ -92,7 +92,7 @@ import nvidia_smi
 
 from data import datasets
 import models.models as models
-from optim import sgdavg
+from optim import sgdavg, sgd_momentum_avg
 from optim.grad import non_private as np_grad
 from optim.grad.private import private, aug_data, aug_momentum
 from optim import update as up
@@ -146,6 +146,7 @@ flags.DEFINE_integer('depth', 6, "Network depth")
 flags.DEFINE_integer('checkpoint', 20, "Checkpoint interval in epochs")
 flags.DEFINE_integer('width', 1, "Network width")
 flags.DEFINE_string('aug_type', 'data', 'Augmentation type: data or momentum')
+flags.DEFINE_float('mult_radius', 1, 'Radius for momentum sampling')
 
 def experiment():
     logger.info("Running Experiment")
@@ -204,7 +205,7 @@ def experiment():
     def average_params(params, add_params, t):
         return averaging.average_params(params, add_params, t,
                                         FLAGS.ema_coef, FLAGS.ema_start_step, FLAGS.polyak_start_step)
-    opt_init, opt_update, get_params, set_params = sgdavg.sgd(FLAGS.learning_rate)
+    opt_init, opt_update, get_params, set_params = sgd_momentum_avg.sgd(FLAGS.learning_rate)
 
     rng = random.PRNGKey(42)
     if FLAGS.model == "cnn":
@@ -221,8 +222,8 @@ def experiment():
     init_batch = shape_as_image(*next(batches), dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True)[0]
     logger.info(f"Init batch shape: {init_batch.shape}")
     init_args = [init_batch]
-    # if FLAGS.model == "wideresnet":
-    #     init_args.append(True)
+    if FLAGS.model == "wideresnet":
+        init_args.append(True)
     init_params = model.init(key, *init_args)
 
     def predict(params, inputs):
@@ -291,18 +292,31 @@ def experiment():
             opt_state = set_params(avg_params, opt_state)
         return opt_state, total_grad_norm
 
-    private_grad = private.private_grad
-    if FLAGS.aug_type == "data":
-        private_grad = aug_data.private_grad
-    elif FLAGS.aug_type == "momentum":
-        private_grad = aug_momentum.private_grad
-
     @jit
     def private_update(rng, i, opt_state, batch, add_params):
         params = get_params(opt_state)
         rng = random.fold_in(rng, i)  # get new key for new random numbers
-        private_grads, total_grad_norm, total_aug_norms = private_grad(params, batch, rng, FLAGS.l2_norm_clip,
-                     FLAGS.noise_multiplier, FLAGS.batch_size, loss, FLAGS.augmult)
+        if FLAGS.augmult <= 0:
+            private_grads, total_grad_norm, total_aug_norms = private.private_grad(params, batch, rng, FLAGS.l2_norm_clip,
+                                                                           FLAGS.noise_multiplier, FLAGS.batch_size,
+                                                                           loss)
+            total_aug_norms = None
+        elif FLAGS.aug_type == "data":
+            private_grads, total_grad_norm, total_aug_norms = aug_data.private_grad(params, batch, rng,
+                                                                                   FLAGS.l2_norm_clip,
+                                                                                   FLAGS.noise_multiplier,
+                                                                                   FLAGS.batch_size,
+                                                                                   loss)
+        elif FLAGS.aug_type == "momentum":
+            _, velocity = opt_state
+            private_grads, total_grad_norm, total_aug_norms = aug_momentum.private_grad(params, batch, rng,
+                                                                                   FLAGS.l2_norm_clip,
+                                                                                   FLAGS.noise_multiplier,
+                                                                                   FLAGS.batch_size,
+                                                                                   loss, FLAGS.augmult, velocity,
+                                                                                   FLAGS.mult_radius)
+        else:
+            raise ValueError("Undefined augmentation type")
         opt_state = opt_update(
             i, private_grads, opt_state)
         if FLAGS.param_averaging:

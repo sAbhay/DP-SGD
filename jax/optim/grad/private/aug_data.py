@@ -28,7 +28,7 @@ def clipped_grad(params, l2_norm_clip, single_example_batch, loss):
 
 
 def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
-                 batch_size, loss, augmult):
+                 batch_size, loss):
     """Return differentially private gradients for params, evaluated on batch."""
     # logger.info("Batch shape: {}".format(batch[0].shape, batch[1].shape))
     clipped_grads, total_grad_norm, total_aug_norms = vmap(clipped_grad, (None, None, 0, None))(params, l2_norm_clip, batch, loss)
