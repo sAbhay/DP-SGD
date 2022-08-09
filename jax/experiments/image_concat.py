@@ -24,6 +24,7 @@ HYPERPARAMETER_STRING_FORMS = {
     "ess": "EMA start step",
     "pss": "Polyak start step",
     "mu": "EMA coefficient",
+    "augtype": "Augmentation type",
     "aug": "Augmentations",
     "rf": "Random flip",
     "rc": "Random crop",
@@ -67,14 +68,14 @@ def make_single_plot(hyperparameter_string, plot_dir):
 def title_plot(image, hyperparam_string):
     image = ImageOps.expand(image, border=75, fill='white')
     draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype("../arial.ttf", 25)
+    font = ImageFont.truetype("../arial.ttf", 23)
 
     splits = hyperparam_string.split('_')
     title = splits[0] + " with "
     splits = splits[1].split(',')
     for split in splits:
         k, v = split.split('=')
-        if k in {"dataset", "model", "depth", "bs", "grp", "ws", "pa", "aug"}:
+        if k in {"dataset", "model", "depth", "bs", "grp", "ws", "pa", "aug", "augtype"}:
             title += HYPERPARAMETER_STRING_FORMS[k] + "=" + v + " "
     logger.info("title: {}, image size: {}".format(title, image.size))
 
