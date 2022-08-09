@@ -205,7 +205,7 @@ def experiment():
     def average_params(params, add_params, t):
         return averaging.average_params(params, add_params, t,
                                         FLAGS.ema_coef, FLAGS.ema_start_step, FLAGS.polyak_start_step)
-    opt_init, opt_update, get_params, set_params = sgd_momentum_avg.momentum(FLAGS.learning_rate)
+    opt_init, opt_update, get_params, set_params = sgd_momentum_avg.sgd_momentum(FLAGS.learning_rate)
 
     rng = random.PRNGKey(42)
     if FLAGS.model == "cnn":
