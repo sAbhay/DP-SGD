@@ -1,5 +1,5 @@
 from sys import path
-path.append('../..')
+path.append('../../../')
 from common import util, log
 logger = log.get_logger('optimizer')
 

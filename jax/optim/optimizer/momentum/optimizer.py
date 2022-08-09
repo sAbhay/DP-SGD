@@ -1,7 +1,7 @@
 from sys import path
-path.append('../..')
+path.append('../../../')
 from common import util, log
-logger = log.get_logger('optimizer')
+logger = log.get_logger('momentum_optimizer')
 
 from typing import NamedTuple, Callable, Tuple
 import functools

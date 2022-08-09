@@ -1,4 +1,4 @@
-from jax.optim.optimizer.sgd.optimizer import optimizer
+from .optimizer import optimizer
 from jax.example_libraries.optimizers import make_schedule
 import jax.numpy as jnp
 

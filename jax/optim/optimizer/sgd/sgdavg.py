@@ -1,4 +1,4 @@
-from jax.optim.optimizer import Optimizer, optimizer, logger
+from .optimizer import Optimizer, optimizer, logger
 from jax.example_libraries.optimizers import make_schedule
 
 @optimizer
