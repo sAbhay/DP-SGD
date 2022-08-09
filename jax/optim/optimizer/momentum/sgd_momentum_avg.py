@@ -1,4 +1,4 @@
-from .optimizer import Optimizer, optimizer, logger
+from jax.optim.optimizer.sgd.optimizer import optimizer
 from jax.example_libraries.optimizers import make_schedule
 import jax.numpy as jnp
 
@@ -26,7 +26,10 @@ def sgd_momentum(step_size, mass: float):
   def get_params(state):
     x, _ = state
     return x
-  def set_params(new_params, old_params):
+  def get_velocity(state):
+    _, velocity = state
+    return velocity
+  def set_params(new_params, state):
     # logger.info(f"x_new: {x_new}, x: {x}")
     return new_params
-  return init, update, get_params, set_params
+  return init, update, get_params, get_velocity, set_params

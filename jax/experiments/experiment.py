@@ -92,7 +92,8 @@ import nvidia_smi
 
 from data import datasets
 import models.models as models
-from optim import sgdavg, sgd_momentum_avg
+from optim.optimizer.sgd import sgdavg
+from optim.optimizer.momentum import sgd_momentum_avg
 from optim.grad import non_private as np_grad
 from optim.grad.private import private, aug_data, aug_momentum
 from optim import update as up
@@ -206,7 +207,7 @@ def experiment():
     def average_params(params, add_params, t):
         return averaging.average_params(params, add_params, t,
                                         FLAGS.ema_coef, FLAGS.ema_start_step, FLAGS.polyak_start_step)
-    opt_init, opt_update, get_params, set_params = sgd_momentum_avg.sgd_momentum(FLAGS.learning_rate, FLAGS.mass)
+    opt_init, opt_update, get_params, get_velocity, set_params = sgd_momentum_avg.sgd_momentum(FLAGS.learning_rate, FLAGS.mass)
 
     rng = random.PRNGKey(42)
     if FLAGS.model == "cnn":
