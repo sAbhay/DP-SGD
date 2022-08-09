@@ -72,8 +72,6 @@ Example invocations:
 
 from sys import path as syspath
 
-import jax.numpy
-
 syspath.append('../')
 
 from common import log
@@ -95,6 +93,8 @@ import nvidia_smi
 from data import datasets
 import models.models as models
 from optim import sgdavg
+from optim.grad import non_private as np_grad
+from optim.grad.private import private, aug_data, aug_momentum
 from optim import update as up
 from common import averaging
 
@@ -145,6 +145,7 @@ flags.DEFINE_string('model', "cnn", "Model: cnn, wideresnet, or wideresnet2")
 flags.DEFINE_integer('depth', 6, "Network depth")
 flags.DEFINE_integer('checkpoint', 20, "Checkpoint interval in epochs")
 flags.DEFINE_integer('width', 1, "Network width")
+flags.DEFINE_string('aug_type', 'data', 'Augmentation type: data or momentum')
 
 def experiment():
     logger.info("Running Experiment")
@@ -158,7 +159,7 @@ def experiment():
     train_images, train_labels, test_images, test_labels = datasets.data(name=FLAGS.dataset)
     logger.info(f"Train set shape: {train_images.shape}, {train_labels.shape}")
     log_memory_usage(logger, handle)
-    if FLAGS.dpsgd and FLAGS.augmult > 0:
+    if FLAGS.dpsgd and FLAGS.aug_type == 'data' and FLAGS.augmult > 0:
         start_time = time.time()
         image_size = datasets.IMAGE_SHAPE[FLAGS.dataset]
         aug_train_images, aug_train_labels = datasets.apply_augmult(train_images, train_labels,
@@ -195,7 +196,7 @@ def experiment():
             target_shape = (-1, augmult, 1, *image_shape) if dummy_dim else (-1, augmult, *image_shape)
         return jnp.reshape(images, target_shape), labels
 
-    if FLAGS.dpsgd and FLAGS.augmult > 0:
+    if FLAGS.dpsgd and FLAGS.aug_type == 'data' and FLAGS.augmult > 0:
         batches = data_stream(aug_train_images, aug_train_labels)
     else:
         batches = data_stream(train_images, train_labels)
@@ -282,7 +283,7 @@ def experiment():
 
     def update(_, i, opt_state, batch, add_params):
         params = get_params(opt_state)
-        grads, total_grad_norm = up.non_private_grad(params, batch, FLAGS.batch_size, loss)
+        grads, total_grad_norm = np_grad.non_private_grad(params, batch, FLAGS.batch_size, loss)
         opt_state = opt_update(i, grads, opt_state)
         if FLAGS.param_averaging:
             params = get_params(opt_state)
@@ -290,11 +291,17 @@ def experiment():
             opt_state = set_params(avg_params, opt_state)
         return opt_state, total_grad_norm
 
+    private_grad = private.private_grad
+    if FLAGS.aug_type == "data":
+        private_grad = aug_data.private_grad
+    elif FLAGS.aug_type == "momentum":
+        private_grad = aug_momentum.private_grad
+
     @jit
     def private_update(rng, i, opt_state, batch, add_params):
         params = get_params(opt_state)
         rng = random.fold_in(rng, i)  # get new key for new random numbers
-        private_grads, total_grad_norm, total_aug_norms = up.private_grad(params, batch, rng, FLAGS.l2_norm_clip,
+        private_grads, total_grad_norm, total_aug_norms = private_grad(params, batch, rng, FLAGS.l2_norm_clip,
                      FLAGS.noise_multiplier, FLAGS.batch_size, loss, FLAGS.augmult)
         opt_state = opt_update(
             i, private_grads, opt_state)
@@ -344,7 +351,7 @@ def experiment():
 
         # evaluate test accuracy
         params = get_params(opt_state)
-        test_acc, _, _ = accuracy(params, shape_as_image(test_images, test_labels, augmult=0))
+        test_acc, _, _ = accuracy(params, shape_as_image(test_images, test_labels, augmult=0), splits=5)
         test_loss = loss(params, shape_as_image(test_images, test_labels, augmult=0))
         logger.info('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             test_loss, 100 * test_acc))
