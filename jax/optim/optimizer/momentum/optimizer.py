@@ -119,9 +119,9 @@ def optimizer(opt_maker: Callable[...,
 
     @functools.wraps(set_params)
     def tree_set_params(new_tree, opt_state):
-      logger.info("Opt_state set_params: {}".format(opt_state))
+      # logger.info("Opt_state set_params: {}".format(opt_state))
       states_flat, tree, subtrees = opt_state
-      logger.info("Subtrees set_params: {}".format(subtrees))
+      # logger.info("Subtrees set_params: {}".format(subtrees))
       new_flat, tree2 = tree_flatten(new_tree)
       # if tree2 != tree:
       #   msg = ("optimizer update function was passed a new tree that did "
