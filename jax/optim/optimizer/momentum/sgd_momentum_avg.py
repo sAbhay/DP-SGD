@@ -31,5 +31,6 @@ def sgd_momentum(step_size, mass: float):
     return velocity
   def set_params(new_params, state):
     # logger.info(f"x_new: {x_new}, x: {x}")
-    return new_params
+    _, velocity = state
+    return new_params, velocity
   return init, update, get_params, get_velocity, set_params

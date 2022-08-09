@@ -123,11 +123,11 @@ def optimizer(opt_maker: Callable[...,
       states_flat, tree, subtrees = opt_state
       logger.info("Subtrees set_params: {}".format(subtrees))
       new_flat, tree2 = tree_flatten(new_tree)
-      if tree2 != tree:
-        msg = ("optimizer update function was passed a new tree that did "
-               "not match the parameter tree structure with which it was "
-               "initialized: parameter tree {} and new tree {}.")
-        raise TypeError(msg.format(tree, tree2))
+      # if tree2 != tree:
+      #   msg = ("optimizer update function was passed a new tree that did "
+      #          "not match the parameter tree structure with which it was "
+      #          "initialized: parameter tree {} and new tree {}.")
+      #   raise TypeError(msg.format(tree, tree2))
       states = map(tree_unflatten, subtrees, states_flat)
       new_states = map(set_params, new_flat, states)
       new_states_flat, subtrees2 = util.unzip2(map(tree_flatten, new_states))

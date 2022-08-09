@@ -310,7 +310,7 @@ def experiment():
                                                                                    FLAGS.batch_size,
                                                                                    loss)
         elif FLAGS.aug_type == "momentum":
-            _, velocity = opt_state
+            velocity = get_velocity(opt_state)
             private_grads, total_grad_norm, total_aug_norms = aug_momentum.private_grad(params, batch, rng,
                                                                                    FLAGS.l2_norm_clip,
                                                                                    FLAGS.noise_multiplier,
