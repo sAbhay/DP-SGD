@@ -147,6 +147,7 @@ flags.DEFINE_integer('checkpoint', 20, "Checkpoint interval in epochs")
 flags.DEFINE_integer('width', 1, "Network width")
 flags.DEFINE_string('aug_type', 'data', 'Augmentation type: data or momentum')
 flags.DEFINE_float('mult_radius', 1, 'Radius for momentum sampling')
+flags.DEFINE_float('mass', 0.9, 'Momentum coefficient')
 
 def experiment():
     logger.info("Running Experiment")
@@ -205,7 +206,7 @@ def experiment():
     def average_params(params, add_params, t):
         return averaging.average_params(params, add_params, t,
                                         FLAGS.ema_coef, FLAGS.ema_start_step, FLAGS.polyak_start_step)
-    opt_init, opt_update, get_params, set_params = sgd_momentum_avg.sgd_momentum(FLAGS.learning_rate)
+    opt_init, opt_update, get_params, set_params = sgd_momentum_avg.sgd_momentum(FLAGS.learning_rate, FLAGS.mass)
 
     rng = random.PRNGKey(42)
     if FLAGS.model == "cnn":
