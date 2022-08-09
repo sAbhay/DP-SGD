@@ -25,7 +25,7 @@ def unzip2(xys):
 ## Source: https://gist.github.com/willwhitney/dd89cac6a5b771ccff18b06b33372c75
 
 from jax import numpy as jnp
-from jax.lib import pytree
+from jax.tree_util import tree_flatten, tree_unflatten
 
 def tree_stack(trees):
   """Takes a list of trees and stacks every corresponding leaf.
@@ -37,7 +37,7 @@ def tree_stack(trees):
   leaves_list = []
   treedef_list = []
   for tree in trees:
-    leaves, treedef = pytree.flatten(tree)
+    leaves, treedef = tree_flatten(tree)
     leaves_list.append(leaves)
     treedef_list.append(treedef)
 
@@ -53,7 +53,7 @@ def tree_unstack(tree):
   [((a[0], b[0]), c[0]), ..., ((a[k], b[k]), c[k])]
   Useful for turning the output of a vmapped function into normal objects.
   """
-  leaves, treedef = pytree.flatten(tree)
+  leaves, treedef = tree_flatten(tree)
   n_trees = leaves[0].shape[0]
   new_leaves = [[] for _ in range(n_trees)]
   for leaf in leaves:
