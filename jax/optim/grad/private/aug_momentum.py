@@ -23,7 +23,7 @@ def clipped_grad(params, l2_norm_clip, single_example_batch, loss):
 
 
 def clipped_grad_single_aug_params(params, l2_norm_clip, batch, loss):
-    clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0, None, None))(params, l2_norm_clip, batch, loss)
+    clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0, None))(params, l2_norm_clip, batch, loss)
     logger.info("Total grad norm shape: {}".format(total_grad_norm.shape))
     return clipped_grads, total_grad_norm
 
@@ -34,7 +34,7 @@ def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
     # logger.info("Batch shape: {}".format(batch[0].shape, batch[1].shape))
     mults = random.uniform(rng, shape=(augmult,), minval=-1, maxval=1) * mult_radius
     aug_params = generate_augmult_perturbed_params(params, velocity, mults, augmult)
-    clipped_grads, total_grad_norm = vmap(clipped_grad_single_aug_params, (0, None, None, None, None))(aug_params, l2_norm_clip, batch, loss)
+    clipped_grads, total_grad_norm = vmap(clipped_grad_single_aug_params, (0, None, None, None))(aug_params, l2_norm_clip, batch, loss)
     logger.info("Total grad norm shape: {}".format(total_grad_norm.shape))
     clipped_grads_flat, grads_treedef = tree_flatten(clipped_grads)
     aggregated_clipped_grads = [g.sum(0) for g in clipped_grads_flat]
