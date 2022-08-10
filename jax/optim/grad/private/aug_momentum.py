@@ -33,7 +33,7 @@ def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
     """Return differentially private gradients for params, evaluated on batch."""
     # logger.info("Batch shape: {}".format(batch[0].shape, batch[1].shape))
     logger.info(f"params shape: {util.params_shape(params)}")
-    logger.info(f"batch shape: {batch.shape}")
+    logger.info(f"batch shape: {batch[0].shape}, {batch[1].shape}")
     clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0, None))(params, l2_norm_clip, batch, loss)
     mults = random.uniform(rng, shape=(augmult-1,), minval=-1, maxval=1) * mult_radius
 
