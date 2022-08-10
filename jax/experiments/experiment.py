@@ -328,7 +328,7 @@ def experiment():
         return opt_state, total_grad_norm, total_aug_norms
 
     # _, init_params = init_random_params(key, (-1, 28, 28, 1))
-    logger.info("Model init params: {}".format(init_params))
+    # logger.info("Model init params: {}".format(init_params))
     up.params_norm(init_params)
     opt_state = opt_init(init_params)
     itercount = itertools.count()
