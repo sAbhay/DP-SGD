@@ -31,9 +31,6 @@ def clipped_grad_single_aug_params(params, l2_norm_clip, batch, loss):
 def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
                  batch_size, loss, augmult, velocity, mult_radius):
     """Return differentially private gradients for params, evaluated on batch."""
-    # logger.info("Batch shape: {}".format(batch[0].shape, batch[1].shape))
-    logger.info(f"params shape: {util.params_shape(params)}")
-    logger.info(f"batch shape: {batch[0].shape}, {batch[1].shape}")
     clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0, None))(params, l2_norm_clip, batch, loss)
     mults = random.uniform(rng, shape=(augmult-1,), minval=-1, maxval=1) * mult_radius
 
@@ -42,13 +39,11 @@ def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
     aug_clipped_grads = clipped_grads
     aug_total_norms = []
     for param in aug_params:
-        logger.info(f"aug param shape: {util.params_shape(param)}")
-        clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0, None))(params, l2_norm_clip, batch, loss)
-        logger.info("Total grad norm shape: {}".format(total_grad_norm.shape))
+        clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0, None))(param, l2_norm_clip, batch, loss)
         aug_clipped_grads = tree_map(lambda g1, g2: g1 + g2, aug_clipped_grads, clipped_grads)
         aug_total_norms.append(total_grad_norm)
-    total_grad_norm = jnp.mean(aug_total_norms)
     total_aug_norms = jnp.asarray(aug_total_norms)
+    total_grad_norm = jnp.mean(total_aug_norms)
     logger.info("Total grad norm shape: {}".format(total_grad_norm.shape))
     clipped_grads_flat, grads_treedef = tree_flatten(clipped_grads)
     aggregated_clipped_grads = [g.sum(0) for g in clipped_grads_flat]
