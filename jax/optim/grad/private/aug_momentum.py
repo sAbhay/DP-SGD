@@ -40,7 +40,8 @@ def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
     aug_total_norms = []
     for param in aug_params:
         logger.info(f"aug param shape: {util.params_shape(param)}")
-        clipped_grads, total_grad_norm = clipped_grad_single_aug_params(param, l2_norm_clip, batch, loss)
+        clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0, None))(params, l2_norm_clip, batch, loss)
+        logger.info("Total grad norm shape: {}".format(total_grad_norm.shape))
         if aug_clipped_grads is None:
             aug_clipped_grads = clipped_grads
         else:
