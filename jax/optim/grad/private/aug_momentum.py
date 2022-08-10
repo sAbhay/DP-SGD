@@ -32,20 +32,20 @@ def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
                  batch_size, loss, augmult, velocity, mult_radius):
     """Return differentially private gradients for params, evaluated on batch."""
     # logger.info("Batch shape: {}".format(batch[0].shape, batch[1].shape))
-    mults = random.uniform(rng, shape=(augmult-1,), minval=-1, maxval=1) * mult_radius
     logger.info(f"params shape: {util.params_shape(params)}")
-    aug_params = generate_augmult_perturbed_params(params, velocity, mults, augmult) + [params]
+    logger.info(f"batch shape: {batch.shape}")
+    clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0, None))(params, l2_norm_clip, batch, loss)
+    mults = random.uniform(rng, shape=(augmult-1,), minval=-1, maxval=1) * mult_radius
+
+    aug_params = generate_augmult_perturbed_params(params, velocity, mults, augmult-1)
     # clipped_grads, total_grad_norm = vmap(clipped_grad_single_aug_params, (0, None, None, None))(aug_params, l2_norm_clip, batch, loss)
-    aug_clipped_grads = None
+    aug_clipped_grads = clipped_grads
     aug_total_norms = []
     for param in aug_params:
         logger.info(f"aug param shape: {util.params_shape(param)}")
         clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0, None))(params, l2_norm_clip, batch, loss)
         logger.info("Total grad norm shape: {}".format(total_grad_norm.shape))
-        if aug_clipped_grads is None:
-            aug_clipped_grads = clipped_grads
-        else:
-            aug_clipped_grads = tree_map(lambda g1, g2: g1 + g2, aug_clipped_grads, clipped_grads)
+        aug_clipped_grads = tree_map(lambda g1, g2: g1 + g2, aug_clipped_grads, clipped_grads)
         aug_total_norms.append(total_grad_norm)
     total_grad_norm = jnp.mean(aug_total_norms)
     total_aug_norms = jnp.asarray(aug_total_norms)
@@ -67,7 +67,7 @@ def generate_augmult_perturbed_params(params, velocity, mults, augmult):
     # return aug_params
 
     aug_params = []
-    for i in range(augmult-1):
+    for i in range(augmult):
         aug_params.append(perturb_params_with_momentum(params, velocity, mults[i]))
     return aug_params
 
