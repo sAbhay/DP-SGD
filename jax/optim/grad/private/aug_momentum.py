@@ -32,9 +32,20 @@ def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
                  batch_size, loss, augmult, velocity, mult_radius):
     """Return differentially private gradients for params, evaluated on batch."""
     # logger.info("Batch shape: {}".format(batch[0].shape, batch[1].shape))
-    mults = random.uniform(rng, shape=(augmult,), minval=-1, maxval=1) * mult_radius
-    aug_params = generate_augmult_perturbed_params(params, velocity, mults, augmult)
-    clipped_grads, total_grad_norm = vmap(clipped_grad_single_aug_params, (0, None, None, None))(aug_params, l2_norm_clip, batch, loss)
+    mults = random.uniform(rng, shape=(augmult-1,), minval=-1, maxval=1) * mult_radius
+    aug_params = generate_augmult_perturbed_params(params, velocity, mults, augmult) + [params]
+    # clipped_grads, total_grad_norm = vmap(clipped_grad_single_aug_params, (0, None, None, None))(aug_params, l2_norm_clip, batch, loss)
+    aug_clipped_grads = None
+    aug_total_norms = []
+    for param in aug_params:
+        clipped_grads, total_grad_norm = clipped_grad_single_aug_params(param, l2_norm_clip, batch, loss)
+        if aug_clipped_grads is None:
+            aug_clipped_grads = clipped_grads
+        else:
+            aug_clipped_grads = tree_map(lambda g1, g2: g1 + g2, aug_clipped_grads, clipped_grads)
+        aug_total_norms.append(total_grad_norm)
+    total_grad_norm = jnp.mean(aug_total_norms)
+    total_aug_norms = jnp.asarray(aug_total_norms)
     logger.info("Total grad norm shape: {}".format(total_grad_norm.shape))
     clipped_grads_flat, grads_treedef = tree_flatten(clipped_grads)
     aggregated_clipped_grads = [g.sum(0) for g in clipped_grads_flat]
@@ -48,12 +59,16 @@ def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
 
 
 def generate_augmult_perturbed_params(params, velocity, mults, augmult):
-    augmult_params = util.tree_stack([params] * augmult)
-    aug_params = vmap(perturb_params_with_momentum, (0, None, 0))(augmult_params, velocity, mults)
+    # augmult_params = util.tree_stack([params] * augmult)
+    # aug_params = vmap(perturb_params_with_momentum, (0, None, 0))(augmult_params, velocity, mults)
+    # return aug_params
+
+    aug_params = []
+    for i in range(augmult-1):
+        aug_params.append(perturb_params_with_momentum(params, velocity, mults[i]))
     return aug_params
 
-    # for i in range(augmult):
-    #     params = perturb_params_with_momentum(params, velocity, mult)
+
 
 
 def perturb_params_with_momentum(params, velocity, mult):
