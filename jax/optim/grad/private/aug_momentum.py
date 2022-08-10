@@ -42,9 +42,8 @@ def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
         clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0, None))(param, l2_norm_clip, batch, loss)
         aug_clipped_grads = tree_map(lambda g1, g2: g1 + g2, aug_clipped_grads, clipped_grads)
         aug_total_norms.append(total_grad_norm)
-    total_aug_norms = jnp.asarray(aug_total_norms)
-    total_grad_norm = jnp.mean(total_aug_norms)
-    logger.info("Total grad norm shape: {}".format(total_grad_norm.shape))
+    total_aug_norms = jnp.hstack(aug_total_norms)
+    total_grad_norm = jnp.mean(total_aug_norms, axis=1)
     clipped_grads_flat, grads_treedef = tree_flatten(clipped_grads)
     aggregated_clipped_grads = [g.sum(0) for g in clipped_grads_flat]
     rngs = random.split(rng, len(aggregated_clipped_grads))
