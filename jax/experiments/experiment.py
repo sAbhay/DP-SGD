@@ -187,15 +187,15 @@ def experiment():
                 batch_idx = perm[i * FLAGS.batch_size:(i + 1) * FLAGS.batch_size]
                 yield train_images[batch_idx], train_labels[batch_idx]
 
-    def shape_as_image(images, labels, dataset=FLAGS.dataset, dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True):
+    def shape_as_image(images, labels, dataset=FLAGS.dataset, dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True, aug_type=FLAGS.aug_type):
         # logger.info(f"Preshaped images shape: {images.shape}")
         image_shape = datasets.IMAGE_SHAPE[dataset]
         target_shape = (-1, 1, *image_shape) if dummy_dim else (-1, *image_shape)
         if flatten_augmult:
-            if augmult > 0:
+            if augmult > 0 and aug_type == 'data':
                 # logger.info(f"Preshaped labels shape: {labels.shape}")
                 labels = jnp.reshape(labels, (-1, *labels.shape[2:]))
-        elif augmult > 0:
+        elif augmult > 0 and aug_type == 'data':
             target_shape = (-1, augmult, 1, *image_shape) if dummy_dim else (-1, augmult, *image_shape)
         return jnp.reshape(images, target_shape), labels
 
