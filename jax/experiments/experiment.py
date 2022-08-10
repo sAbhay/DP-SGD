@@ -299,7 +299,7 @@ def experiment():
         params = get_params(opt_state)
         rng = random.fold_in(rng, i)  # get new key for new random numbers
         if FLAGS.augmult <= 0:
-            private_grads, total_grad_norm, total_aug_norms = private.private_grad(params, batch, rng, FLAGS.l2_norm_clip,
+            private_grads, total_grad_norm = private.private_grad(params, batch, rng, FLAGS.l2_norm_clip,
                                                                            FLAGS.noise_multiplier, FLAGS.batch_size,
                                                                            loss)
             total_aug_norms = None
