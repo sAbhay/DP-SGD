@@ -34,6 +34,8 @@ def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
     # logger.info("Batch shape: {}".format(batch[0].shape, batch[1].shape))
     mults = random.uniform(rng, shape=(augmult-1,), minval=-1, maxval=1) * mult_radius
     aug_params = generate_augmult_perturbed_params(params, velocity, mults, augmult) + [params]
+    logger.info(f"params shape: {util.params_shape(params)}")
+    logger.info(f"aug params shape: {util.params_shape(aug_params[0])}")
     # clipped_grads, total_grad_norm = vmap(clipped_grad_single_aug_params, (0, None, None, None))(aug_params, l2_norm_clip, batch, loss)
     aug_clipped_grads = None
     aug_total_norms = []

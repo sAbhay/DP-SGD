@@ -61,3 +61,10 @@ def tree_unstack(tree):
       new_leaves[i].append(leaf[i])
   new_trees = [treedef.unflatten(l) for l in new_leaves]
   return new_trees
+
+
+from jax import tree_map
+
+def params_shape(params):
+  """Returns the shape of a parameter object."""
+  return tree_map(lambda x: x.shape, params)
