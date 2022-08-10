@@ -173,7 +173,7 @@ def experiment():
         logger.info("Augmented train images in {:.2f} sec".format(time.time() - start_time))
         log_memory_usage(logger, handle)
     else:
-        logger.warn("No data augmentation applied for vanilla SGD")
+        logger.info("No data augmentation applied")
     num_train = train_images.shape[0]
     num_complete_batches, leftover = divmod(num_train, FLAGS.batch_size)
     num_batches = num_complete_batches + bool(leftover)
