@@ -9,7 +9,7 @@ from PIL import Image, ImageOps, ImageDraw, ImageFont
 from analysis import NORM_DIR, get_hyperparameter_strings, PLOTS_DIR
 
 HYPERPARAMETER_STRING_FORMS = {
-    "dataset": "Dataset",
+    "data": "Dataset",
     "model": "Model",
     "depth": "Depth",
     "loss": "Loss",
@@ -75,7 +75,7 @@ def title_plot(image, hyperparam_string):
     splits = splits[1].split(',')
     for split in splits:
         k, v = split.split('=')
-        if k in {"dataset", "model", "depth", "bs", "grp", "ws", "pa", "aug", "augtype"}:
+        if k in {"data", "model", "depth", "bs", "grp", "ws", "pa", "aug", "augtype"}:
             title += HYPERPARAMETER_STRING_FORMS[k] + "=" + v + " "
     logger.info("title: {}, image size: {}".format(title, image.size))
 

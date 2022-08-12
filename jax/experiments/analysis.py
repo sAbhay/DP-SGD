@@ -80,6 +80,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
                                          columns=logit_cols)
     sample_df["max_logit"] = sample_df[logit_cols].max(axis=1)
     last_epoch = sample_df['epoch'].max()
+    sample_df['accurate'] = sample_df['accurate'].replace({True: "Accurate", False: "Misclassified"})
 
     sample_df[(sample_df['epoch'] == 0) | (sample_df['epoch'] == last_epoch)][['epoch', 'norm', 'accurate']]. \
         hist(column='norm', by=['epoch', 'accurate'], legend=False)
@@ -91,8 +92,13 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     cols = ['epoch', 'param_norm']
     epoch_df = pd.DataFrame(param_norms, columns=cols)
     epoch_df['average_grad_norm'] = sample_df.groupby(['epoch']).mean()['norm']
+    epoch_df['average_grad_norm_given_misclassified'] = sample_df[sample_df['accurate'] == 'Misclassified']. \
+        groupby(['epoch']).mean()['norm']
+    epoch_df['average_grad_norm_given_accurate'] = sample_df[sample_df['accurate'] == 'Accurate']. \
+        groupby(['epoch']).mean()['norm']
     sns.lineplot(x='epoch', y='value', hue='variable',
-                 data=pd.melt(epoch_df[['epoch', 'param_norm', 'average_grad_norm']], ['epoch']))
+                 data=pd.melt(epoch_df[['epoch', 'average_grad_norm', 'average_grad_norm_given_misclassified', 'average_grad_norm_given_accurate']], ['epoch']))
+    plt.yscale('log')
     plt.suptitle('Average gradient and parameter norms by epoch')
     plt.savefig(os.path.join(plot_dir, 'grad_norms_param_norms.png'))
     plt.close()
