@@ -392,7 +392,7 @@ def experiment():
 
         stats.append((train_loss.item(), train_acc.item(), test_loss.item(), test_acc.item(), eps.item() if FLAGS.dpsgd else None))
 
-        if (epoch % FLAGS.checkpoint) == 0:
+        if (epoch % FLAGS.checkpoint) == 0 or epoch == FLAGS.epochs - 1:
             hyperparams_string = checkpoint(FLAGS, grad_norms, param_norms, stats, aug_norms=aug_norms, plot=True)
 
         epoch_time = time.time() - start_time
