@@ -239,8 +239,8 @@ def experiment():
     model_fn = models.get_model_fn(FLAGS.model, model_kwargs)
     model = hk.transform(model_fn, apply_rng=True)
 
-    dummy_batch = (jnp.zeros((FLAGS.batch_size, *datasets.IMAGE_SHAPE[FLAGS.dataset])), jnp.zeros(train_labels[0:FLAGS.batch_size].shape))
-    init_batch = shape_as_image(*dummy_batch, dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True)[0]
+    init_batch = (jnp.zeros((FLAGS.batch_size, *datasets.IMAGE_SHAPE[FLAGS.dataset])), jnp.zeros(train_labels[0:FLAGS.batch_size].shape))
+    # init_batch = shape_as_image(*dummy_batch, dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True)[0]
     logger.info(f"Init batch shape: {init_batch.shape}")
     init_args = [init_batch]
     if FLAGS.model == "wideresnet":
