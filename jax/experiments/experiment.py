@@ -414,7 +414,7 @@ def main(_):
         if FLAGS.hyperparams_string is not None:
             hyperparams_string = FLAGS.hyperparams_string
         else:
-            get_hyperparameter_string(FLAGS)
+            hyperparams_string = get_hyperparameter_string(FLAGS)
 
     plot_results(hyperparams_string, FLAGS.plot_dir, FLAGS.norm_dir)
 
