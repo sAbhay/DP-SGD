@@ -149,6 +149,7 @@ flags.DEFINE_integer('width', 1, "Network width")
 flags.DEFINE_string('aug_type', 'data', 'Augmentation type: data or momentum')
 flags.DEFINE_float('mult_radius', 1, 'Radius for momentum sampling')
 flags.DEFINE_float('mass', 0.9, 'Momentum coefficient')
+flags.DEFINE_float('privacy_budget', None, 'Privacy budget')
 
 def experiment():
     logger.info("Running Experiment")
@@ -397,6 +398,9 @@ def experiment():
 
         epoch_time = time.time() - start_time
         logger.info('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
+        if FLAGS.privacy_budget is not None and eps >= FLAGS.privacy_budget:
+            logger.info('Privacy budget exceeded!')
+            break
     return hyperparams_string
 
 def main(_):

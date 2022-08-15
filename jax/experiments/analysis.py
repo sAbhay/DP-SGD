@@ -98,7 +98,6 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
         groupby(['epoch']).mean()['norm']
     sns.lineplot(x='epoch', y='value', hue='variable',
                  data=pd.melt(epoch_df[['epoch', 'average_grad_norm', 'average_grad_norm_given_misclassified', 'average_grad_norm_given_accurate']], ['epoch']))
-    plt.yscale('log')
     plt.suptitle('Average gradient and parameter norms by epoch')
     plt.savefig(os.path.join(plot_dir, 'grad_norms_param_norms.png'))
     plt.close()
