@@ -46,7 +46,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
 
     norms = []
     for epoch in range(len(epoch_norms)):
-        norms += [(epoch,) + v for v in epoch_norms[epoch]]
+        norms += [(epoch+1,) + v for v in epoch_norms[epoch]]
     for i, norm in enumerate(norms):
         norms[i] = tuple([norm[0], norm[1], norm[2]] + list(norm[3]))
     # print(norms[0])
@@ -54,19 +54,19 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     with open(os.path.join(norm_dir, f'param_norms_{hyperparams_string}.pkl'), 'rb') as f:
         param_norms = pickle.load(f)
     for i, param_norm in enumerate(param_norms):
-        param_norms[i] = (i, param_norm)
+        param_norms[i] = (i+1, param_norm)
 
     with open(os.path.join(norm_dir, f'stats_{hyperparams_string}.pkl'), 'rb') as f:
         stats = pickle.load(f)
     for i, epoch_stats in enumerate(stats):
-        stats[i] = (i, *epoch_stats)
+        stats[i] = (i+1, *epoch_stats)
 
     if "dpsgd" in hyperparams_string and "aug=0" not in hyperparams_string:
         aug_norms = []
         with open(os.path.join(norm_dir, f'aug_norms_{hyperparams_string}.pkl'), 'rb') as f:
             epoch_aug_norms = pickle.load(f)
         for epoch in range(len(epoch_aug_norms)):
-            aug_norms += [(epoch,) + v for v in epoch_aug_norms[epoch]]
+            aug_norms += [(epoch+1,) + v for v in epoch_aug_norms[epoch]]
         for i, norm in enumerate(aug_norms):
             aug_norms[i] = tuple([norm[0], norm[1], *norm[2]])
         n_augs = len(aug_norms[0])-2

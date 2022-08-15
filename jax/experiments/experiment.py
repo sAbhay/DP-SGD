@@ -150,6 +150,7 @@ flags.DEFINE_string('aug_type', 'data', 'Augmentation type: data or momentum')
 flags.DEFINE_float('mult_radius', 1, 'Radius for momentum sampling')
 flags.DEFINE_float('mass', 0.9, 'Momentum coefficient')
 flags.DEFINE_float('privacy_budget', None, 'Privacy budget')
+flags.DEFINE_boolean('adaptive_norm_clip', False, 'Adaptive l2 norm clip')
 
 def experiment():
     logger.info("Running Experiment")
@@ -222,7 +223,8 @@ def experiment():
     model_fn = models.get_model_fn(FLAGS.model, model_kwargs)
     model = hk.transform(model_fn, apply_rng=True)
 
-    init_batch = shape_as_image(*next(batches), dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True)[0]
+    dummy_batch = (jnp.zeros(train_images[0:FLAGS.batch_size].shape), jnp.zeros(train_labels[0:FLAGS.batch_size].shape))
+    init_batch = shape_as_image(*dummy_batch, dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True)[0]
     logger.info(f"Init batch shape: {init_batch.shape}")
     init_args = [init_batch]
     if FLAGS.model == "wideresnet":
@@ -296,24 +298,24 @@ def experiment():
         return opt_state, total_grad_norm
 
     @jit
-    def private_update(rng, i, opt_state, batch, add_params):
+    def private_update(rng, i, opt_state, batch, add_params, l2_norm_clip=FLAGS.l2_norm_clip):
         params = get_params(opt_state)
         rng = random.fold_in(rng, i)  # get new key for new random numbers
         if FLAGS.augmult <= 0:
-            private_grads, total_grad_norm = private.private_grad(params, batch, rng, FLAGS.l2_norm_clip,
+            private_grads, total_grad_norm = private.private_grad(params, batch, rng, l2_norm_clip,
                                                                            FLAGS.noise_multiplier, FLAGS.batch_size,
                                                                            loss)
             total_aug_norms = None
         elif FLAGS.aug_type == "data":
             private_grads, total_grad_norm, total_aug_norms = aug_data.private_grad(params, batch, rng,
-                                                                                   FLAGS.l2_norm_clip,
+                                                                                   l2_norm_clip,
                                                                                    FLAGS.noise_multiplier,
                                                                                    FLAGS.batch_size,
                                                                                    loss)
         elif FLAGS.aug_type == "momentum":
             velocity = get_velocity(opt_state)
             private_grads, total_grad_norm, total_aug_norms = aug_momentum.private_grad(params, batch, rng,
-                                                                                   FLAGS.l2_norm_clip,
+                                                                                   l2_norm_clip,
                                                                                    FLAGS.noise_multiplier,
                                                                                    FLAGS.batch_size,
                                                                                    loss, FLAGS.augmult, velocity,
@@ -334,6 +336,7 @@ def experiment():
     opt_state = opt_init(init_params)
     itercount = itertools.count()
 
+    epoch_average_grad_norm = 0
     grad_norms = []
     aug_norms = []
     param_norms = []
@@ -341,6 +344,7 @@ def experiment():
     steps_per_epoch = train_images.shape[0] // FLAGS.batch_size
     add_params = {'ema': get_params(opt_state), 'polyak': get_params(opt_state)}
     logger.info('Starting training...')
+    l2_norm_clip = FLAGS.l2_norm_clip
     for epoch in range(1, FLAGS.epochs + 1):
         start_time = time.time()
         epoch_grad_norms = []
@@ -349,14 +353,14 @@ def experiment():
           next_batch = next(batches)
           if FLAGS.dpsgd:
             opt_state, total_grad_norm, total_aug_norms = private_update(
-                key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
+                key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params, l2_norm_clip)
           else:
             opt_state, total_grad_norm = update(
                 key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
           acc, correct, logits = accuracy(get_params(opt_state), shape_as_image(*next_batch, augmult=FLAGS.augmult, flatten_augmult=True))
-          # print('Grad norm', len(total_grad_norm), 'Correct', len(correct))
-          # logger.info("Grad norm: {}, Correct: {}, Logits: {}".format(total_grad_norm.shape, correct.shape, logits.shape))
           epoch_grad_norms += zip(total_grad_norm.tolist(), correct.tolist(), logits.tolist())
+          epoch_average_grad_norm += jnp.sum(total_grad_norm)
+
           if FLAGS.augmult > 0:
             # logger.info(f"Aug norms list: {total_aug_norms.tolist()}")
             epoch_aug_norms += zip(correct.tolist(), total_aug_norms.tolist())
@@ -365,6 +369,10 @@ def experiment():
         grad_norms.append(epoch_grad_norms)
         aug_norms.append(epoch_aug_norms)
         # log_memory_usage(logger, handle)
+        epoch_average_grad_norm /= train_images.shape[0]
+        logger.info(f"Epoch average grad norm: {epoch_average_grad_norm}")
+        if FLAGS.adaptive_norm_clip:
+            l2_norm_clip = epoch_average_grad_norm
 
         # evaluate test accuracy
         params = get_params(opt_state)
