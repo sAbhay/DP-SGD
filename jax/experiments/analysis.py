@@ -114,7 +114,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
 
     sns.lineplot(x='epoch', y='value', hue='variable',
                  data=pd.melt(stats_df[['epoch', 'train_acc', 'test_acc']], ['epoch']))
-    plt.text(10, 0.3, "Best train accuracy: {}".format(stats_df['train_acc'].max()), size='small')
+    plt.text(10, 0.25, "Best train accuracy: {}".format(stats_df['train_acc'].max()), size='small')
     plt.text(10, 0.2, "Best test accuracy: {}".format(stats_df['test_acc'].max()), size='small')
     plt.suptitle('Accuracy Stats')
     plt.savefig(os.path.join(plot_dir, 'accuracy_stats.png'))
