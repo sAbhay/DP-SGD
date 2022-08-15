@@ -204,18 +204,17 @@ def experiment():
         superbatch_labels = jnp.stack(superbatch_labels)
         return superbatch_images, superbatch_labels
 
-    @functools.partial(pmap, axis_name='i')
     def shape_as_image(images, labels, dataset=FLAGS.dataset, dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True, aug_type=FLAGS.aug_type):
         # logger.info(f"Preshaped images shape: {images.shape}")
         image_shape = datasets.IMAGE_SHAPE[dataset]
-        target_shape = (-1, 1, *image_shape) if dummy_dim else (-1, *image_shape)
+        target_shape = (num_devices, -1, 1, *image_shape) if dummy_dim else (num_devices, -1, *image_shape)
         if flatten_augmult:
             if augmult > 0 and aug_type == 'data':
                 # logger.info(f"Preshaped labels shape: {labels.shape}")
-                labels = jnp.reshape(labels, (-1, *labels.shape[2:]))
+                labels = jnp.reshape(labels, (num_devices, -1, *labels.shape[2:]))
         elif augmult > 0 and aug_type == 'data':
-            target_shape = (-1, augmult, 1, *image_shape) if dummy_dim else (-1, augmult, *image_shape)
-        return jnp.reshape(images, target_shape), labels
+            target_shape = (num_devices, -1, augmult, 1, *image_shape) if dummy_dim else (num_devices, -1, augmult, *image_shape)
+        return jnp.reshape(images, target_shape), jnp.reshape(labels, (num_devices, *labels.shape[1:]))
 
     if FLAGS.dpsgd and FLAGS.aug_type == 'data' and FLAGS.augmult > 0:
         batches = data_stream(aug_train_images, aug_train_labels)
