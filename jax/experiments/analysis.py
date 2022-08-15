@@ -114,6 +114,8 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
 
     sns.lineplot(x='epoch', y='value', hue='variable',
                  data=pd.melt(stats_df[['epoch', 'train_acc', 'test_acc']], ['epoch']))
+    plt.text(10, 0.3, "Best train accuracy: {}".format(stats_df['train_acc'].max()), size='small')
+    plt.text(10, 0.2, "Best test accuracy: {}".format(stats_df['test_acc'].max()), size='small')
     plt.suptitle('Accuracy Stats')
     plt.savefig(os.path.join(plot_dir, 'accuracy_stats.png'))
     plt.close()
@@ -130,6 +132,7 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
         norm_cols = [f'aug_norm_{i}' for i in range(n_augs)]
         cols = ['epoch', 'accurate'] + norm_cols
         aug_df = pd.DataFrame(aug_norms, columns=cols)
+        aug_df['accurate'] = aug_df['accurate'].replace({True: "Accurate", False: "Misclassified"})
         aug_df_combined = pd.melt(aug_df, id_vars=['epoch', 'accurate'], value_vars=norm_cols, value_name='norm')
         aug_df_combined[(aug_df_combined['epoch'] == 0) | (aug_df_combined['epoch'] == last_epoch)][['epoch', 'norm', 'accurate']]. \
             hist(column='norm', by=['epoch', 'accurate'], legend=False)
