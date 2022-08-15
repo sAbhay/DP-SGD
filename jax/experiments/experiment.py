@@ -359,7 +359,7 @@ def experiment():
                 key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
           acc, correct, logits = accuracy(get_params(opt_state), shape_as_image(*next_batch, augmult=FLAGS.augmult, flatten_augmult=True))
           epoch_grad_norms += zip(total_grad_norm.tolist(), correct.tolist(), logits.tolist())
-          epoch_average_grad_norm += jnp.sum(total_grad_norm)
+          epoch_average_grad_norm += jnp.nansum(total_grad_norm)
 
           if FLAGS.augmult > 0:
             # logger.info(f"Aug norms list: {total_aug_norms.tolist()}")
