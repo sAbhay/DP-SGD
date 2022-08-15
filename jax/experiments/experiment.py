@@ -280,7 +280,7 @@ def experiment():
     else:
         raise ValueError("Undefined loss")
 
-    @functools.partial(pmap, axis_name='i', donate_argnums=(0,))
+    # @functools.partial(pmap, axis_name='i', donate_argnums=(0,))
     def accuracy(params, batch, splits=1):
       acc = 0
       correct = []
@@ -313,24 +313,24 @@ def experiment():
             opt_state = set_params(avg_params, opt_state)
         return opt_state, total_grad_norm
 
-    @functools.partial(pmap, axis_name='i', donate_argnums=(0,))
+
     def private_update(rng, i, opt_state, batch, add_params, l2_norm_clip=FLAGS.l2_norm_clip):
         params = get_params(opt_state)
         rng = random.fold_in(rng, i)  # get new key for new random numbers
         if FLAGS.augmult <= 0:
-            private_grads, total_grad_norm = private.private_grad(params, batch, rng, l2_norm_clip,
+            private_grads, total_grad_norm = pmap(private.private_grad, axis='i')(params, batch, rng, l2_norm_clip,
                                                                            FLAGS.noise_multiplier, FLAGS.batch_size,
                                                                            loss)
             total_aug_norms = None
         elif FLAGS.aug_type == "data":
-            private_grads, total_grad_norm, total_aug_norms = aug_data.private_grad(params, batch, rng,
+            private_grads, total_grad_norm, total_aug_norms = pmap(aug_data.private_grad, axis='i')(params, batch, rng,
                                                                                    l2_norm_clip,
                                                                                    FLAGS.noise_multiplier,
                                                                                    FLAGS.batch_size,
                                                                                    loss)
         elif FLAGS.aug_type == "momentum":
             velocity = get_velocity(opt_state)
-            private_grads, total_grad_norm, total_aug_norms = aug_momentum.private_grad(params, batch, rng,
+            private_grads, total_grad_norm, total_aug_norms = pmap(aug_momentum.private_grad, axis='i')(params, batch, rng,
                                                                                    l2_norm_clip,
                                                                                    FLAGS.noise_multiplier,
                                                                                    FLAGS.batch_size,
