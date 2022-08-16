@@ -28,8 +28,8 @@ def clipped_grad_single_aug_params(params, l2_norm_clip, batch, loss):
     return clipped_grads, total_grad_norm
 
 
-def private_grad(params, batch, rng, velocity, l2_norm_clip, noise_multiplier,
-                 batch_size, loss, augmult, mult_radius):
+def private_grad(params, batch, rng, l2_norm_clip, noise_multiplier,
+                 batch_size, loss, augmult, velocity, mult_radius):
     """Return differentially private gradients for params, evaluated on batch."""
     clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0, None))(params, l2_norm_clip, batch, loss)
     mults = random.uniform(rng, shape=(augmult-1,), minval=-1, maxval=1) * mult_radius
