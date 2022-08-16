@@ -387,6 +387,9 @@ def experiment():
             opt_state, total_grad_norm = update(
                 key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
           acc, correct, logits = reshape_device_dim(*accuracy(get_params(opt_state), shape_as_image(*next_batch, augmult=FLAGS.augmult, flatten_augmult=True)))
+          logger.info(f"acc shape: {acc.shape}")
+          logger.info(f"correct shape: {correct.shape}")
+          logger.info(f"logits shape: {logits.shape}")
           epoch_grad_norms += zip(total_grad_norm.tolist(), correct.tolist(), logits.tolist())
           epoch_average_grad_norm += sum(total_grad_norm.tolist())
 
