@@ -341,6 +341,7 @@ def experiment():
         # logger.info(f"Params shape: {cutil.params_shape(params)}")
         # logger.info(f"Private grads shape: {cutil.params_shape(private_grads)}")
         private_grads = pmap(lambda private_grads: jax.lax.pmean(private_grads, axis_name='i'), axis_name='i')
+        logger.info(f"Private grads shape: {cutil.params_shape(private_grads)}")
         opt_state = opt_update(
             i, private_grads, opt_state)
         if FLAGS.param_averaging:
