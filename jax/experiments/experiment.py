@@ -299,11 +299,11 @@ def experiment():
       acc = 0
       correct = []
       all_logits = []
-      split_size = int(batch[0].shape[1] / splits)
-      assert (batch[0].shape[1] % splits) == 0, f"{batch[0].shape[1]} % {splits} != 0"
+      split_size = int(batch[0].shape[0] / splits)
+      assert (batch[0].shape[0] % splits) == 0, f"{batch[0].shape[0]} % {splits} != 0"
       for i in range(splits):
-        inputs = batch[0][:, i * split_size:(i + 1) * split_size, :, :, :]
-        targets = batch[1][:, i * split_size:(i + 1) * split_size, :]
+        inputs = batch[0][i * split_size:(i + 1) * split_size]
+        targets = batch[1][i * split_size:(i + 1) * split_size]
         if split:
             inputs, targets = split_across_devices(inputs, targets, num_devices)
         # logger.info(f"Inputs shape: {inputs.shape}")
@@ -425,12 +425,12 @@ def experiment():
 
         # evaluate test accuracy
         params = get_params(opt_state)
-        test_acc, _, _ = accuracy(params, shape_as_image(test_images, test_labels, augmult=0), splits=5)
+        test_acc, _, _ = accuracy(params, shape_as_image(test_images, test_labels, augmult=0), splits=5, split=True)
         test_loss = loss(params, shape_as_image(test_images, test_labels, augmult=0))
         logger.info('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             test_loss, 100 * test_acc))
         # log_memory_usage(logger, handle)
-        train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels, augmult=0), splits=5)
+        train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels, augmult=0), splits=5, split=True)
         # train_loss = loss(params, shape_as_image(train_images, train_labels, augmult=0))
         train_loss = test_loss
         logger.info('Train set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
