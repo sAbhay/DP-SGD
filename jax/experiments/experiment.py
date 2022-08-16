@@ -391,7 +391,6 @@ def experiment():
           logger.info(f"correct shape: {correct.shape}")
           logger.info(f"logits shape: {logits.shape}")
           logger.info(f"total grad norm shape: {total_grad_norm.shape}")
-          logger.info(f"total aug norm shape: {total_aug_norms.shape}")
           epoch_grad_norms += zip(total_grad_norm.tolist(), correct.tolist(), logits.tolist())
           epoch_average_grad_norm += sum(total_grad_norm.tolist())
 
