@@ -302,8 +302,8 @@ def experiment():
       split_size = int(batch[0].shape[1] / splits)
       assert (batch[0].shape[1] % splits) == 0, f"{batch[0].shape[1]} % {splits} != 0"
       for i in range(splits):
-        logger.info("images shape: {}".format(batch[0].shape[1]))
-        logger.info("labels shape: {}".format(batch[1].shape[1]))
+        logger.info("images shape: {}".format(batch[0].shape))
+        logger.info("labels shape: {}".format(batch[1].shape))
         inputs = batch[0][:, i * split_size:(i + 1) * split_size, :, :, :]
         targets = batch[1][:, i * split_size:(i + 1) * split_size]
         if split:
