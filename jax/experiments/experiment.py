@@ -92,7 +92,7 @@ import numpy.random as npr
 
 import nvidia_smi
 
-from data import datasets, shard
+from data import datasets
 import models.models as models
 from optim.optimizer.sgd import sgdavg
 from optim.optimizer.momentum import sgd_momentum_avg
@@ -187,8 +187,6 @@ def experiment():
     num_complete_batches, leftover = divmod(num_train, FLAGS.batch_size)
     num_batches = num_complete_batches + bool(leftover)
     key = random.PRNGKey(FLAGS.seed)
-    train_images, train_labels = shard.shard_dataset(train_images, train_labels, devices)
-    test_images, test_labels = shard.shard_dataset(test_images, test_labels, devices)
 
     def data_stream(train_images, train_labels):
         rng = npr.RandomState(FLAGS.seed)
@@ -196,7 +194,7 @@ def experiment():
             perm = rng.permutation(num_train)
             for i in range(num_batches):
                 batch_idx = perm[i * FLAGS.batch_size // num_devices:(i + 1) * FLAGS.batch_size // num_devices]
-                yield train_images[:, batch_idx], train_labels[:, batch_idx]
+                yield train_images[batch_idx], train_labels[batch_idx]
 
     def make_superbatch(input_dataset):
         """Constructs a superbatch, i.e. one batch of data per device."""
@@ -399,9 +397,8 @@ def experiment():
         epoch_grad_norms = []
         epoch_aug_norms = []
         for _ in range(num_batches):
-          next_batch = next(batches)
-          logger.info(f"Batch shape: {next_batch.shape}")
-          # next_batch = make_superbatch(batches)
+          # next_batch = next(batches)
+          next_batch = make_superbatch(batches)
           if FLAGS.dpsgd:
             opt_state, total_grad_norm, total_aug_norms = private_update(
                 key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params, l2_norm_clip)
