@@ -249,9 +249,9 @@ def experiment():
 
     def predict(params, inputs):
         if FLAGS.model == "cnn":
-            predictions = model.apply(params, inputs)
+            predictions = model.apply(params, None, inputs)
         elif FLAGS.model == "wideresnet" or FLAGS.model == "wideresnet2":
-            predictions = model.apply(params, inputs)
+            predictions = model.apply(params, None, inputs)
         else:
             return ValueError(f"Unknown model: {FLAGS.model}")
         return predictions
