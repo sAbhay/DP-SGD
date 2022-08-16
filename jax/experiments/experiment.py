@@ -401,7 +401,7 @@ def experiment():
         epoch_aug_norms = []
         for _ in range(num_batches):
           next_batch = next(batches)
-          logger.info(f"Batch shape: {(next_batch[0].shape, next_batch[1].shape)}")
+          # logger.info(f"Batch shape: {(next_batch[0].shape, next_batch[1].shape)}")
           # next_batch = make_superbatch(batches)
           if FLAGS.dpsgd:
             opt_state, total_grad_norm, total_aug_norms = private_update(
