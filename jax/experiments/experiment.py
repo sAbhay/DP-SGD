@@ -160,6 +160,7 @@ def experiment():
     log_memory_usage(logger, handle)
     num_devices = jax.local_device_count()
     logger.info("Found {} devices".format(num_devices))
+    assert FLAGS.batch_size % num_devices == 0, "Batch size must be divisible by number of devices"
 
     if FLAGS.microbatches:
         raise NotImplementedError(
@@ -167,10 +168,6 @@ def experiment():
         )
 
     train_images, train_labels, test_images, test_labels = datasets.data(name=FLAGS.dataset)
-    train_images = train_images[:512]
-    train_labels = train_labels[:512]
-    test_images = test_images[:500]
-    test_labels = test_labels[:500]
     logger.info(f"Train set shape: {train_images.shape}, {train_labels.shape}")
     log_memory_usage(logger, handle)
     if FLAGS.dpsgd and FLAGS.aug_type == 'data' and FLAGS.augmult > 0:
@@ -195,7 +192,7 @@ def experiment():
         while True:
             perm = rng.permutation(num_train)
             for i in range(num_batches):
-                batch_idx = perm[i * FLAGS.batch_size:(i + 1) * FLAGS.batch_size]
+                batch_idx = perm[i * FLAGS.batch_size // num_devices:(i + 1) * FLAGS.batch_size // num_devices]
                 yield train_images[batch_idx], train_labels[batch_idx]
 
     def make_superbatch(input_dataset):
