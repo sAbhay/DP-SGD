@@ -293,7 +293,6 @@ def experiment():
         loss = hinge_loss
     else:
         raise ValueError("Undefined loss")
-    loss = jit(loss)
 
     # @functools.partial(pmap, axis_name='i', donate_argnums=(0,))
     def accuracy(params, batch, splits=1, split=False):
@@ -374,7 +373,7 @@ def experiment():
     # _, init_params = init_random_params(key, (-1, 28, 28, 1))
     # logger.info("Model init params: {}".format(init_params))
     up.params_norm(init_params)
-    init_params = jax.tree_util.tree_map(lambda x: jnp.stack([x] * num_devices), init_params)
+    # init_params = jax.tree_util.tree_map(lambda x: jnp.stack([x] * num_devices), init_params)
     # logger.info("Model init params shape: {}".format(cutil.params_shape(init_params)))
     opt_state = opt_init(init_params)
     # logger.info("Model params shape: {}".format(cutil.params_shape(get_params(opt_state))))
