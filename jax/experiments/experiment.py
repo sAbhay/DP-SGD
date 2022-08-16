@@ -303,7 +303,7 @@ def experiment():
       assert (batch[0].shape[1] % splits) == 0, f"{batch[0].shape[1]} % {splits} != 0"
       for i in range(splits):
         inputs = batch[0][:, i * split_size:(i + 1) * split_size, :, :, :]
-        targets = batch[1][:, i * split_size:(i + 1) * split_size]
+        targets = batch[1][:, i * split_size:(i + 1) * split_size, :]
         if split:
             inputs, targets = split_across_devices(inputs, targets, num_devices)
         # logger.info(f"Inputs shape: {inputs.shape}")
