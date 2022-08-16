@@ -62,7 +62,7 @@ def reshape_device_dim(*args):
         if len(arg.shape) > 2:
             ret.append(arg.reshape(-1, *arg.shape[:2]))
         elif len(arg.shape) > 0:
-            ret.append(arg.reshape(-1,))
+            ret.append(arg.reshape(-1))
         else:
             ret.append(arg)
     return ret
