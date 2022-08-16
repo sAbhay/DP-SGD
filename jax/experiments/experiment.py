@@ -427,7 +427,6 @@ def experiment():
 
         # evaluate test accuracy
         params = get_params(opt_state)
-        logger.info("Test labels shape: {}".format(test_labels.shape))
         test_acc, _, _ = accuracy(params, shape_as_image(test_images, test_labels, augmult=0), splits=5)
         test_loss = loss(params, shape_as_image(test_images, test_labels, augmult=0))
         logger.info('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
