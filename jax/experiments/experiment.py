@@ -381,14 +381,17 @@ def experiment():
           if FLAGS.dpsgd:
             opt_state, total_grad_norm, total_aug_norms = private_update(
                 key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params, l2_norm_clip)
-            total_grad_norm = total_grad_norm.reshape((-1,))
+            total_grad_norm = reshape_device_dim(total_grad_norm)
             total_aug_norms = total_aug_norms.reshape((FLAGS.augmult, -1))
           else:
             opt_state, total_grad_norm = update(
                 key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
           acc, correct, logits = reshape_device_dim(*accuracy(get_params(opt_state), shape_as_image(*next_batch, augmult=FLAGS.augmult, flatten_augmult=True)))
-          correct = correct.reshape((-1,))
-          logits = logits.reshape((-1, FLAGS.num_classes))
+          logger.info(f"acc shape: {acc.shape}")
+          logger.info(f"correct shape: {correct.shape}")
+          logger.info(f"logits shape: {logits.shape}")
+          logger.info(f"total grad norm shape: {total_grad_norm.shape}")
+          logger.info(f"total aug norm shape: {total_aug_norms.shape}")
           epoch_grad_norms += zip(total_grad_norm.tolist(), correct.tolist(), logits.tolist())
           epoch_average_grad_norm += sum(total_grad_norm.tolist())
 
