@@ -11,6 +11,7 @@ from common import util, log
 logger = log.get_logger('aug_momentum')
 
 
+@jit
 def clipped_grad(params, l2_norm_clip, single_example_batch, loss):
     """Evaluate gradient for a single-example batch and clip its grad norm."""
     grads = grad(loss)(params, single_example_batch)
@@ -58,6 +59,7 @@ def private_grad(params, batch, rng, velocity, l2_norm_clip, noise_multiplier,
     return tree_unflatten(grads_treedef, normalized_noised_aggregated_clipped_grads), total_grad_norm, total_aug_norms
 
 
+@jit
 def generate_augmult_perturbed_params(params, velocity, mults, augmult):
     # augmult_params = util.tree_stack([params] * augmult)
     # aug_params = vmap(perturb_params_with_momentum, (0, None, 0))(augmult_params, velocity, mults)
@@ -70,7 +72,7 @@ def generate_augmult_perturbed_params(params, velocity, mults, augmult):
 
 
 
-
+@jit
 def perturb_params_with_momentum(params, velocity, mult):
     return tree_map(
         lambda p, v: p + mult * v,
