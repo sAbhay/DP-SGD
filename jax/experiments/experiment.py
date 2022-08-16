@@ -293,8 +293,7 @@ def experiment():
         targets = batch[1][i * split_size:(i + 1) * split_size]
         # logger.info(f"Inputs shape: {inputs.shape}")
         target_class = jnp.argmax(targets, axis=-1)
-        logits = pmap(predict, axis_name='i')(params, inputs)
-        logger.info(f"Logits shape: {logits.shape}")
+        logits = predict(params, inputs)
         predicted_class = jnp.argmax(logits, axis=-1)
         # logits_list = logits.tolist()
         # print(logits_list[0])
