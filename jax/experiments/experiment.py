@@ -337,7 +337,6 @@ def experiment():
                 pmap(partial(aug_momentum.private_grad, l2_norm_clip=l2_norm_clip, noise_multiplier=FLAGS.noise_multiplier,
                              batch_size=FLAGS.batch_size, loss=loss, augmult=FLAGS.augmult, mult_radius=FLAGS.mult_radius), axis_name='i')\
                     (params, batch, rng, velocity)
-            total_grad_norm, total_aug_norms = reshape_device_dim(total_grad_norm, total_aug_norms)
         else:
             raise ValueError("Undefined augmentation type")
         # logger.info(f"Params shape: {cutil.params_shape(params)}")
