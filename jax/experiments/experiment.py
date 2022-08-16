@@ -293,6 +293,7 @@ def experiment():
         loss = hinge_loss
     else:
         raise ValueError("Undefined loss")
+    loss = jit(loss)
 
     # @functools.partial(pmap, axis_name='i', donate_argnums=(0,))
     def accuracy(params, batch, splits=1, split=False):
