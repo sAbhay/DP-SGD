@@ -383,6 +383,7 @@ def experiment():
     param_norms = []
     stats = []
     steps_per_epoch = train_images.shape[0] // FLAGS.batch_size
+    step = 0
     add_params = {'ema': get_params(opt_state), 'polyak': get_params(opt_state)}
     logger.info('Starting training...')
     l2_norm_clip = FLAGS.l2_norm_clip
@@ -410,6 +411,8 @@ def experiment():
           if FLAGS.augmult > 0:
             # logger.info(f"Aug norms list: {total_aug_norms.tolist()}")
             epoch_aug_norms += zip(correct.tolist(), total_aug_norms.tolist())
+          step += 1
+          print(f"Step {step}")
         param_norms.append(float(up.params_norm(get_params(opt_state))))
 
         grad_norms.append(epoch_grad_norms)
