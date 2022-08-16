@@ -55,3 +55,14 @@ def log_memory_usage(logger, handle):
     mem_res = nvidia_smi.nvmlDeviceGetMemoryInfo(handle)
     logger.info(f'GPU usage: {100 * (mem_res.used / mem_res.total):.3f}%')
 
+
+def reshape_device_dim(*args):
+    ret = []
+    for arg in args:
+        if len(arg.shape) > 2:
+            ret.append(arg.reshape(-1, *arg.shape[:2]))
+        elif len(arg.shape) > 0:
+            ret.append(arg.reshape(-1))
+        else:
+            ret.append(arg)
+    return ret
