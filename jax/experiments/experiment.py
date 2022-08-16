@@ -159,6 +159,7 @@ def experiment():
     logger.info("Running Experiment")
     log_memory_usage(logger, handle)
     num_devices = jax.local_device_count()
+    devices = jax.devices()
     logger.info("Found {} devices".format(num_devices))
     assert FLAGS.batch_size % num_devices == 0, "Batch size must be divisible by number of devices"
 
@@ -204,8 +205,8 @@ def experiment():
         # a python list. This is what `jax.pmap` expects as input.
         # superbatch_images = jnp.stack(superbatch_images)
         # superbatch_labels = jnp.stack(superbatch_labels)
-        superbatch_images = jax.device_put_sharded(superbatch_images, num_devices)
-        superbatch_labels = jax.device_put_sharded(superbatch_labels, num_devices)
+        superbatch_images = jax.device_put_sharded(superbatch_images, devices)
+        superbatch_labels = jax.device_put_sharded(superbatch_labels, devices)
         return superbatch_images, superbatch_labels
 
     def split_across_devices(images, labels, num_devices):
