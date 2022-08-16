@@ -5,13 +5,14 @@ from jax import vmap, tree_map
 from jax.tree_util import tree_flatten, tree_unflatten
 import jax.numpy as jnp
 
+from functools import partial
+
 from sys import path as syspath
 syspath.append('../../')
 from common import util, log
 logger = log.get_logger('aug_momentum')
 
 
-@jit
 def clipped_grad(params, l2_norm_clip, single_example_batch, loss):
     """Evaluate gradient for a single-example batch and clip its grad norm."""
     grads = grad(loss)(params, single_example_batch)
@@ -32,7 +33,8 @@ def clipped_grad_single_aug_params(params, l2_norm_clip, batch, loss):
 def private_grad(params, batch, rng, velocity, l2_norm_clip, noise_multiplier,
                  batch_size, loss, augmult, mult_radius):
     """Return differentially private gradients for params, evaluated on batch."""
-    clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0, None))(params, l2_norm_clip, batch, loss)
+    clipped_grad_jit = jit(partial(clipped_grad, loss=loss))
+    clipped_grads, total_grad_norm = vmap(clipped_grad_jit, (None, None, 0, None))(params, l2_norm_clip, batch, loss)
     mults = random.uniform(rng, shape=(augmult-1,), minval=-1, maxval=1) * mult_radius
 
     # aug_params = generate_augmult_perturbed_params(params, velocity, mults, augmult-1)
