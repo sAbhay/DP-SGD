@@ -225,10 +225,10 @@ def experiment():
         if flatten_augmult:
             if augmult > 0 and aug_type == 'data':
                 # logger.info(f"Preshaped labels shape: {labels.shape}")
-                labels = jnp.reshape(labels, (num_devices, -1, labels.shape[-1]))
+                labels = jnp.reshape(labels, (num_devices, -1, *labels.shape[2:]))
         elif augmult > 0 and aug_type == 'data':
             target_shape = (num_devices, -1, augmult, 1, *image_shape) if dummy_dim else (num_devices, -1, augmult, *image_shape)
-        return jnp.reshape(images, target_shape), jnp.reshape(labels, (num_devices, -1, *labels.shape[2:]))
+        return jnp.reshape(images, target_shape), jnp.reshape(labels, (num_devices, -1, labels.shape[-1]))
 
     if FLAGS.dpsgd and FLAGS.aug_type == 'data' and FLAGS.augmult > 0:
         batches = data_stream(aug_train_images, aug_train_labels)
