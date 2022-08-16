@@ -167,10 +167,10 @@ def experiment():
         )
 
     train_images, train_labels, test_images, test_labels = datasets.data(name=FLAGS.dataset)
-    train_images = train_images[:512]
-    train_labels = train_labels[:512]
-    test_images = test_images[:500]
-    test_labels = test_labels[:500]
+    train_images = train_images[:10000]
+    train_labels = train_labels[:10000]
+    test_images = test_images[:2000]
+    test_labels = test_labels[:2000]
     logger.info(f"Train set shape: {train_images.shape}, {train_labels.shape}")
     log_memory_usage(logger, handle)
     if FLAGS.dpsgd and FLAGS.aug_type == 'data' and FLAGS.augmult > 0:
