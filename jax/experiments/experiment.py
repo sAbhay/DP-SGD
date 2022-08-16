@@ -300,7 +300,6 @@ def experiment():
       for i in range(splits):
         inputs = batch[0][i * split_size:(i + 1) * split_size]
         targets = batch[1][i * split_size:(i + 1) * split_size]
-        inputs, targets = split_across_devices(inputs, targets, num_devices)
         # logger.info(f"Inputs shape: {inputs.shape}")
         target_class = jnp.argmax(targets, axis=-1)
         logits = pmap(predict, axis_name='i')(params, inputs)
