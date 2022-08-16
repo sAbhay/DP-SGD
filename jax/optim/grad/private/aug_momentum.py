@@ -33,7 +33,7 @@ def clipped_grad_single_aug_params(params, l2_norm_clip, batch, loss):
 def private_grad(params, batch, rng, velocity, l2_norm_clip, noise_multiplier,
                  batch_size, loss, augmult, mult_radius):
     """Return differentially private gradients for params, evaluated on batch."""
-    clipped_grads, total_grad_norm = vmap(clipped_grad_jit, (None, None, 0))(params, l2_norm_clip, batch)
+    clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0, None))(params, l2_norm_clip, batch, loss)
     mults = random.uniform(rng, shape=(augmult-1,), minval=-1, maxval=1) * mult_radius
 
     # aug_params = generate_augmult_perturbed_params(params, velocity, mults, augmult-1)
@@ -60,7 +60,6 @@ def private_grad(params, batch, rng, velocity, l2_norm_clip, noise_multiplier,
     return tree_unflatten(grads_treedef, normalized_noised_aggregated_clipped_grads), total_grad_norm, total_aug_norms
 
 
-@jit
 def generate_augmult_perturbed_params(params, velocity, mults, augmult):
     # augmult_params = util.tree_stack([params] * augmult)
     # aug_params = vmap(perturb_params_with_momentum, (0, None, 0))(augmult_params, velocity, mults)
@@ -73,7 +72,6 @@ def generate_augmult_perturbed_params(params, velocity, mults, augmult):
 
 
 
-@jit
 def perturb_params_with_momentum(params, velocity, mult):
     return tree_map(
         lambda p, v: p + mult * v,
