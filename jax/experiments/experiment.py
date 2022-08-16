@@ -256,7 +256,7 @@ def experiment():
 
     init_batch = (jnp.zeros((FLAGS.batch_size // num_devices, *datasets.IMAGE_SHAPE[FLAGS.dataset])), jnp.zeros(train_labels[0:FLAGS.batch_size//num_devices].shape))[0]
     # init_batch = shape_as_image(*dummy_batch, dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True)[0]
-    logger.info(f"Init batch shape: {init_batch.shape}")
+    logger.info(f"Init batch shape: {(init_batch[0].shape, init_batch[1].shape)}")
     init_args = [init_batch]
     if FLAGS.model == "wideresnet":
         init_args.append(True)
@@ -400,7 +400,7 @@ def experiment():
         epoch_aug_norms = []
         for _ in range(num_batches):
           next_batch = next(batches)
-          logger.info(f"Batch shape: {(next_batch[0].shape, next_batch[1].shape)}")
+          logger.info(f"Batch shape: {next_batch.shape}")
           # next_batch = make_superbatch(batches)
           if FLAGS.dpsgd:
             opt_state, total_grad_norm, total_aug_norms = private_update(
