@@ -213,9 +213,9 @@ def experiment():
         """Splits the data across devices."""
         # Split the data across devices.
         assert images.shape[0] % num_devices == 0
-        split_images = jnp.stack(jnp.split(images, num_devices))
+        split_images = images.reshape((num_devices, -1, *images.shape[2:]))
         logger.info(f"Split images shape: {split_images.shape}")
-        split_labels = jnp.stack(jnp.split(labels, num_devices))
+        split_labels = labels.reshape((num_devices, -1, *labels.shape[2:]))
         return split_images, split_labels
 
     def shape_as_image(images, labels, dataset=FLAGS.dataset, dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True, aug_type=FLAGS.aug_type):
