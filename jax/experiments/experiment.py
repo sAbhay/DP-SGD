@@ -69,7 +69,7 @@ Example invocations:
 
 # TODO: set up log debugging
 # TODO: add virtual gradient accumulation
-import functools
+
 from sys import path as syspath
 
 syspath.append('../')
@@ -85,8 +85,6 @@ from jax import random
 from jax import nn
 import jax.numpy as jnp
 import haiku as hk
-import jax
-from jax import pmap
 
 import numpy.random as npr
 
@@ -157,8 +155,6 @@ flags.DEFINE_boolean('adaptive_norm_clip', False, 'Adaptive l2 norm clip')
 def experiment():
     logger.info("Running Experiment")
     log_memory_usage(logger, handle)
-    num_devices = jax.local_device_count()
-    logger.info("Found {} devices".format(num_devices))
 
     if FLAGS.microbatches:
         raise NotImplementedError(
@@ -193,18 +189,6 @@ def experiment():
                 batch_idx = perm[i * FLAGS.batch_size:(i + 1) * FLAGS.batch_size]
                 yield train_images[batch_idx], train_labels[batch_idx]
 
-    def make_superbatch(input_dataset):
-        """Constructs a superbatch, i.e. one batch of data per device."""
-        # Get N batches, then split into list-of-images and list-of-labels.
-        superbatch = [next(input_dataset) for _ in range(num_devices)]
-        superbatch_images, superbatch_labels = zip(*superbatch)
-        # Stack the superbatches to be one array with a leading dimension, rather than
-        # a python list. This is what `jax.pmap` expects as input.
-        superbatch_images = jnp.stack(superbatch_images)
-        superbatch_labels = jnp.stack(superbatch_labels)
-        return superbatch_images, superbatch_labels
-
-    @functools.partial(pmap, axis_name='i')
     def shape_as_image(images, labels, dataset=FLAGS.dataset, dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True, aug_type=FLAGS.aug_type):
         # logger.info(f"Preshaped images shape: {images.shape}")
         image_shape = datasets.IMAGE_SHAPE[dataset]
@@ -249,9 +233,9 @@ def experiment():
 
     def predict(params, inputs):
         if FLAGS.model == "cnn":
-            predictions = pmap(model.apply, axis_name='i')(params, None, inputs)
+            predictions = model.apply(params, None, inputs)
         elif FLAGS.model == "wideresnet" or FLAGS.model == "wideresnet2":
-            predictions = pmap(model.apply, axis_name='i')(params, None, inputs)
+            predictions = model.apply(params, None, inputs)
         else:
             return ValueError(f"Unknown model: {FLAGS.model}")
         return predictions
@@ -281,7 +265,6 @@ def experiment():
     else:
         raise ValueError("Undefined loss")
 
-    @functools.partial(pmap, axis_name='i', donate_argnums=(0,))
     def accuracy(params, batch, splits=1):
       acc = 0
       correct = []
@@ -314,7 +297,7 @@ def experiment():
             opt_state = set_params(avg_params, opt_state)
         return opt_state, total_grad_norm
 
-    @functools.partial(pmap, axis_name='i', donate_argnums=(0,))
+    @jit
     def private_update(rng, i, opt_state, batch, add_params, l2_norm_clip=FLAGS.l2_norm_clip):
         params = get_params(opt_state)
         rng = random.fold_in(rng, i)  # get new key for new random numbers
@@ -339,7 +322,6 @@ def experiment():
                                                                                    FLAGS.mult_radius)
         else:
             raise ValueError("Undefined augmentation type")
-        private_grads = jax.lax.pmean(private_grads, axis='i')
         opt_state = opt_update(
             i, private_grads, opt_state)
         if FLAGS.param_averaging:
@@ -351,7 +333,6 @@ def experiment():
     # _, init_params = init_random_params(key, (-1, 28, 28, 1))
     # logger.info("Model init params: {}".format(init_params))
     up.params_norm(init_params)
-    init_params = jax.tree_util.tree_map(lambda x: jnp.stack([x] * num_devices), init_params)
     opt_state = opt_init(init_params)
     itercount = itertools.count()
 
@@ -368,9 +349,8 @@ def experiment():
         start_time = time.time()
         epoch_grad_norms = []
         epoch_aug_norms = []
-        for _ in range(num_batches // num_devices):
-          # next_batch = next(batches)
-          next_batch = make_superbatch(batches)
+        for _ in range(num_batches):
+          next_batch = next(batches)
           if FLAGS.dpsgd:
             opt_state, total_grad_norm, total_aug_norms = private_update(
                 key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params, l2_norm_clip)
