@@ -225,7 +225,7 @@ def experiment():
         if flatten_augmult:
             if augmult > 0 and aug_type == 'data':
                 # logger.info(f"Preshaped labels shape: {labels.shape}")
-                labels = jnp.reshape(labels, (num_devices, -1, labels.shape[-1]))
+                labels = jnp.reshape(labels, (num_devices, -1, *labels.shape[2:]))
         elif augmult > 0 and aug_type == 'data':
             target_shape = (num_devices, -1, augmult, 1, *image_shape) if dummy_dim else (num_devices, -1, augmult, *image_shape)
         return jnp.reshape(images, target_shape), jnp.reshape(labels, (num_devices, -1, *labels.shape[2:]))
@@ -302,8 +302,8 @@ def experiment():
       split_size = int(batch[0].shape[1] / splits)
       assert (batch[0].shape[1] % splits) == 0, f"{batch[0].shape[1]} % {splits} != 0"
       for i in range(splits):
-        # logger.info("images shape: {}".format(batch[0].shape))
-        # logger.info("labels shape: {}".format(batch[1].shape))
+        logger.info("images shape: {}".format(batch[0].shape))
+        logger.info("labels shape: {}".format(batch[1].shape))
         inputs = batch[0][:, i * split_size:(i + 1) * split_size, :, :, :]
         targets = batch[1][:, i * split_size:(i + 1) * split_size]
         if split:
@@ -427,7 +427,7 @@ def experiment():
 
         # evaluate test accuracy
         params = get_params(opt_state)
-        # logger.info("Test labels shape: {}".format(test_labels.shape))
+        logger.info("Test labels shape: {}".format(test_labels.shape))
         test_acc, _, _ = accuracy(params, shape_as_image(test_images, test_labels, augmult=0), splits=5)
         test_loss = loss(params, shape_as_image(test_images, test_labels, augmult=0))
         logger.info('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
