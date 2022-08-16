@@ -351,9 +351,9 @@ def experiment():
     # logger.info("Model init params: {}".format(init_params))
     up.params_norm(init_params)
     init_params = jax.tree_util.tree_map(lambda x: jnp.stack([x] * num_devices), init_params)
-    logger.info("Model init params shape: {}".format(cutil.params_shape(init_params)))
+    # logger.info("Model init params shape: {}".format(cutil.params_shape(init_params)))
     opt_state = opt_init(init_params)
-    logger.info("Model params shape: {}".format(cutil.params_shape(get_params(opt_state))))
+    # logger.info("Model params shape: {}".format(cutil.params_shape(get_params(opt_state))))
     itercount = itertools.count()
 
     epoch_average_grad_norm = 0
@@ -397,12 +397,12 @@ def experiment():
 
         # evaluate test accuracy
         params = get_params(opt_state)
-        test_acc, _, _ = accuracy(params, shape_as_image(test_images, test_labels, augmult=0), splits=5)
+        test_acc, _, _ = pmap(partial(accuracy, splits=5))(params, shape_as_image(test_images, test_labels, augmult=0), axis_name='i')
         test_loss = loss(params, shape_as_image(test_images, test_labels, augmult=0))
         logger.info('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             test_loss, 100 * test_acc))
         # log_memory_usage(logger, handle)
-        train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels, augmult=0), splits=5)
+        train_acc, _, _ = pmap(partial(accuracy, splits=5))(params, shape_as_image(train_images, train_labels, augmult=0), axis_name='i')
         # train_loss = loss(params, shape_as_image(train_images, train_labels, augmult=0))
         train_loss = test_loss
         logger.info('Train set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
