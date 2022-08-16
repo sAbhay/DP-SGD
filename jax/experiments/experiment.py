@@ -300,7 +300,7 @@ def experiment():
       correct = []
       all_logits = []
       split_size = int(batch[0].shape[0] / splits)
-      assert (batch[0].shape[0] % splits) == 0, f"{batch[0].shape[0]} % {splits} != 0"
+      assert (batch[0].shape[0] % splits) == 0
       for i in range(splits):
         inputs = batch[0][i * split_size:(i + 1) * split_size]
         targets = batch[1][i * split_size:(i + 1) * split_size]
