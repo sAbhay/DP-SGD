@@ -400,30 +400,22 @@ def experiment():
         epoch_grad_norms = []
         epoch_aug_norms = []
         for _ in range(num_batches):
-          t = time.time()
           next_batch = next(batches)
-          logger.info("Batch time: {}".format(time.time() - t))
           # logger.info(f"Batch shape: {(next_batch[0].shape, next_batch[1].shape)}")
           # next_batch = make_superbatch(batches)
-          t = time.time()
           if FLAGS.dpsgd:
             opt_state, total_grad_norm, total_aug_norms = private_update(
                 key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params, l2_norm_clip)
             total_grad_norm = total_grad_norm.reshape((-1,))
             total_aug_norms = total_aug_norms.reshape((FLAGS.augmult, -1))
-            logger.info(f"Grad time: {time.time() - t}")
           else:
             opt_state, total_grad_norm = update(
                 key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
-          t = time.time()
           acc, correct, logits = accuracy(get_params(opt_state), shape_as_image(*next_batch, augmult=FLAGS.augmult, flatten_augmult=True))
-          logger.info(f"Accuracy time: {time.time() - t}")
-          t = time.time()
           correct = correct.reshape((-1,))
           logits = logits.reshape((-1, NUM_CLASSES))
           epoch_grad_norms += zip(total_grad_norm.tolist(), correct.tolist(), logits.tolist())
           epoch_average_grad_norm += sum(total_grad_norm.tolist())
-          logger.info(f"To lists time: {time.time() - t}")
 
           if FLAGS.augmult > 0:
             # logger.info(f"Aug norms list: {total_aug_norms.tolist()}")
