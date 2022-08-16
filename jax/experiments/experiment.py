@@ -69,7 +69,7 @@ Example invocations:
 
 # TODO: set up log debugging
 # TODO: add virtual gradient accumulation
-import functools
+from functools import partial
 from sys import path as syspath
 
 syspath.append('../')
@@ -100,6 +100,7 @@ from optim.grad import non_private as np_grad
 from optim.grad.private import private, aug_data, aug_momentum
 from optim import update as up
 from common import averaging
+from common import util as cutil
 
 from absl import app
 from absl import flags
@@ -331,12 +332,10 @@ def experiment():
                                                                                    loss)
         elif FLAGS.aug_type == "momentum":
             velocity = get_velocity(opt_state)
-            private_grads, total_grad_norm, total_aug_norms = pmap(aug_momentum.private_grad, axis_name='i')(params, batch, rng,
-                                                                                   l2_norm_clip,
-                                                                                   FLAGS.noise_multiplier,
-                                                                                   FLAGS.batch_size,
-                                                                                   loss, FLAGS.augmult, velocity,
-                                                                                   FLAGS.mult_radius)
+            private_grads, total_grad_norm, total_aug_norms = \
+                pmap(partial(aug_momentum.private_grad, l2_norm_clip=l2_norm_clip, noise_multiplier=FLAGS.noise_multiplier,
+                             batch_size=FLAGS.batch_size, loss=loss, augmult=FLAGS.augmult, mult_radius=FLAGS.mult_radius), axis_name='i')\
+                    (params, batch, rng, velocity)
         else:
             raise ValueError("Undefined augmentation type")
         private_grads = jax.lax.pmean(private_grads, axis_name='i')
@@ -352,7 +351,9 @@ def experiment():
     # logger.info("Model init params: {}".format(init_params))
     up.params_norm(init_params)
     init_params = jax.tree_util.tree_map(lambda x: jnp.stack([x] * num_devices), init_params)
+    logger.info("Model init params shape: {}".format(cutil.params_shape(init_params)))
     opt_state = opt_init(init_params)
+    logger.info("Model params shape: {}".format(cutil.params_shape(get_params(opt_state))))
     itercount = itertools.count()
 
     epoch_average_grad_norm = 0
