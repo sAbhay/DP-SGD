@@ -189,7 +189,6 @@ def experiment():
     key = random.PRNGKey(FLAGS.seed)
     train_images, train_labels = shard.shard_dataset(train_images, train_labels, devices)
     test_images, test_labels = shard.shard_dataset(test_images, test_labels, devices)
-    NUM_CLASSES = train_labels.shape[1]
 
     def data_stream(train_images, train_labels):
         rng = npr.RandomState(FLAGS.seed)
@@ -413,7 +412,7 @@ def experiment():
                 key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
           acc, correct, logits = accuracy(get_params(opt_state), shape_as_image(*next_batch, augmult=FLAGS.augmult, flatten_augmult=True))
           correct = correct.reshape((-1,))
-          logits = logits.reshape((-1, NUM_CLASSES))
+          logits = logits.reshape((-1, train_labels.shape[1]))
           epoch_grad_norms += zip(total_grad_norm.tolist(), correct.tolist(), logits.tolist())
           epoch_average_grad_norm += sum(total_grad_norm.tolist())
 
