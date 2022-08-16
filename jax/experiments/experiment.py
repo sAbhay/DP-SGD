@@ -415,7 +415,7 @@ def experiment():
             # logger.info(f"Aug norms list: {total_aug_norms.tolist()}")
             epoch_aug_norms += zip(correct.tolist(), total_aug_norms.tolist())
           step += 1
-          logger.info(f"Step {step}")
+          # print(f"Step {step}")
         param_norms.append(float(up.params_norm(get_params(opt_state))))
 
         grad_norms.append(epoch_grad_norms)
