@@ -271,9 +271,12 @@ def experiment():
 
     # jconfig.update('jax_platform_name', 'cpu')
 
-    def ce_loss(params, batch):
+    def ce_loss(params, batch, parallel=False):
       inputs, targets = batch
-      logits = predict(params, inputs)
+      if not parallel:
+        logits = predict(params, inputs)
+      else:
+        logits = pmap(predict, axis_name='i')(params, inputs)
       logits = nn.log_softmax(logits, axis=-1)  # log normalize
       return -jnp.mean(jnp.mean(jnp.sum(logits * targets, axis=-1), axis=0))  # cross entropy loss
 
@@ -429,7 +432,7 @@ def experiment():
         params = get_params(opt_state)
         # logger.info("Test labels shape: {}".format(test_labels.shape))
         test_acc, _, _ = accuracy(params, shape_as_image(test_images, test_labels, augmult=0), splits=5)
-        test_loss = loss(params, shape_as_image(test_images, test_labels, augmult=0))
+        test_loss = loss(params, shape_as_image(test_images, test_labels, augmult=0), parallel=True)
         logger.info('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             test_loss, 100 * test_acc))
         # log_memory_usage(logger, handle)
