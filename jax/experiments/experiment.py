@@ -189,7 +189,7 @@ def experiment():
     key = random.PRNGKey(FLAGS.seed)
     train_images, train_labels = shard.shard_dataset(train_images, train_labels, devices)
     test_images, test_labels = shard.shard_dataset(test_images, test_labels, devices)
-    NUM_CLASSES = train_labels.shape[1]
+    NUM_CLASSES = 10
 
     def data_stream(train_images, train_labels):
         rng = npr.RandomState(FLAGS.seed)
