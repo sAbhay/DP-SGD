@@ -105,7 +105,7 @@ from common import util as cutil
 from absl import app
 from absl import flags
 
-from util import plot_results, checkpoint, get_hyperparameter_string, log_memory_usage, reshape_device_dim
+from util import plot_results, checkpoint, get_hyperparameter_string, log_memory_usage
 
 FLAGS = flags.FLAGS
 
@@ -382,7 +382,7 @@ def experiment():
           else:
             opt_state, total_grad_norm = update(
                 key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
-          acc, correct, logits = reshape_device_dim(*accuracy(get_params(opt_state), shape_as_image(*next_batch, augmult=FLAGS.augmult, flatten_augmult=True)))
+          acc, correct, logits = accuracy(get_params(opt_state), shape_as_image(*next_batch, augmult=FLAGS.augmult, flatten_augmult=True))
           epoch_grad_norms += zip(total_grad_norm.tolist(), correct.tolist(), logits.tolist())
           epoch_average_grad_norm += sum(total_grad_norm.tolist())
 
@@ -401,12 +401,12 @@ def experiment():
 
         # evaluate test accuracy
         params = get_params(opt_state)
-        test_acc, _, _ = reshape_device_dim(*accuracy(params, shape_as_image(test_images, test_labels, augmult=0), splits=5))
+        test_acc, _, _ = pmap(partial(accuracy, splits=5))(params, shape_as_image(test_images, test_labels, augmult=0), axis_name='i')
         test_loss = loss(params, shape_as_image(test_images, test_labels, augmult=0))
         logger.info('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             test_loss, 100 * test_acc))
         # log_memory_usage(logger, handle)
-        train_acc, _, _ = reshape_device_dim(*accuracy(params, shape_as_image(train_images, train_labels, augmult=0), splits=5))
+        train_acc, _, _ = pmap(partial(accuracy, splits=5))(params, shape_as_image(train_images, train_labels, augmult=0), axis_name='i')
         # train_loss = loss(params, shape_as_image(train_images, train_labels, augmult=0))
         train_loss = test_loss
         logger.info('Train set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
