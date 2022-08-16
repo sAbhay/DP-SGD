@@ -205,14 +205,6 @@ def experiment():
         superbatch_labels = jnp.stack(superbatch_labels)
         return superbatch_images, superbatch_labels
 
-    def split_across_devices(images, labels, num_devices):
-        """Splits the data across devices."""
-        # Split the data across devices.
-        assert images.shape[0] % num_devices == 0
-        split_images, split_labels = jax.lax.dynamic_partition(
-            data_stream(train_images, train_labels), num_devices)
-        return split_images, split_labels
-
     def shape_as_image(images, labels, dataset=FLAGS.dataset, dummy_dim=False, augmult=FLAGS.augmult, flatten_augmult=True, aug_type=FLAGS.aug_type):
         # logger.info(f"Preshaped images shape: {images.shape}")
         image_shape = datasets.IMAGE_SHAPE[dataset]
@@ -396,7 +388,7 @@ def experiment():
                 key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
           acc, correct, logits = accuracy(get_params(opt_state), shape_as_image(*next_batch, augmult=FLAGS.augmult, flatten_augmult=True))
           correct = correct.reshape((-1,))
-          logits = logits.reshape((-1, train_labels.shape[1]))
+          logits = logits.reshape((-1, FLAGS.num_classes))
           epoch_grad_norms += zip(total_grad_norm.tolist(), correct.tolist(), logits.tolist())
           epoch_average_grad_norm += sum(total_grad_norm.tolist())
 
