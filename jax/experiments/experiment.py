@@ -294,7 +294,7 @@ def experiment():
         # logger.info(f"Inputs shape: {inputs.shape}")
         target_class = jnp.argmax(targets, axis=-1)
         logits = pmap(predict, axis_name='i')(params, inputs)
-        # logger.info(f"Logits shape: {logits.shape}")
+        logger.info(f"Logits shape: {logits.shape}")
         predicted_class = jnp.argmax(logits, axis=-1)
         # logits_list = logits.tolist()
         # print(logits_list[0])
@@ -386,8 +386,7 @@ def experiment():
           else:
             opt_state, total_grad_norm = update(
                 key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
-          acc, correct, logits = reshape_device_dim(*accuracy(get_params(opt_state), shape_as_image(*next_batch, augmult=FLAGS.augmult, flatten_augmult=True)))
-          logger.info(f"total grad norm shape: {total_grad_norm.shape}")
+          acc, correct, logits = accuracy(get_params(opt_state), shape_as_image(*next_batch, augmult=FLAGS.augmult, flatten_augmult=True))
           logger.info(f"acc shape: {acc.shape}")
           logger.info(f"correct shape: {correct.shape}")
           logger.info(f"logits shape: {logits.shape}")
