@@ -202,10 +202,8 @@ def experiment():
         superbatch_images, superbatch_labels = zip(*superbatch)
         # Stack the superbatches to be one array with a leading dimension, rather than
         # a python list. This is what `jax.pmap` expects as input.
-        # superbatch_images = jnp.stack(superbatch_images)
-        # superbatch_labels = jnp.stack(superbatch_labels)
-        superbatch_images = jax.device_put_sharded(superbatch_images, num_devices)
-        superbatch_labels = jax.device_put_sharded(superbatch_labels, num_devices)
+        superbatch_images = jnp.stack(superbatch_images)
+        superbatch_labels = jnp.stack(superbatch_labels)
         return superbatch_images, superbatch_labels
 
     def split_across_devices(images, labels, num_devices):
@@ -375,7 +373,7 @@ def experiment():
     # _, init_params = init_random_params(key, (-1, 28, 28, 1))
     # logger.info("Model init params: {}".format(init_params))
     up.params_norm(init_params)
-    init_params = jax.tree_util.tree_map(lambda x: jnp.stack([x] * num_devices), init_params)
+    # init_params = jax.tree_util.tree_map(lambda x: jnp.stack([x] * num_devices), init_params)
     # logger.info("Model init params shape: {}".format(cutil.params_shape(init_params)))
     opt_state = opt_init(init_params)
     # logger.info("Model params shape: {}".format(cutil.params_shape(get_params(opt_state))))
