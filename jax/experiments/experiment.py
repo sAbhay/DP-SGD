@@ -295,7 +295,7 @@ def experiment():
         raise ValueError("Undefined loss")
 
     # @functools.partial(pmap, axis_name='i', donate_argnums=(0,))
-    def accuracy(params, batch, splits=1):
+    def accuracy(params, batch, splits=1, split=False):
       acc = 0
       correct = []
       all_logits = []
@@ -304,7 +304,8 @@ def experiment():
       for i in range(splits):
         inputs = batch[0][i * split_size:(i + 1) * split_size]
         targets = batch[1][i * split_size:(i + 1) * split_size]
-        inputs, targets = split_across_devices(inputs, targets, num_devices)
+        if split:
+            inputs, targets = split_across_devices(inputs, targets, num_devices)
         # logger.info(f"Inputs shape: {inputs.shape}")
         target_class = jnp.argmax(targets, axis=-1)
         logits = pmap(predict, axis_name='i')(params, inputs)
@@ -421,12 +422,12 @@ def experiment():
 
         # evaluate test accuracy
         params = get_params(opt_state)
-        test_acc, _, _ = accuracy(params, shape_as_image(test_images, test_labels, augmult=0), splits=5)
+        test_acc, _, _ = accuracy(params, shape_as_image(test_images, test_labels, augmult=0), splits=5, split=True)
         test_loss = loss(params, shape_as_image(test_images, test_labels, augmult=0))
         logger.info('Test set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
             test_loss, 100 * test_acc))
         # log_memory_usage(logger, handle)
-        train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels, augmult=0), splits=5)
+        train_acc, _, _ = accuracy(params, shape_as_image(train_images, train_labels, augmult=0), splits=5, split=True)
         # train_loss = loss(params, shape_as_image(train_images, train_labels, augmult=0))
         train_loss = test_loss
         logger.info('Train set loss, accuracy (%): ({:.2f}, {:.2f})'.format(
