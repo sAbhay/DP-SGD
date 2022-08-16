@@ -317,21 +317,20 @@ def experiment():
     def private_update(rng, i, opt_state, batch, add_params, l2_norm_clip=FLAGS.l2_norm_clip):
         params = get_params(opt_state)
         rng = random.fold_in(rng, i)  # get new key for new random numbers
-        rng = jnp.broadcast_to(rng, (num_devices,) + rng.shape)
         if FLAGS.augmult <= 0:
-            private_grads, total_grad_norm = pmap(private.private_grad, in_axis='i')(params, batch, rng, l2_norm_clip,
+            private_grads, total_grad_norm = pmap(private.private_grad, axis='i')(params, batch, rng, l2_norm_clip,
                                                                            FLAGS.noise_multiplier, FLAGS.batch_size,
                                                                            loss)
             total_aug_norms = None
         elif FLAGS.aug_type == "data":
-            private_grads, total_grad_norm, total_aug_norms = pmap(aug_data.private_grad, in_axis='i')(params, batch, rng,
+            private_grads, total_grad_norm, total_aug_norms = pmap(aug_data.private_grad, axis='i')(params, batch, rng,
                                                                                    l2_norm_clip,
                                                                                    FLAGS.noise_multiplier,
                                                                                    FLAGS.batch_size,
                                                                                    loss)
         elif FLAGS.aug_type == "momentum":
             velocity = get_velocity(opt_state)
-            private_grads, total_grad_norm, total_aug_norms = pmap(aug_momentum.private_grad, in_axis='i')(params, batch, rng,
+            private_grads, total_grad_norm, total_aug_norms = pmap(aug_momentum.private_grad, axis='i')(params, batch, rng,
                                                                                    l2_norm_clip,
                                                                                    FLAGS.noise_multiplier,
                                                                                    FLAGS.batch_size,
