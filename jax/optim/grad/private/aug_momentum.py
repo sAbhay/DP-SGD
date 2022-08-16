@@ -25,7 +25,7 @@ def clipped_grad(params, l2_norm_clip, single_example_batch, loss):
 
 
 def clipped_grad_single_aug_params(params, l2_norm_clip, batch, loss):
-    clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0))(params, l2_norm_clip, batch, loss)
+    clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0, None))(params, l2_norm_clip, batch, loss)
     logger.info("Total grad norm shape: {}".format(total_grad_norm.shape))
     return clipped_grads, total_grad_norm
 
