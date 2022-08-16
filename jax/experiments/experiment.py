@@ -393,7 +393,7 @@ def experiment():
         start_time = time.time()
         epoch_grad_norms = []
         epoch_aug_norms = []
-        for _ in range(num_batches // num_devices):
+        for _ in range(num_batches):
           # next_batch = next(batches)
           next_batch = make_superbatch(batches)
           if FLAGS.dpsgd:
