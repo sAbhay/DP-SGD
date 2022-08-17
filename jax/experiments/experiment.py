@@ -342,9 +342,7 @@ def experiment():
     @jit
     def comp_private_grads(rng, i, opt_state, batch, l2_norm_clip=FLAGS.l2_norm_clip):
         params = get_params(opt_state)
-        rng = random.fold_in(rng, i)  # get new key for new random numbers
         t_t = time.time()
-        rng = jnp.broadcast_to(rng, (num_devices,) + rng.shape)
         logger.info(f"Time to broadcast rng: {time.time() - t_t}")
         if FLAGS.augmult <= 0:
             t_t = time.time()
@@ -432,7 +430,10 @@ def experiment():
           # next_batch = make_superbatch(batches)
           t = time.time()
           if FLAGS.dpsgd:
-            opt_state, total_grad_norm, total_aug_norms = pmap(partial(private_update, l2_norm_clip=l2_norm_clip, rng=key, i=next(itercount)), axis_name='i')(opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
+            i = next(itercount)
+            rng = random.fold_in(rng, i)  # get new key for new random numbers
+            rng = jnp.broadcast_to(rng, (num_devices,) + rng.shape)
+            opt_state, total_grad_norm, total_aug_norms = pmap(partial(private_update, l2_norm_clip=l2_norm_clip, i=i), axis_name='i')(rng, opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
             total_grad_norm = total_grad_norm.reshape((-1,))
             if FLAGS.augmult > 0:
                 total_aug_norms = total_aug_norms.reshape((FLAGS.augmult, -1))
