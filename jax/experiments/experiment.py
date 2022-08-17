@@ -425,19 +425,19 @@ def experiment():
           else:
             opt_state, total_grad_norm = update(
                 key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
-          t = time.time()
-          acc, correct, logits = accuracy(get_params(opt_state), shape_as_image(*next_batch, augmult=FLAGS.augmult, flatten_augmult=True))
-          logger.info(f"Accuracy time: {time.time() - t}")
-          t = time.time()
-          correct = correct.reshape((-1,))
-          logits = logits.reshape((-1, NUM_CLASSES))
-          epoch_grad_norms += zip(total_grad_norm.tolist(), correct.tolist(), logits.tolist())
-          epoch_average_grad_norm += sum(total_grad_norm.tolist())
-          logger.info(f"To lists time: {time.time() - t}")
-
-          if FLAGS.augmult > 0:
-            # logger.info(f"Aug norms list: {total_aug_norms.tolist()}")
-            epoch_aug_norms += zip(correct.tolist(), total_aug_norms.tolist())
+          # t = time.time()
+          # acc, correct, logits = accuracy(get_params(opt_state), shape_as_image(*next_batch, augmult=FLAGS.augmult, flatten_augmult=True))
+          # logger.info(f"Accuracy time: {time.time() - t}")
+          # t = time.time()
+          # correct = correct.reshape((-1,))
+          # logits = logits.reshape((-1, NUM_CLASSES))
+          # epoch_grad_norms += zip(total_grad_norm.tolist(), correct.tolist(), logits.tolist())
+          # epoch_average_grad_norm += sum(total_grad_norm.tolist())
+          # logger.info(f"To lists time: {time.time() - t}")
+          #
+          # if FLAGS.augmult > 0:
+          #   # logger.info(f"Aug norms list: {total_aug_norms.tolist()}")
+          #   epoch_aug_norms += zip(correct.tolist(), total_aug_norms.tolist())
           step += 1
           logger.info(f"Step {step}")
         param_norms.append(float(up.params_norm(get_params(opt_state))))
