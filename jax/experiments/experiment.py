@@ -391,7 +391,7 @@ def experiment():
         logger.info(f"Time to average params: {time.time() - t_t}")
         return opt_state, total_grad_norm, total_aug_norms
 
-    def private_update(rng, i, opt_state, batch, add_params, l2_norm_clip=FLAGS.l2_norm_clip):
+    def private_update(rng, opt_state, batch, add_params, i, l2_norm_clip=FLAGS.l2_norm_clip):
         private_grads, total_grad_norm, total_aug_norms = comp_private_grads(rng, i, opt_state, batch, l2_norm_clip)
         t_t = time.time()
         private_grads = pmap(lambda x: jax.lax.pmean(x, axis_name='i'), axis_name='i')(private_grads)
