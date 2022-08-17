@@ -389,7 +389,7 @@ def experiment():
             avg_params = average_params(params, add_params, i)
             opt_state = set_params(avg_params, opt_state)
         logger.info(f"Time to average params: {time.time() - t_t}")
-        return opt_state, total_grad_norm, total_aug_norms
+        return opt_state
 
     def private_update(rng, opt_state, batch, add_params, i, l2_norm_clip=FLAGS.l2_norm_clip):
         rng = random.fold_in(rng, i)  # get new key for new random numbers
@@ -398,7 +398,7 @@ def experiment():
         t_t = time.time()
         private_grads = pmap(lambda x: jax.lax.pmean(x, axis_name='i'), axis_name='i')(private_grads)
         logger.info(f"Time to pmean: {time.time() - t_t}")
-        opt_state, total_grad_norm, total_aug_norms = pmap(partial(update_params, i=i), axis_name='i')(private_grads, add_params, opt_state)
+        opt_state = pmap(partial(update_params, i=i), axis_name='i')(private_grads, add_params, opt_state)
         return opt_state, total_grad_norm, total_aug_norms
 
     # _, init_params = init_random_params(key, (-1, 28, 28, 1))
