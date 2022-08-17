@@ -358,10 +358,14 @@ def experiment():
                                                                                    loss)
         elif FLAGS.aug_type == "momentum":
             velocity = get_velocity(opt_state)
-            private_grads, total_grad_norm, total_aug_norms = \
-                pmap(partial(aug_momentum.private_grad, l2_norm_clip=l2_norm_clip, noise_multiplier=FLAGS.noise_multiplier,
-                             batch_size=FLAGS.batch_size, loss=loss, augmult=FLAGS.augmult, mult_radius=FLAGS.mult_radius), axis_name='i')\
-                    (params, batch, rng, velocity)
+            t_t = time.time()
+            f = partial(aug_momentum.private_grad, l2_norm_clip=l2_norm_clip, noise_multiplier=FLAGS.noise_multiplier,
+                         batch_size=FLAGS.batch_size, loss=loss, augmult=FLAGS.augmult, mult_radius=FLAGS.mult_radius)
+            logger.info(f"Time to partial: {time.time() - t_t}")
+            t_t = time.time()
+            private_grads, total_grad_norm, total_aug_norms = pmap(f, axis_name='i')\
+                (params, batch, rng, velocity)
+            logger.info(f"Time to pmap: {time.time() - t_t}")
             # logger.info(f"Grad norm shape: {total_grad_norm.shape}")
             # logger.info(f"Aug norm shape: {total_aug_norms.shape}")
         else:
