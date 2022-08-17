@@ -432,7 +432,7 @@ def experiment():
           # next_batch = make_superbatch(batches)
           t = time.time()
           if FLAGS.dpsgd:
-            opt_state, total_grad_norm, total_aug_norms = pmap(partial(private_update, l2_norm_clip=l2_norm_clip, key=key, i=next(itercount)), axis_name='i')(opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
+            opt_state, total_grad_norm, total_aug_norms = pmap(partial(private_update, l2_norm_clip=l2_norm_clip, rng=key, i=next(itercount)), axis_name='i')(opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
             total_grad_norm = total_grad_norm.reshape((-1,))
             if FLAGS.augmult > 0:
                 total_aug_norms = total_aug_norms.reshape((FLAGS.augmult, -1))
