@@ -340,35 +340,33 @@ def experiment():
 
 
     @jit
-    def private_update(rng, i, opt_state, batch, add_params, l2_norm_clip=FLAGS.l2_norm_clip):
+    def comp_private_grads(rng, opt_state, batch, l2_norm_clip=FLAGS.l2_norm_clip):
         params = get_params(opt_state)
-        rng = random.fold_in(rng, i)  # get new key for new random numbers
         t_t = time.time()
-        rng = jnp.broadcast_to(rng, (num_devices,) + rng.shape)
         logger.info(f"Time to broadcast rng: {time.time() - t_t}")
         if FLAGS.augmult <= 0:
             t_t = time.time()
-            private_grads, total_grad_norm = pmap(partial(private.private_grad, l2_norm_clip=l2_norm_clip,
-                        noise_multiplier=FLAGS.noise_multiplier, batch_size=FLAGS.batch_size, loss=loss), axis_name='i')\
-                (params, batch, rng)
+            private_grads, total_grad_norm = partial(private.private_grad, l2_norm_clip=l2_norm_clip,
+                                                     noise_multiplier=FLAGS.noise_multiplier,
+                                                     batch_size=FLAGS.batch_size, loss=loss)(params, batch, rng)
             logger.info(f"Time to pmap: {time.time() - t_t}")
             total_aug_norms = None
         elif FLAGS.aug_type == "data":
-            private_grads, total_grad_norm, total_aug_norms = pmap(aug_data.private_grad, axis_name='i')(params, batch, rng,
-                                                                                   l2_norm_clip,
-                                                                                   FLAGS.noise_multiplier,
-                                                                                   FLAGS.batch_size,
-                                                                                   loss)
+            private_grads, total_grad_norm, total_aug_norms = aug_data.private_grad(params, batch, rng,
+                                                                                    l2_norm_clip,
+                                                                                    FLAGS.noise_multiplier,
+                                                                                    FLAGS.batch_size,
+                                                                                    loss)
         elif FLAGS.aug_type == "momentum":
             velocity = get_velocity(opt_state)
             t_t = time.time()
             f = partial(aug_momentum.private_grad, l2_norm_clip=l2_norm_clip, noise_multiplier=FLAGS.noise_multiplier,
-                         batch_size=FLAGS.batch_size, loss=loss, augmult=FLAGS.augmult, mult_radius=FLAGS.mult_radius)
+                        batch_size=FLAGS.batch_size, loss=loss, augmult=FLAGS.augmult, mult_radius=FLAGS.mult_radius)
             logger.info(f"Time to partial: {time.time() - t_t}")
-            logger.info(f"params, batch, rng, velocity type: {type(params)}, {type(batch)}, {type(rng)}, {type(velocity)}")
+            logger.info(
+                f"params, batch, rng, velocity type: {type(params)}, {type(batch)}, {type(rng)}, {type(velocity)}")
             t_t = time.time()
-            private_grads, total_grad_norm, total_aug_norms = pmap(f, axis_name='i')\
-                (params, batch, rng, velocity)
+            private_grads, total_grad_norm, total_aug_norms = f(params, batch, rng, velocity)
             logger.info(f"Time to pmap: {time.time() - t_t}")
             # logger.info(f"Grad norm shape: {total_grad_norm.shape}")
             # logger.info(f"Aug norm shape: {total_aug_norms.shape}")
@@ -376,10 +374,11 @@ def experiment():
             raise ValueError("Undefined augmentation type")
         # logger.info(f"Params shape: {cutil.params_shape(params)}")
         # logger.info(f"Private grads shape: {cutil.params_shape(private_grads)}")
-        t_t = time.time()
-        private_grads = pmap(lambda x: jax.lax.pmean(x, axis_name='i'), axis_name='i')(private_grads)
-        logger.info(f"Time to pmean: {time.time() - t_t}")
-        # logger.info(f"Private grads shape: {cutil.params_shape(private_grads)}")
+        return private_grads, total_grad_norm, total_aug_norms
+
+
+    @jit
+    def update_params(private_grads, add_params, opt_state, i):
         t_t = time.time()
         opt_state = opt_update(
             i, private_grads, opt_state)
@@ -390,6 +389,16 @@ def experiment():
             avg_params = average_params(params, add_params, i)
             opt_state = set_params(avg_params, opt_state)
         logger.info(f"Time to average params: {time.time() - t_t}")
+        return opt_state
+
+    def private_update(rng, opt_state, batch, add_params, i, l2_norm_clip=FLAGS.l2_norm_clip):
+        rng = random.fold_in(rng, i)  # get new key for new random numbers
+        rng = jnp.broadcast_to(rng, (num_devices,) + rng.shape)
+        private_grads, total_grad_norm, total_aug_norms = pmap(jit(partial(comp_private_grads, l2_norm_clip=l2_norm_clip)), axis_name='i')(rng, opt_state, batch)
+        t_t = time.time()
+        private_grads = pmap(lambda x: jax.lax.pmean(x, axis_name='i'), axis_name='i')(private_grads)
+        logger.info(f"Time to pmean: {time.time() - t_t}")
+        opt_state = pmap(jit(partial(update_params, i=i)), axis_name='i')(private_grads, add_params, opt_state)
         return opt_state, total_grad_norm, total_aug_norms
 
     # _, init_params = init_random_params(key, (-1, 28, 28, 1))
@@ -423,8 +432,7 @@ def experiment():
           # next_batch = make_superbatch(batches)
           t = time.time()
           if FLAGS.dpsgd:
-            opt_state, total_grad_norm, total_aug_norms = private_update(
-                key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params, l2_norm_clip)
+            opt_state, total_grad_norm, total_aug_norms = partial(private_update, l2_norm_clip=l2_norm_clip, i=next(itercount))(rng, opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
             total_grad_norm = total_grad_norm.reshape((-1,))
             if FLAGS.augmult > 0:
                 total_aug_norms = total_aug_norms.reshape((FLAGS.augmult, -1))
