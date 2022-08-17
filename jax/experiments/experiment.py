@@ -86,7 +86,7 @@ from jax import nn
 import jax.numpy as jnp
 import haiku as hk
 import jax
-from jax import pmap
+from jax import vmap, pmap
 
 import numpy.random as npr
 
@@ -363,9 +363,9 @@ def experiment():
                          batch_size=FLAGS.batch_size, loss=loss, augmult=FLAGS.augmult, mult_radius=FLAGS.mult_radius)
             logger.info(f"Time to partial: {time.time() - t_t}")
             t_t = time.time()
-            private_grads, total_grad_norm, total_aug_norms = pmap(f, axis_name='i')\
+            private_grads, total_grad_norm, total_aug_norms = vmap(f, (0, 0, 0, 0))\
                 (params, batch, rng, velocity)
-            logger.info(f"Time to pmap: {time.time() - t_t}")
+            logger.info(f"Time to vmap: {time.time() - t_t}")
             # logger.info(f"Grad norm shape: {total_grad_norm.shape}")
             # logger.info(f"Aug norm shape: {total_aug_norms.shape}")
         else:
