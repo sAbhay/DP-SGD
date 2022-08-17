@@ -432,11 +432,11 @@ def experiment():
           # next_batch = make_superbatch(batches)
           t = time.time()
           if FLAGS.dpsgd:
-            opt_state, total_grad_norm, total_aug_norms = partial(private_update, l2_norm_clip=l2_norm_clip, i=next(itercount))(rng, opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
+            opt_state, total_grad_norm, total_aug_norms = private_update(rng, opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params, l2_norm_clip=l2_norm_clip, i=next(itercount))
+            logger.info(f"Grad time: {time.time() - t}")
             total_grad_norm = total_grad_norm.reshape((-1,))
             if FLAGS.augmult > 0:
                 total_aug_norms = total_aug_norms.reshape((FLAGS.augmult, -1))
-            logger.info(f"Grad time: {time.time() - t}")
           else:
             opt_state, total_grad_norm = update(
                 key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
