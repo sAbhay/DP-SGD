@@ -86,7 +86,7 @@ from jax import nn
 import jax.numpy as jnp
 import haiku as hk
 import jax
-from jax import vmap, pmap
+from jax import pmap
 
 import numpy.random as npr
 
@@ -359,13 +359,13 @@ def experiment():
         elif FLAGS.aug_type == "momentum":
             velocity = get_velocity(opt_state)
             t_t = time.time()
-            f = partial(aug_momentum.private_grad, l2_norm_clip=l2_norm_clip, noise_multiplier=FLAGS.noise_multiplier,
-                         batch_size=FLAGS.batch_size, loss=loss, augmult=FLAGS.augmult, mult_radius=FLAGS.mult_radius)
+            f = jit(partial(aug_momentum.private_grad, l2_norm_clip=l2_norm_clip, noise_multiplier=FLAGS.noise_multiplier,
+                         batch_size=FLAGS.batch_size, loss=loss, augmult=FLAGS.augmult, mult_radius=FLAGS.mult_radius))
             logger.info(f"Time to partial: {time.time() - t_t}")
             t_t = time.time()
-            private_grads, total_grad_norm, total_aug_norms = vmap(f, (0, 0, 0, 0))\
+            private_grads, total_grad_norm, total_aug_norms = pmap(f, axis_name='i')\
                 (params, batch, rng, velocity)
-            logger.info(f"Time to vmap: {time.time() - t_t}")
+            logger.info(f"Time to pmap: {time.time() - t_t}")
             # logger.info(f"Grad norm shape: {total_grad_norm.shape}")
             # logger.info(f"Aug norm shape: {total_aug_norms.shape}")
         else:
