@@ -370,12 +370,16 @@ def experiment():
         private_grads = pmap(lambda x: jax.lax.pmean(x, axis_name='i'), axis_name='i')(private_grads)
         logger.info(f"Time to pmean: {time.time() - t_t}")
         # logger.info(f"Private grads shape: {cutil.params_shape(private_grads)}")
+        t_t = time.time()
         opt_state = opt_update(
             i, private_grads, opt_state)
+        logger.info(f"Time to opt_update: {time.time() - t_t}")
+        t_t = time.time()
         if FLAGS.param_averaging:
             params = get_params(opt_state)
             avg_params = average_params(params, add_params, i)
             opt_state = set_params(avg_params, opt_state)
+        logger.info(f"Time to average params: {time.time() - t_t}")
         return opt_state, total_grad_norm, total_aug_norms
 
     # _, init_params = init_random_params(key, (-1, 28, 28, 1))
