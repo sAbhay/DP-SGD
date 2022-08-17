@@ -274,12 +274,9 @@ def experiment():
 
     # jconfig.update('jax_platform_name', 'cpu')
 
-    def ce_loss(params, batch, parallel=False):
+    def ce_loss(params, batch):
       inputs, targets = batch
-      if not parallel:
-        logits = predict(params, inputs)
-      else:
-        logits = pmap(predict, axis_name='i')(params, inputs)
+      logits = predict(params, inputs)
       logits = nn.log_softmax(logits, axis=-1)  # log normalize
       return -jnp.mean(jnp.mean(jnp.sum(logits * targets, axis=-1), axis=0))  # cross entropy loss
 
