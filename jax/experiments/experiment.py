@@ -340,7 +340,7 @@ def experiment():
 
 
     @jit
-    def comp_private_grads(rng, i, opt_state, batch, l2_norm_clip=FLAGS.l2_norm_clip):
+    def comp_private_grads(rng, opt_state, batch, l2_norm_clip=FLAGS.l2_norm_clip):
         params = get_params(opt_state)
         t_t = time.time()
         logger.info(f"Time to broadcast rng: {time.time() - t_t}")
@@ -378,7 +378,7 @@ def experiment():
 
 
     @jit
-    def update_params(i, private_grads, opt_state):
+    def update_params(private_grads, add_params, opt_state, i):
         t_t = time.time()
         opt_state = opt_update(
             i, private_grads, opt_state)
@@ -392,11 +392,13 @@ def experiment():
         return opt_state, total_grad_norm, total_aug_norms
 
     def private_update(rng, opt_state, batch, add_params, i, l2_norm_clip=FLAGS.l2_norm_clip):
-        private_grads, total_grad_norm, total_aug_norms = comp_private_grads(rng, i, opt_state, batch, l2_norm_clip)
+        rng = random.fold_in(rng, i)  # get new key for new random numbers
+        rng = jnp.broadcast_to(rng, (num_devices,) + rng.shape)
+        private_grads, total_grad_norm, total_aug_norms = pmap(partial(comp_private_grads, l2_norm_clip=l2_norm_clip, i=i), axis_name='i')(rng, opt_state, batch)
         t_t = time.time()
         private_grads = pmap(lambda x: jax.lax.pmean(x, axis_name='i'), axis_name='i')(private_grads)
         logger.info(f"Time to pmean: {time.time() - t_t}")
-        opt_state, total_grad_norm, total_aug_norms = update_params(i, private_grads, opt_state)
+        opt_state, total_grad_norm, total_aug_norms = pmap(partial(update_params, i=i), axis_name='i')(private_grads, add_params, opt_state)
         return opt_state, total_grad_norm, total_aug_norms
 
     # _, init_params = init_random_params(key, (-1, 28, 28, 1))
@@ -430,10 +432,7 @@ def experiment():
           # next_batch = make_superbatch(batches)
           t = time.time()
           if FLAGS.dpsgd:
-            i = next(itercount)
-            rng = random.fold_in(rng, i)  # get new key for new random numbers
-            rng = jnp.broadcast_to(rng, (num_devices,) + rng.shape)
-            opt_state, total_grad_norm, total_aug_norms = pmap(partial(private_update, l2_norm_clip=l2_norm_clip, i=i), axis_name='i')(rng, opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
+            opt_state, total_grad_norm, total_aug_norms = partial(private_update, l2_norm_clip=l2_norm_clip, i=next(itercount))(rng, opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params)
             total_grad_norm = total_grad_norm.reshape((-1,))
             if FLAGS.augmult > 0:
                 total_aug_norms = total_aug_norms.reshape((FLAGS.augmult, -1))
