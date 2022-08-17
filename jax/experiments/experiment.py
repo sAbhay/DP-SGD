@@ -422,7 +422,8 @@ def experiment():
             opt_state, total_grad_norm, total_aug_norms = private_update(
                 key, next(itercount), opt_state, shape_as_image(*next_batch, dummy_dim=True, augmult=FLAGS.augmult, flatten_augmult=False), add_params, l2_norm_clip)
             total_grad_norm = total_grad_norm.reshape((-1,))
-            total_aug_norms = total_aug_norms.reshape((FLAGS.augmult, -1))
+            if FLAGS.augmult > 0:
+                total_aug_norms = total_aug_norms.reshape((FLAGS.augmult, -1))
             logger.info(f"Grad time: {time.time() - t}")
           else:
             opt_state, total_grad_norm = update(
