@@ -342,7 +342,9 @@ def experiment():
     def private_update(rng, i, opt_state, batch, add_params, l2_norm_clip=FLAGS.l2_norm_clip):
         params = get_params(opt_state)
         rng = random.fold_in(rng, i)  # get new key for new random numbers
+        t_t = time.time()
         rng = jnp.broadcast_to(rng, (num_devices,) + rng.shape)
+        logger.info(f"Time to broadcast rng: {time.time() - t_t}")
         if FLAGS.augmult <= 0:
             private_grads, total_grad_norm = pmap(private.private_grad, axis_name='i')(params, batch, rng, l2_norm_clip,
                                                                            FLAGS.noise_multiplier, FLAGS.batch_size,
