@@ -366,7 +366,9 @@ def experiment():
             raise ValueError("Undefined augmentation type")
         # logger.info(f"Params shape: {cutil.params_shape(params)}")
         # logger.info(f"Private grads shape: {cutil.params_shape(private_grads)}")
+        t_t = time.time()
         private_grads = pmap(lambda x: jax.lax.pmean(x, axis_name='i'), axis_name='i')(private_grads)
+        logger.info(f"Time to pmean: {time.time() - t_t}")
         # logger.info(f"Private grads shape: {cutil.params_shape(private_grads)}")
         opt_state = opt_update(
             i, private_grads, opt_state)
