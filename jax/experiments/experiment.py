@@ -394,7 +394,7 @@ def experiment():
     def private_update(rng, opt_state, batch, add_params, i, l2_norm_clip=FLAGS.l2_norm_clip):
         rng = random.fold_in(rng, i)  # get new key for new random numbers
         rng = jnp.broadcast_to(rng, (num_devices,) + rng.shape)
-        private_grads, total_grad_norm, total_aug_norms = pmap(partial(comp_private_grads, l2_norm_clip=l2_norm_clip, i=i), axis_name='i')(rng, opt_state, batch)
+        private_grads, total_grad_norm, total_aug_norms = pmap(partial(comp_private_grads, l2_norm_clip=l2_norm_clip), axis_name='i')(rng, opt_state, batch)
         t_t = time.time()
         private_grads = pmap(lambda x: jax.lax.pmean(x, axis_name='i'), axis_name='i')(private_grads)
         logger.info(f"Time to pmean: {time.time() - t_t}")
