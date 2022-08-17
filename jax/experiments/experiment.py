@@ -393,6 +393,7 @@ def experiment():
     # logger.info("Model init params: {}".format(init_params))
     up.params_norm(init_params)
     init_params = jax.tree_util.tree_map(lambda x: jnp.stack([x] * num_devices), init_params)
+    init_params = jax.device_put_sharded(init_params, devices)
     # logger.info("Model init params shape: {}".format(cutil.params_shape(init_params)))
     opt_state = opt_init(init_params)
     # logger.info("Model params shape: {}".format(cutil.params_shape(get_params(opt_state))))
