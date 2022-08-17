@@ -5,7 +5,7 @@ from jax import vmap, tree_map
 from jax.tree_util import tree_flatten, tree_unflatten
 import jax.numpy as jnp
 
-from functools import partial
+import time
 
 from sys import path as syspath
 syspath.append('../../')
@@ -33,19 +33,23 @@ def clipped_grad_single_aug_params(params, l2_norm_clip, batch, loss):
 def private_grad(params, batch, rng, velocity, l2_norm_clip, noise_multiplier,
                  batch_size, loss, augmult, mult_radius):
     """Return differentially private gradients for params, evaluated on batch."""
+    t_g = time.time()
     clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0, None))(params, l2_norm_clip, batch, loss)
+    logger.info("Time to clipped grad: {}".format(time.time() - t_g))
     mults = random.uniform(rng, shape=(augmult-1,), minval=-1, maxval=1) * mult_radius
 
     # aug_params = generate_augmult_perturbed_params(params, velocity, mults, augmult-1)
     # clipped_grads, total_grad_norm = vmap(clipped_grad_single_aug_params, (0, None, None, None))(aug_params, l2_norm_clip, batch, loss)
     aug_clipped_grads = clipped_grads
     aug_total_norms = [total_grad_norm]
+    t_g = time.time()
     for i in range(augmult-1):
         param = perturb_params_with_momentum(params, velocity, mults[i])
         clipped_grads, total_grad_norm = vmap(clipped_grad, (None, None, 0, None))(param, l2_norm_clip, batch, loss)
         aug_clipped_grads = tree_map(lambda g1, g2: g1 + g2, aug_clipped_grads, clipped_grads)
         aug_total_norms.append(total_grad_norm)
     total_aug_norms = jnp.vstack(aug_total_norms)
+    logger.info("Time to augmult clipped grad: {}".format(time.time() - t_g))
     # logger.info(f"Total aug norm shape: {total_aug_norms.shape}")
     total_grad_norm = jnp.mean(total_aug_norms, axis=0)
     # logger.info(f"Total grad norm shape: {total_grad_norm.shape}")
