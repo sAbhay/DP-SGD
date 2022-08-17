@@ -339,6 +339,7 @@ def experiment():
         return opt_state, total_grad_norm
 
 
+    @jit
     def private_update(rng, i, opt_state, batch, add_params, l2_norm_clip=FLAGS.l2_norm_clip):
         params = get_params(opt_state)
         rng = random.fold_in(rng, i)  # get new key for new random numbers
