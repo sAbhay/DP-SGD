@@ -343,9 +343,11 @@ def experiment():
         rng = jnp.broadcast_to(rng, (num_devices,) + rng.shape)
         logger.info(f"Time to broadcast rng: {time.time() - t_t}")
         if FLAGS.augmult <= 0:
-            private_grads, total_grad_norm = pmap(private.private_grad, axis_name='i')(params, batch, rng, l2_norm_clip,
-                                                                           FLAGS.noise_multiplier, FLAGS.batch_size,
-                                                                           loss)
+            t_t = time.time()
+            private_grads, total_grad_norm = pmap(partial(private.private_grad, l2_norm_clip=l2_norm_clip,
+                        noise_multiplier=FLAGS.noise_multiplier, batch_size=FLAGS.batch_size, loss=loss), axis_name='i')\
+                (params, batch, rng)
+            logger.info(f"Time to pmap: {time.time() - t_t}")
             total_aug_norms = None
         elif FLAGS.aug_type == "data":
             private_grads, total_grad_norm, total_aug_norms = pmap(aug_data.private_grad, axis_name='i')(params, batch, rng,
