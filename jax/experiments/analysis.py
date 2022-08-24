@@ -80,9 +80,10 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
                                          columns=logit_cols)
     sample_df["max_logit"] = sample_df[logit_cols].max(axis=1)
     last_epoch = sample_df['epoch'].max()
+    first_epoch = sample_df['epoch'].min()
     sample_df['accurate'] = sample_df['accurate'].replace({True: "Accurate", False: "Misclassified"})
 
-    sample_df[(sample_df['epoch'] == 0) | (sample_df['epoch'] == last_epoch)][['epoch', 'norm', 'accurate']]. \
+    sample_df[(sample_df['epoch'] == first_epoch) | (sample_df['epoch'] == last_epoch)][['epoch', 'norm', 'accurate']]. \
         hist(column='norm', by=['epoch', 'accurate'], legend=False)
     plt.suptitle('Gradient norms by sample classification at train start and end')
     # plt.xlabel("Gradient norm")
