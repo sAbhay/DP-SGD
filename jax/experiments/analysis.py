@@ -86,8 +86,8 @@ def make_plots(hyperparams_string, plot_dir, norm_dir):
     sample_df[(sample_df['epoch'] == first_epoch) | (sample_df['epoch'] == last_epoch)][['epoch', 'norm', 'accurate']]. \
         hist(column='norm', by=['epoch', 'accurate'], legend=False)
     plt.suptitle('Gradient norms by sample classification at train start and end')
-    # plt.xlabel("Gradient norm")
-    # plt.ylabel("Count")
+    plt.xlabel("Gradient norm")
+    plt.ylabel("Count")
     plt.savefig(os.path.join(plot_dir, 'final_epoch_grad_norms_accuracy.png'))
     plt.close()
     logger.info("Saved final epoch grad norms hist at {}".format(plot_dir))
