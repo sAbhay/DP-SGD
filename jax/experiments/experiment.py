@@ -408,7 +408,7 @@ def experiment():
 
         epoch_time = time.time() - start_time
         logger.info('Epoch {} in {:0.2f} sec'.format(epoch, epoch_time))
-        if FLAGS.privacy_budget is not None and eps >= FLAGS.privacy_budget:
+        if FLAGS.privacy_budget is not None and eps is not None and eps >= FLAGS.privacy_budget:
             logger.info('Privacy budget exceeded!')
             break
     return hyperparams_string
