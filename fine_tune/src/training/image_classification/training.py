@@ -10,6 +10,8 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps):
     for i, data in enumerate(trainloader, 0):
       # get the inputs; data is a list of [inputs, labels]
       inputs, labels = data
+      inputs = inputs.cuda()
+      labels = labels.cuda()
 
       # zero the parameter gradients
       optimizer.zero_grad()
