@@ -24,7 +24,7 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps):
 
       # print statistics
       running_loss += loss.item()
-      if i % 200 == 1999:  # print every 2000 mini-batches
+      if i % 20 == 1999:  # print every 2000 mini-batches
         print(f'[{step + 1}, {i + 1:5d}] loss: {running_loss / 2000:.3f}')
         running_loss = 0.0
 
