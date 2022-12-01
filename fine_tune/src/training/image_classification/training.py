@@ -3,6 +3,8 @@ import copy
 
 from .util import add_models, mult_model
 
+PRINT_EVERY = 700
+
 def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps):
   for step in range(max_steps):  # loop over the dataset multiple times
 
@@ -24,8 +26,8 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps):
 
       # print statistics
       running_loss += loss.item()
-      if i % 700 == 699:  # print every 2000 mini-batches
-        print(f'[{step + 1}, {i + 1:5d}] loss: {running_loss / 2000:.3f}')
+      if i % PRINT_EVERY == (PRINT_EVERY-1):  # print every mini-batches
+        print(f'[{step + 1}, {i + 1:5d}] loss: {running_loss / PRINT_EVERY:.3f}')
         running_loss = 0.0
 
   print('Finished Training')
