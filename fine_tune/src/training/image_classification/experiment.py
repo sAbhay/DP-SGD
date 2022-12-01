@@ -9,7 +9,7 @@ from .evaluation import total_loss, accuracy
 def run_experiment():
   model = get_model(depth=16, width=4, dropout_rate=0.0)
   loss = torch.nn.CrossEntropyLoss()
-  optimizer_fn = bind(torch.optim.SGD, ...)
+  optimizer_fn = bind(torch.optim.SGD, ..., lr=0.1)
 
   trainset, valset, testset = get_cifar10_data()
   print(f"Dataset sizes: train: {len(trainset)}, val: {len(valset)}, test: {len(testset)}")
