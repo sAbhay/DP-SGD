@@ -32,7 +32,7 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps):
 
 def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, max_steps):
   for epoch in range(epochs):
-    partitions = torch.utils.data.random_split(trainset, [1]*splits, generator=torch.Generator().manual_seed(42))
+    partitions = torch.utils.data.random_split(trainset, [1/splits]*splits, generator=torch.Generator().manual_seed(42))
     model = model.cpu()
     running_average_model = None
     for partition in partitions:
