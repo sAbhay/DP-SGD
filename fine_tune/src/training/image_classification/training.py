@@ -1,7 +1,7 @@
 import torch
 import copy
 
-import util
+from .util import add_models, mult_model
 
 def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps):
   for step in range(max_steps):  # loop over the dataset multiple times
@@ -45,7 +45,7 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
       if running_average_model is None:
         running_average_model = sub_model
       else:
-        running_average_model = util.add_models(running_average_model, sub_model)
-    running_average_model = util.mult_model(running_average_model, 1. / splits)
+        running_average_model = add_models(running_average_model, sub_model)
+    running_average_model = mult_model(running_average_model, 1. / splits)
     model = running_average_model
   return model
