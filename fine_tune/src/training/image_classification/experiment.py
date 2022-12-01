@@ -3,7 +3,7 @@ import torch
 from .util import bind
 from .data.cifar10 import get_cifar10_data
 from .models.cifar10 import get_model
-import training
+from .training import train
 
 def run_experiment():
   model = get_model(depth=16, width=4, dropout_rate=0.0)
@@ -12,5 +12,5 @@ def run_experiment():
 
   trainset, valset, testset = get_cifar10_data()
 
-  model = training.train(trainset=trainset, model=model, loss_fn=loss, optimizer_fn=optimizer_fn,
+  model = train(trainset=trainset, model=model, loss_fn=loss, optimizer_fn=optimizer_fn,
                          epochs=1, splits=1, batch_size=64, max_steps=10)
