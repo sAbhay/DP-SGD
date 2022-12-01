@@ -2,8 +2,9 @@ import torch
 import copy
 
 from .util import add_models, mult_model
+from .project_gradient_descent import project_model_dist_constraint
 
-def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps):
+def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps, model_ref=None, max_dist=None):
   for step in range(max_steps):  # loop over the dataset multiple times
 
     running_loss = 0.0
@@ -21,6 +22,9 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps):
       loss = loss_fn(outputs, labels)
       loss.backward()
       optimizer.step()
+
+      if model_ref is not None and max_dist is not None:
+        model = project_model_dist_constraint(model, model_ref, max_dist)
 
       # print statistics
       running_loss += loss.item()
