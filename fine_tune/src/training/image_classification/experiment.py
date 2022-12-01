@@ -1,8 +1,8 @@
 import torch
 
 from .util import bind
-from data.cifar10 import get_cifar10_data
-from models.cifar10 import get_model
+from .data.cifar10 import get_cifar10_data
+from .models.cifar10 import get_model
 import training
 
 def run_experiment():
