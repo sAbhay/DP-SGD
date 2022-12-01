@@ -4,6 +4,7 @@ from .util import bind
 from .data.cifar10 import get_cifar10_data
 from .models.cifar10 import get_model
 from .training import train
+from .evaluation import total_loss, accuracy
 
 def run_experiment():
   model = get_model(depth=16, width=4, dropout_rate=0.0)
@@ -14,3 +15,5 @@ def run_experiment():
 
   model = train(trainset=trainset, model=model, loss_fn=loss, optimizer_fn=optimizer_fn,
                          epochs=1, splits=1, batch_size=64, max_steps=10)
+  print(f"Train loss: {total_loss(model, loss, trainset)}, accuracy: {accuracy(model, trainset)}")
+  print(f"Eval loss: {total_loss(model, loss, valset)}, accuracy: {accuracy(model, valset)}")
