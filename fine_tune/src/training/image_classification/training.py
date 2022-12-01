@@ -2,7 +2,7 @@ import torch
 import copy
 
 from .util import add_models, mult_model
-from .project_gradient_descent import project_model_dist_constraint
+from .project_gradient_descent import project_model_dist_constraint, model_dist
 
 def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps, model_ref=None, max_dist=None):
   for step in range(max_steps):  # loop over the dataset multiple times
@@ -37,7 +37,7 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps, model_ref=
 def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, max_steps):
   for epoch in range(epochs):
     partitions = torch.utils.data.random_split(trainset, [len(trainset)//splits]*splits, generator=torch.Generator().manual_seed(42))
-    model = model.cpu()
+    # model = model.cpu()
     running_average_model = None
     for partition in partitions:
       trainloader = torch.utils.data.DataLoader(partition, batch_size=batch_size, shuffle=True, num_workers=2)
@@ -45,6 +45,7 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
       optimizer = optimizer_fn(model_copy.parameters())
 
       sub_model = sub_train_loop(trainloader, model_copy, loss_fn, optimizer, max_steps)
+      print(f"Model dist: {model_dist(model, sub_model)}")
 
       if running_average_model is None:
         running_average_model = sub_model
@@ -52,4 +53,5 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
         running_average_model = add_models(running_average_model, sub_model)
     running_average_model = mult_model(running_average_model, 1. / splits)
     model = running_average_model
+    print(f"Epoch {epoch} done")
   return model
