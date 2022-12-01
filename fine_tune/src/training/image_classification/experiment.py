@@ -12,6 +12,7 @@ def run_experiment():
   optimizer_fn = bind(torch.optim.Adam, ...)
 
   trainset, valset, testset = get_cifar10_data()
+  print(f"Dataset size: train={len(trainset)}")
 
   model = train(trainset=trainset, model=model, loss_fn=loss, optimizer_fn=optimizer_fn,
                          epochs=1, splits=1, batch_size=64, max_steps=10)
