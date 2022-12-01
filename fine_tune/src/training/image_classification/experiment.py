@@ -8,7 +8,7 @@ from .training import train
 from .evaluation import total_loss, accuracy
 
 def run_experiment():
-  model = get_model(depth=16, width=4, dropout_rate=0.0)
+  model = get_model(depth=16, width=4, dropout_rate=0.0).cuda()
 
   loss = torch.nn.CrossEntropyLoss()
   optimizer_fn = bind(torch.optim.SGD, ..., lr=0.1)
