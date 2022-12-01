@@ -27,7 +27,7 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps):
       # print statistics
       running_loss += loss.item()
       if i % PRINT_EVERY == (PRINT_EVERY-1):  # print every mini-batches
-        print(f'[{step + 1}, {i + 1:5d}] loss: {running_loss / PRINT_EVERY:.3f}')
+        print(f'[{step + 1}, {i + 1:5d}] loss: {running_loss / PRINT_EVERY:.6f}')
         running_loss = 0.0
 
   print('Finished Training')
@@ -36,10 +36,7 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps):
 
 def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, max_steps):
   for epoch in range(epochs):
-    if splits == 1:
-      partitions = [trainset]
-    else:
-      partitions = torch.utils.data.random_split(trainset, [1./splits]*splits, generator=torch.Generator().manual_seed(42))
+    partitions = torch.utils.data.random_split(trainset, [len(trainset)//splits]*splits, generator=torch.Generator().manual_seed(42))
     model = model.cpu()
     running_average_model = None
     for partition in partitions:
