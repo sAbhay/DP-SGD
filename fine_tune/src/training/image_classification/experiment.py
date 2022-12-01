@@ -17,4 +17,4 @@ def run_experiment():
   model = train(trainset=trainset, model=model, loss_fn=loss, optimizer_fn=optimizer_fn,
                          epochs=1, splits=1, batch_size=64, max_steps=30)
   print(f"Train loss: {total_loss(model, loss, trainset)}, accuracy: {accuracy(model, trainset)}")
-  print(f"Eval loss: {total_loss(model, loss, valset)}, accuracy: {accuracy(model, valset)}")
+  print(f"Val loss: {total_loss(model, loss, valset)}, accuracy: {accuracy(model, valset)}")
