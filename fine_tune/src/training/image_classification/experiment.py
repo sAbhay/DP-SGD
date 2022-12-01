@@ -1,5 +1,4 @@
 import torch
-from torch.nn.parallel import DistributedDataParallel as DDP
 
 from .util import bind
 from .data.cifar10 import get_cifar10_data
@@ -17,6 +16,6 @@ def run_experiment():
   print(f"Dataset sizes: train: {len(trainset)}, val: {len(valset)}, test: {len(testset)}")
 
   model = train(trainset=trainset, model=model, loss_fn=loss, optimizer_fn=optimizer_fn,
-                         epochs=10, splits=4, batch_size=128, max_steps=20)
+                         epochs=10, splits=4, batch_size=2048, max_steps=20)
   print(f"Train loss: {total_loss(model, loss, trainset)}, accuracy: {accuracy(model, trainset)}")
   print(f"Val loss: {total_loss(model, loss, valset)}, accuracy: {accuracy(model, valset)}")

@@ -4,6 +4,9 @@ import copy
 from .util import add_models, mult_model
 from .project_gradient_descent import project_model_dist_constraint, model_dist
 
+
+MODELS_PER_GPU = 4
+
 def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps, model_ref=None, max_dist=None):
   for step in range(max_steps):  # loop over the dataset multiple times
 
