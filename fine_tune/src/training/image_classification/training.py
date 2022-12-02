@@ -3,6 +3,7 @@ import copy
 
 from .util import add_models, mult_model
 from .project_gradient_descent import project_model_dist_constraint, model_dist
+from .evaluation import total_loss, accuracy
 
 
 MODELS_PER_GPU = 4
@@ -33,13 +34,13 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps, model_ref=
 
       # print statistics
       running_loss += loss.item()
-      print(f'[{step + 1}] loss: {running_loss / len(trainloader.dataset):.6f}')
+      # print(f'[{step + 1}] loss: {running_loss / len(trainloader.dataset):.6f}')
       step += 1
       if step > max_steps:
         training = False
         break
 
-  print('Finished Training')
+  # print('Finished Training')
   return model
 
 
@@ -62,5 +63,6 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
         running_average_model = add_models(running_average_model, sub_model)
     running_average_model = mult_model(running_average_model, 1. / splits)
     model = running_average_model
+    print(f"Train loss: {total_loss(model, loss, trainset)}, accuracy: {accuracy(model, trainset)}")
     print(f"Epoch {epoch} done")
   return model
