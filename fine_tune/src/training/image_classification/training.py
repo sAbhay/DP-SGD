@@ -44,7 +44,7 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps, model_ref=
   return model
 
 
-def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, max_steps):
+def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, max_steps, valset=None):
   for epoch in range(epochs):
     partitions = torch.utils.data.random_split(trainset, [len(trainset)//splits]*splits, generator=torch.Generator().manual_seed(42))
     # model = model.cpu()
@@ -63,6 +63,8 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
         running_average_model = add_models(running_average_model, sub_model)
     running_average_model = mult_model(running_average_model, 1. / splits)
     model = running_average_model
-    print(f"Train loss: {total_loss(model, loss, trainset)}, accuracy: {accuracy(model, trainset)}")
+    print(f"Train loss: {total_loss(model, loss_fn, trainset)}, accuracy: {accuracy(model, trainset)}")
+    if valset is not None:
+      print(f"Val loss: {total_loss(model, loss_fn, valset)}, accuracy: {accuracy(model, valset)}")
     print(f"Epoch {epoch} done")
   return model
