@@ -49,13 +49,14 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
     partitions = torch.utils.data.random_split(trainset, [len(trainset)//splits]*splits, generator=torch.Generator().manual_seed(42))
     # model = model.cpu()
     running_average_model = None
+    running_model_dist = 0
     for partition in partitions:
       trainloader = torch.utils.data.DataLoader(partition, batch_size=batch_size, shuffle=True, num_workers=2)
       model_copy = copy.deepcopy(model).cuda()
       optimizer = optimizer_fn(model_copy.parameters())
 
       sub_model = sub_train_loop(trainloader, model_copy, loss_fn, optimizer, max_steps)
-      print(f"Model dist: {model_dist(model, sub_model)}")
+      running_model_dist += model_dist(model, sub_model)
 
       if running_average_model is None:
         running_average_model = sub_model
@@ -66,5 +67,6 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
     print(f"Train loss: {total_loss(model, loss_fn, trainset)}, accuracy: {accuracy(model, trainset)}")
     if valset is not None:
       print(f"Val loss: {total_loss(model, loss_fn, valset)}, accuracy: {accuracy(model, valset)}")
+    print(f"Average submodel Euclidean distance: {running_model_dist / splits}")
     print(f"Epoch {epoch} done")
   return model
