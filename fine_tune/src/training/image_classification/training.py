@@ -9,7 +9,8 @@ MODELS_PER_GPU = 4
 
 def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps, model_ref=None, max_dist=None):
   step = 1
-  while True:  # loop over the dataset multiple times
+  training = True
+  while training:  # loop over the dataset multiple times
 
     running_loss = 0.0
     for i, data in enumerate(trainloader, 0):
@@ -35,6 +36,7 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps, model_ref=
       print(f'[{step + 1}] loss: {running_loss / len(trainloader.dataset):.6f}')
       step += 1
       if step > max_steps:
+        training = False
         break
 
   print('Finished Training')
