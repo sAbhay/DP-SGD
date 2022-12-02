@@ -55,7 +55,7 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
       model_copy = copy.deepcopy(model).cuda()
       optimizer = optimizer_fn(model_copy.parameters())
 
-      sub_model = sub_train_loop(trainloader, model_copy, loss_fn, optimizer, max_steps)
+      sub_model = sub_train_loop(trainloader, model_copy, loss_fn, optimizer, max_steps, model_ref=model, max_dist=120.0)
       running_model_dist += model_dist(model, sub_model)
 
       if running_average_model is None:
