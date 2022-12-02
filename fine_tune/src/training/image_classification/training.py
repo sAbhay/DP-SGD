@@ -8,7 +8,8 @@ from .project_gradient_descent import project_model_dist_constraint, model_dist
 MODELS_PER_GPU = 4
 
 def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps, model_ref=None, max_dist=None):
-  for step in range(max_steps):  # loop over the dataset multiple times
+  step = 1
+  while True:  # loop over the dataset multiple times
 
     running_loss = 0.0
     for i, data in enumerate(trainloader, 0):
@@ -31,7 +32,10 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps, model_ref=
 
       # print statistics
       running_loss += loss.item()
-    print(f'[{step + 1}] loss: {running_loss / len(trainloader.dataset):.6f}')
+      print(f'[{step + 1}] loss: {running_loss / len(trainloader.dataset):.6f}')
+      step += 1
+      if step > max_steps:
+        break
 
   print('Finished Training')
   return model
