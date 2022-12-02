@@ -67,6 +67,6 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
     print(f"Train loss: {total_loss(model, loss_fn, trainset)}, accuracy: {accuracy(model, trainset)}")
     if valset is not None:
       print(f"Val loss: {total_loss(model, loss_fn, valset)}, accuracy: {accuracy(model, valset)}")
-    print(f"Average submodel Euclidean distance: {running_model_dist / splits}")
+    print(f"Average submodel Euclidean distance: {running_model_dist / len(partitions)}")
     print(f"Epoch {epoch} done")
   return model
