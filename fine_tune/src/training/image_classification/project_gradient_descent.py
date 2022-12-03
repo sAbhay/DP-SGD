@@ -25,8 +25,10 @@ def project_model_dist_constraint(model, model_ref, max_dist, dist=None):
   sd = model.state_dict()
   sd_ref = model_ref.state_dict()
 
+  print(dist, max_dist)
   for key in sd:
     sd[key] = (sd[key] - sd_ref[key]) * max_dist / dist
 
   model.load_state_dict(sd)
+  print(model_dist(model, model_ref), max_dist)
   return model
