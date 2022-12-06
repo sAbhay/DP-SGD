@@ -34,13 +34,14 @@ def project_model_dist_constraint(model, model_ref, max_dist, dist=None):
   return model
 
 
-def interpolate_model(modelA, modelB, max_dist):
-  dist = model_dist(modelA, modelB)
-  sdA = modelA.state_dict()
-  sdB = modelB.state_dict()
+def interpolate_model(model, model_ref, max_dist):
+  dist = model_dist(model, model_ref)
+  sd = model.state_dict()
+  sd_ref = model.state_dict()
 
-  for key in sdA:
-    sdA[key] += (sdB[key] - sdA[key]) * max_dist / dist
+  for key in sd:
+    sd[key] = sd_ref[key] + (sd[key] - sd_ref[key]) * max_dist / dist
 
-  modelA.load_state_dict(sdA)
-  return modelA
+  model.load_state_dict(sd)
+  print(model_dist(model, model_ref), max_dist)
+  return model
