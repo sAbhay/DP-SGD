@@ -75,7 +75,7 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
       running_average_model = mult_model(running_average_model, 1. / splits)
       model = running_average_model
       if max_dist is not None:
-        model = add_Gaussian_noise_model(model, std_scalar=max_dist/splits)
+        model = add_Gaussian_noise_model(model, std_scalar=0.01*max_dist/splits)
 
       print(f"Train loss: {total_loss(model, loss_fn, trainset)}, accuracy: {accuracy(model, trainset)}")
       if valset is not None:
