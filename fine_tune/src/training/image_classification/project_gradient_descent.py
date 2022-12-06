@@ -42,7 +42,7 @@ def interpolate_model(model, model_ref, max_dist):
   sd_ref = model.state_dict()
 
   for key in sd:
-    sd[key] = sd_ref[key] + (sd[key] - sd_ref[key]) * max_dist / dist
+    sd[key] = sd_ref[key] + (sd[key] - sd_ref[key]) * max_dist / (dist * len(sd))
 
   model.load_state_dict(sd)
   return model
