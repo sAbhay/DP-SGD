@@ -2,7 +2,7 @@ import torch
 import copy
 
 from .util import add_models, mult_model
-from .project_gradient_descent import project_model_dist_constraint, model_dist
+from .project_gradient_descent import project_model_dist_constraint, model_dist, interpolate_model
 from .evaluation import total_loss, accuracy
 
 
@@ -30,7 +30,7 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps, model_ref=
       optimizer.step()
 
       if model_ref is not None and max_dist is not None:
-        model = project_model_dist_constraint(model, model_ref, max_dist)
+        model = interpolate_model(model, model_ref, max_dist)
 
       # print statistics
       running_loss += loss.item()
