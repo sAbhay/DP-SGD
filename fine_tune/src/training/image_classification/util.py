@@ -41,7 +41,7 @@ def mult_model(model, scalar):
 def add_Gaussian_noise_model(model, std_scalar):
   sd = model.state_dict()
   for key in sd:
-    std = torch.ones_like(sd[key]) * std_scalar
+    std = (torch.ones_like(sd[key]) * std_scalar).type(torch.cuda.FloatTensor)
     sd[key] = torch.normal(sd[key], std)
   model.load_state_dict(sd)
   return model
