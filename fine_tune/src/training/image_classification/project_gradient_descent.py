@@ -43,7 +43,7 @@ def interpolate_model(model, model_ref, max_dist):
 
   print("Interpolating", dist, max_dist)
   for key in sd:
-    sd[key] = sd_ref[key] + (sd[key] - sd_ref[key]) * torch.square(max_dist / (dist + 1e-8))
+    sd[key] = sd_ref[key] + (sd[key] - sd_ref[key]) * torch.sqrt(max_dist / dist)
 
   model.load_state_dict(sd)
   return model
