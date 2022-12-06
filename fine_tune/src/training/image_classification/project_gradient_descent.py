@@ -39,7 +39,7 @@ def interpolate_model(model, model_ref, max_dist):
   if dist < max_dist:
     return model
   sd = model.state_dict()
-  sd_ref = model.state_dict()
+  sd_ref = model_ref.state_dict()
 
   print("Interpolating", dist, max_dist)
   for key in sd:
