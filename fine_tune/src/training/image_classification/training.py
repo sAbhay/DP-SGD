@@ -47,7 +47,7 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps, model_ref=
   return model
 
 
-def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, max_steps, valset=None):
+def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, max_steps, valset=None, max_dist=None):
   for epoch in range(epochs):
     partitions = torch.utils.data.random_split(trainset, [len(trainset)//splits]*splits, generator=torch.Generator().manual_seed(42))
     # model = model.cpu()
@@ -60,8 +60,9 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
 
       sub_model = sub_train_loop(trainloader, model_copy, loss_fn, optimizer, max_steps)
       # print("Sub model dist = {}".format(model_dist(sub_model, model)))
-      with torch.no_grad():
-        sub_model = interpolate_model(sub_model, model, 50)
+      if max_dist is not None:
+        with torch.no_grad():
+          sub_model = interpolate_model(sub_model, model, max_dist)
       # print("Interpolated sub model dist = {}".format(model_dist(sub_model, model)))
       running_model_dist += model_dist(model, sub_model)
 
