@@ -71,6 +71,7 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
           running_average_model = sub_model
         else:
           running_average_model = add_models(running_average_model, sub_model)
+    with torch.no_grad():
       running_average_model = mult_model(running_average_model, 1. / splits)
       model = running_average_model
       if max_dist is not None:
