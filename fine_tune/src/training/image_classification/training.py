@@ -29,8 +29,10 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps, model_ref=
       loss.backward()
       optimizer.step()
 
-      if model_ref is not None and max_dist is not None:
-        model = interpolate_model(model, model_ref, max_dist)
+      with torch.no_grad():
+        if model_ref is not None and max_dist is not None:
+          model = interpolate_model(model, model_ref, max_dist)
+          print("Model dist = {}, step {}".format(model_dist(model, model_ref), max_dist), step)
 
       # print statistics
       running_loss += loss.item()
