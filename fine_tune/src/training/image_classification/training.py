@@ -31,9 +31,8 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps, model_ref=
 
       with torch.no_grad():
         if model_ref is not None and max_dist is not None:
-          og_model = copy.deepcopy(model)
-          int_model = interpolate_model(model, model_ref, max_dist)
-          print("Int model dist = {}, step {}".format(model_dist(int_model, og_model), step), max_dist)
+          print("Original model dist = {}, step {}".format(model_dist(model, model_ref), step), max_dist)
+          model = interpolate_model(model, model_ref, max_dist)
           print("Model dist = {}, step {}".format(model_dist(model, model_ref), step), max_dist)
 
       # print statistics
