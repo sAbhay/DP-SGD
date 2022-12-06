@@ -41,8 +41,9 @@ def interpolate_model(model, model_ref, max_dist):
   sd = model.state_dict()
   sd_ref = model.state_dict()
 
+  print("Interpolating", dist, max_dist)
   for key in sd:
-    sd[key] = sd_ref[key] + (sd[key] - sd_ref[key]) * max_dist / (dist * len(sd))
+    sd[key] = sd_ref[key] + (sd[key] - sd_ref[key]) * max_dist / (dist + 1e-8)
 
   model.load_state_dict(sd)
   return model
