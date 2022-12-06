@@ -3,7 +3,7 @@ import math
 
 
 def tensor_euclidean_dist(m1, m2):
-  return torch.sum(torch.square(m1 - m2))
+  return torch.sqrt(torch.sum(torch.square(m1 - m2)))
 
 
 def model_dist(modelA, modelB):
