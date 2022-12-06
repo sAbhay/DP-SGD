@@ -41,6 +41,6 @@ def mult_model(model, scalar):
 def add_Gaussian_noise_model(model, std_scalar):
   sd = model.state_dict()
   for key in sd:
-    sd[key] += torch.randn(sd[key].size()).long().cuda() * std_scalar
+    sd[key] += (torch.randn(sd[key].size()) * std_scalar).long().cuda()
   model.load_state_dict(sd)
   return model
