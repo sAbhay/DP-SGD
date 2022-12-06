@@ -36,3 +36,11 @@ def mult_model(model, scalar):
 
   model.load_state_dict(sd)
   return model
+
+
+def add_Gaussian_noise_model(model, std):
+  sd = model.state_dict()
+  for key in sd:
+    sd[key] = torch.normal(sd[key], std);
+  model.load_state_dict(sd)
+  return model
