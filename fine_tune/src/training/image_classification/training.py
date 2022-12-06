@@ -74,7 +74,7 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
     model = running_average_model
     if max_dist is not None:
       with torch.no_grad():
-        model = add_Gaussian_noise_model(model, torch.sqrt(torch.tensor(max_dist / splits).cuda()))
+        model = add_Gaussian_noise_model(model, torch.sqrt(torch.tensor(max_dist / splits, dtype=torch.float).cuda()))
 
     print(f"Train loss: {total_loss(model, loss_fn, trainset)}, accuracy: {accuracy(model, trainset)}")
     if valset is not None:
