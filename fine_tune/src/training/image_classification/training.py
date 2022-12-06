@@ -48,7 +48,7 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps, model_ref=
   return model
 
 
-def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, max_steps, valset=None, max_dist=None):
+def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, max_steps, valset=None, max_dist=None, noise_multiplier=1):
   for epoch in range(epochs):
     partitions = torch.utils.data.random_split(trainset, [len(trainset)//splits]*splits, generator=torch.Generator().manual_seed(42))
     # model = model.cpu()
@@ -75,7 +75,7 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
       running_average_model = mult_model(running_average_model, 1. / splits)
       model = running_average_model
       if max_dist is not None:
-        model = add_Gaussian_noise_model(model, std_scalar=0.01*max_dist/splits)
+        model = add_Gaussian_noise_model(model, std_scalar=noise_multiplier*max_dist/splits)
 
       print(f"Train loss: {total_loss(model, loss_fn, trainset)}, accuracy: {accuracy(model, trainset)}")
       if valset is not None:
