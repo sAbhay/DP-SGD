@@ -32,7 +32,7 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps, model_ref=
       with torch.no_grad():
         if model_ref is not None and max_dist is not None:
           print("Original model dist = {}, step {}".format(model_dist(model, model_ref), step), max_dist)
-          model = interpolate_model(model, model_ref, max_dist)
+          model = project_model_dist_constraint(model, model_ref, max_dist)
           print("Model dist = {}, step {}".format(model_dist(model, model_ref), step), max_dist)
 
       # print statistics
@@ -58,7 +58,8 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
       model_copy = copy.deepcopy(model).cuda()
       optimizer = optimizer_fn(model_copy.parameters())
 
-      sub_model = sub_train_loop(trainloader, model_copy, loss_fn, optimizer, max_steps, model_ref=model, max_dist=120.0)
+      sub_model = sub_train_loop(trainloader, model_copy, loss_fn, optimizer, max_steps)
+      sub_model = interpolate_model(sub_model, model, 120)
       running_model_dist += model_dist(model, sub_model)
 
       if running_average_model is None:
