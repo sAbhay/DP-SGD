@@ -36,6 +36,8 @@ def project_model_dist_constraint(model, model_ref, max_dist, dist=None):
 
 def interpolate_model(model, model_ref, max_dist):
   dist = model_dist(model, model_ref)
+  if dist < max_dist:
+    return model
   sd = model.state_dict()
   sd_ref = model.state_dict()
 
