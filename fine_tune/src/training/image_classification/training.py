@@ -60,11 +60,11 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
       optimizer = optimizer_fn(model_copy.parameters())
 
       sub_model = sub_train_loop(trainloader, model_copy, loss_fn, optimizer, max_steps)
-      # print("Sub model dist = {}".format(model_dist(sub_model, model)))
+      print("Sub model dist = {}".format(model_dist(sub_model, model)))
       if max_dist is not None:
         with torch.no_grad():
           sub_model = interpolate_model(sub_model, model, max_dist)
-      # print("Interpolated sub model dist = {}".format(model_dist(sub_model, model)))
+      print("Interpolated sub model dist = {}".format(model_dist(sub_model, model)))
       running_model_dist += model_dist(model, sub_model)
 
       if running_average_model is None:
@@ -75,7 +75,7 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
     model = running_average_model
     if max_dist is not None:
       with torch.no_grad():
-        model = add_Gaussian_noise_model(model, std_scalar=math.sqrt(max_dist / splits))
+        model = add_Gaussian_noise_model(model, std_scalar=max_dist/splits)
 
     print(f"Train loss: {total_loss(model, loss_fn, trainset)}, accuracy: {accuracy(model, trainset)}")
     if valset is not None:
