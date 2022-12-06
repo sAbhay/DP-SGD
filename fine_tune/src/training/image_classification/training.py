@@ -60,7 +60,8 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
 
       sub_model = sub_train_loop(trainloader, model_copy, loss_fn, optimizer, max_steps)
       print("Sub model dist = {}".format(model_dist(sub_model, model)))
-      sub_model = interpolate_model(sub_model, model, 120)
+      with torch.no_grad():
+        sub_model = interpolate_model(sub_model, model, 120)
       print("Interpolated sub model dist = {}".format(model_dist(sub_model, model)))
       running_model_dist += model_dist(model, sub_model)
 

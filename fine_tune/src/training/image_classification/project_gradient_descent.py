@@ -11,9 +11,9 @@ def model_dist(modelA, modelB):
 
   dist = 0
   for key in sdA:
-    dist += tensor_euclidean_dist(sdB[key], sdA[key])
+    dist += torch.square(tensor_euclidean_dist(sdB[key], sdA[key]))
 
-  return dist
+  return torch.sqrt(dist)
 
 
 def project_model_dist_constraint(model, model_ref, max_dist, dist=None):
