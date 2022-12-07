@@ -16,6 +16,7 @@ class bind(partial):
 
 
 # from https://discuss.pytorch.org/t/average-each-weight-of-two-models/77008/2
+@torch.jit.script
 def add_models(modelA, modelB):
   sdA = modelA.state_dict()
   sdB = modelB.state_dict()
@@ -28,6 +29,7 @@ def add_models(modelA, modelB):
   return modelA
 
 
+@torch.jit.script
 def mult_model(model, scalar):
   sd = model.state_dict()
 

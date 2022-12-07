@@ -2,10 +2,12 @@ import torch
 import math
 
 
+@torch.jit.script
 def tensor_euclidean_dist(m1, m2):
   return torch.sqrt(torch.sum(torch.square(m1 - m2)))
 
 
+@torch.jit.script
 def model_dist(modelA, modelB):
   sdA = modelA.state_dict()
   sdB = modelB.state_dict()
@@ -17,6 +19,7 @@ def model_dist(modelA, modelB):
   return torch.sqrt(dist)
 
 
+@torch.jit.script
 def project_model_dist_constraint(model, model_ref, max_dist, dist=None):
   if dist is None:
     dist = model_dist(model, model_ref)
@@ -35,6 +38,7 @@ def project_model_dist_constraint(model, model_ref, max_dist, dist=None):
   return model
 
 
+@torch.jit.script
 def interpolate_model(model, model_ref, max_dist):
   dist = model_dist(model, model_ref)
   if dist < max_dist:
