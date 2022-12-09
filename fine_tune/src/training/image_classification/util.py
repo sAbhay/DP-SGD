@@ -2,6 +2,30 @@ import torch
 from functools import partial
 
 
+def tensor_euclidean_norm(m1):
+  return torch.sqrt(torch.sum(torch.square(m1)))
+
+
+def model_norm(modelA):
+  sdA = modelA.state_dict()
+
+  norm = 0.0
+  for key in sdA:
+    norm += torch.square(tensor_euclidean_norm(sdA[key]))
+
+  return torch.sqrt(norm)
+
+
+def average_param_mag(model):
+  sd = model.state_dict()
+  total = 0.0
+  param_count = 0
+  for key in sd:
+    total += torch.sum(torch.abs(sd[key]))
+    param_count += sd[key].numel()
+  return total / param_count
+
+
 # from https://stackoverflow.com/a/66274908/10163133
 class bind(partial):
   """
@@ -41,7 +65,10 @@ def mult_model(model, scalar):
 
 def add_Gaussian_noise_model(model, std_scalar):
   sd = model.state_dict()
+  noise_norm = 0.0
   for key in sd:
-    sd[key] += (torch.randn(sd[key].size()) * std_scalar).long().cuda()
+    noise = (torch.randn(sd[key].size()) * std_scalar).long()
+    noise_norm += tensor_euclidean_norm(noise)
+    sd[key] += noise.cuda()
   model.load_state_dict(sd)
-  return model
+  return model, noise_norm

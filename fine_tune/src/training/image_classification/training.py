@@ -2,7 +2,7 @@ import torch
 import copy
 import math
 
-from .util import add_models, mult_model, add_Gaussian_noise_model
+from .util import add_models, mult_model, add_Gaussian_noise_model, model_norm, average_param_mag
 from .project_gradient_descent import project_model_dist_constraint, model_dist, interpolate_model
 from .evaluation import total_loss, accuracy
 
@@ -75,11 +75,11 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
       running_average_model = mult_model(running_average_model, 1. / splits)
       model = running_average_model
       if max_dist is not None:
-        model = add_Gaussian_noise_model(model, std_scalar=noise_multiplier*max_dist/splits)
-
+        model, noise_norm = add_Gaussian_noise_model(model, std_scalar=noise_multiplier*max_dist/splits)
       print(f"Train loss: {total_loss(model, loss_fn, trainset)}, accuracy: {accuracy(model, trainset)}")
       if valset is not None:
         print(f"Val loss: {total_loss(model, loss_fn, valset)}, accuracy: {accuracy(model, valset)}")
       print(f"Average submodel Euclidean distance: {running_model_dist / len(partitions)}")
+      print(f"Model params norm: {model_norm(model)}, noise norm: {noise_norm}, average param mag: {average_param_mag(model)}")
       print(f"Epoch {epoch} done")
   return model

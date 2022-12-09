@@ -1,5 +1,4 @@
 import torch
-import math
 
 
 # TODO: JIT all functions below
