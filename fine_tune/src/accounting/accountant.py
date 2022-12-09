@@ -18,7 +18,6 @@
 from typing import Optional
 
 from src.accounting import calibrate
-from src.training import batching as batching_py
 import numpy as np
 
 
@@ -32,7 +31,7 @@ class Accountant:
       dp_epsilon: float,
       dp_delta: float,
       num_samples: int,
-      batching: batching_py.VirtualBatching,
+      batching: dict,
   ):
     """Initializes the accountant for Differential Privacy.
 
@@ -72,10 +71,11 @@ class Accountant:
 
     self._batch_sizes = [(0, self._batching.batch_size_init)]
     if self._batching.scale_schedule is not None:
-      self._batch_sizes.extend(
-          [(threshold, self._batching.batch_size(threshold+1))
-           for threshold in self._batching.scale_schedule]
-      )
+      raise NotImplementedError('Batching schedule not supported yet.')
+      # self._batch_sizes.extend(
+      #     [(threshold, self._batching.batch_size(threshold+1))
+      #      for threshold in self._batching.scale_schedule]
+      # )
 
   def finite_dp_guarantee(self) -> bool:
     """Returns whether the DP guarantee (eps, delta) can be finite."""
