@@ -5,7 +5,7 @@ from .util import add_models, mult_model, add_Gaussian_noise_model, model_norm, 
 from .project_gradient_descent import project_model_dist_constraint, model_dist, interpolate_model
 from .evaluation import total_loss, accuracy
 
-from src.accounting.accountant import Accountant
+# from src.accounting.accountant import Accountant
 
 
 MODELS_PER_GPU = 4
