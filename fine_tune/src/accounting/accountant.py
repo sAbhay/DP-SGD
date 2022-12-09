@@ -31,7 +31,7 @@ class Accountant:
       dp_epsilon: float,
       dp_delta: float,
       num_samples: int,
-      batching: dict,
+      batch_size: int,
   ):
     """Initializes the accountant for Differential Privacy.
 
@@ -63,15 +63,15 @@ class Accountant:
     else:
       self._std_relative = std_relative
 
-    self._batching = batching
+    self._batch_size = batch_size
     self._num_samples = num_samples
 
     self._dp_epsilon = dp_epsilon
     self._dp_delta = dp_delta
 
-    self._batch_sizes = [(0, self._batching.batch_size_init)]
-    if self._batching.scale_schedule is not None:
-      raise NotImplementedError('Batching schedule not supported yet.')
+    self._batch_sizes = [(0, self._batch_size)]
+    # if self._batching.scale_schedule is not None:
+    #   raise NotImplementedError('Batching schedule not supported yet.')
       # self._batch_sizes.extend(
       #     [(threshold, self._batching.batch_size(threshold+1))
       #      for threshold in self._batching.scale_schedule]
