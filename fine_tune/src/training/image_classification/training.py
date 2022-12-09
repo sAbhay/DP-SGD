@@ -72,6 +72,8 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
   for epoch in range(1, epochs+1):
     partitions = torch.utils.data.random_split(trainset, [len(trainset)//splits]*splits, generator=torch.Generator().manual_seed(42))
     # model = model.cpu()
+    if batch_size == 'full_batch':
+      batch_size = len(partitions[0])
     running_average_model = None
     running_model_dist = 0
     for partition in partitions:
