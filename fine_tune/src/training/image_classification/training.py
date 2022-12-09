@@ -67,7 +67,7 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps, model_ref=
 
 def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, max_steps, valset=None, max_dist=None, noise_multiplier=1):
   writer = SummaryWriter()
-  accountant = Accountant(clipping_norm=max_dist, std_relative=noise_multiplier, epsilon=1, delta=1e-5,
+  accountant = Accountant(clipping_norm=max_dist, std_relative=noise_multiplier, dp_epsilon=1, dp_delta=1e-5,
                           num_samples=splits, batching={'batch_size_init': splits, 'scale_schedule': None})
   for epoch in range(epochs):
     partitions = torch.utils.data.random_split(trainset, [len(trainset)//splits]*splits, generator=torch.Generator().manual_seed(42))
