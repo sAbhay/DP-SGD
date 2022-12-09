@@ -15,9 +15,9 @@
 
 """Privacy accounting."""
 
-from jax_privacy.src.accounting import accountant
-from jax_privacy.src.accounting import calibrate
-from jax_privacy.src.accounting import std_utils
+import accountant
+import calibrate
+import std_utils
 
 
 Accountant = accountant.Accountant
