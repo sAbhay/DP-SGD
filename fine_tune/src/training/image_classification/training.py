@@ -82,6 +82,7 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
       if valset is not None:
         print(f"Val loss: {total_loss(model, loss_fn, valset)}, accuracy: {accuracy(model, valset)}")
       print(f"Average submodel Euclidean distance: {running_model_dist / len(partitions)}")
-      print(f"Model params norm: {model_norm(model)}, noise norm: {noise_norm}, average param mag: {average_param_mag(model)}")
+      print(f"Model params norm: {model_norm(model)}, noise norm: {noise_norm}")
+      print(f"Average param norm: {average_param_mag(model)}, param noise std: {noise_multiplier*max_dist/splits}")
       print(f"Epoch {epoch} done")
   return model

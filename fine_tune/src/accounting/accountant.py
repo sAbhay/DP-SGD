@@ -17,8 +17,8 @@
 
 from typing import Optional
 
-from jax_privacy.src.accounting import calibrate
-from jax_privacy.src.training import batching as batching_py
+from src.accounting import calibrate
+from src.training import batching as batching_py
 import numpy as np
 
 
