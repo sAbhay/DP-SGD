@@ -69,7 +69,7 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
   writer = SummaryWriter()
   accountant = Accountant(clipping_norm=max_dist, std_relative=noise_multiplier, dp_epsilon=1, dp_delta=1e-5,
                           num_samples=splits, batch_size=splits)
-  for epoch in range(epochs):
+  for epoch in range(1, epochs+1):
     partitions = torch.utils.data.random_split(trainset, [len(trainset)//splits]*splits, generator=torch.Generator().manual_seed(42))
     # model = model.cpu()
     running_average_model = None
