@@ -1,5 +1,6 @@
 import torch
 import copy
+from torch.utils.tensorboard import SummaryWriter
 
 from .util import add_models, mult_model, add_Gaussian_noise_model, model_norm, average_param_mag
 from .project_gradient_descent import project_model_dist_constraint, model_dist, interpolate_model
@@ -9,6 +10,20 @@ from .evaluation import total_loss, accuracy
 
 
 MODELS_PER_GPU = 4
+
+
+def write_scalars(writer, n_iter, train_loss, val_loss, train_acc, val_acc, avg_submodel_dist, model_norm, noise_norm, avg_param_norm, param_noise_std):
+  writer.add_scalar('Loss/train', train_loss, n_iter)
+  writer.add_scalar('Loss/test', val_loss, n_iter)
+  writer.add_scalar('Accuracy/train', train_acc, n_iter)
+  writer.add_scalar('Accuracy/test', val_acc, n_iter)
+  writer.add_scalar('Avg submodel dist', avg_submodel_dist, n_iter)
+  writer.add_scalar('Total_norm/model', model_norm, n_iter)
+  writer.add_scalar('Total_norm/noise', noise_norm, n_iter)
+  writer.add_scalar('Avg_norm/param', avg_param_norm, n_iter)
+  writer.add_scalar('Avg_norm/noise_std', param_noise_std, n_iter)
+
+
 
 def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps, model_ref=None, max_dist=None):
   step = 1
@@ -50,6 +65,7 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps, model_ref=
 
 
 def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, max_steps, valset=None, max_dist=None, noise_multiplier=1):
+  writer = SummaryWriter()
   # accountant = Accountant(clipping_norm=max_dist, std_relative=noise_multiplier, epsilon=1, delta=1e-5, num_samples=splits, )
   for epoch in range(epochs):
     partitions = torch.utils.data.random_split(trainset, [len(trainset)//splits]*splits, generator=torch.Generator().manual_seed(42))
@@ -78,11 +94,21 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
       model = running_average_model
       if max_dist is not None:
         model, noise_norm = add_Gaussian_noise_model(model, std_scalar=noise_multiplier*max_dist/splits)
-      print(f"Train loss: {total_loss(model, loss_fn, trainset)}, accuracy: {accuracy(model, trainset)}")
-      if valset is not None:
-        print(f"Val loss: {total_loss(model, loss_fn, valset)}, accuracy: {accuracy(model, valset)}")
-      print(f"Average submodel Euclidean distance: {running_model_dist / len(partitions)}")
-      print(f"Model params norm: {model_norm(model)}, noise norm: {noise_norm}")
-      print(f"Average param norm: {average_param_mag(model)}, param noise std: {noise_multiplier*max_dist/splits}")
+      # print(f"Train loss: {total_loss(model, loss_fn, trainset)}, accuracy: {accuracy(model, trainset)}")
+      # if valset is not None:
+      #   print(f"Val loss: {total_loss(model, loss_fn, valset)}, accuracy: {accuracy(model, valset)}")
+      # print(f"Average submodel Euclidean distance: {running_model_dist / len(partitions)}")
+      # print(f"Model params norm: {model_norm(model)}, noise norm: {noise_norm}")
+      # print(f"Average param norm: {average_param_mag(model)}, param noise std: {noise_multiplier*max_dist/splits}")
+      write_scalars(writer, n_iter=epoch,
+                    train_loss=total_loss(model, loss_fn, trainset),
+                    val_loss=total_loss(model, loss_fn, valset),
+                    train_acc=accuracy(model, trainset),
+                    val_acc=accuracy(model, valset),
+                    avg_submodel_dist=running_model_dist / splits,
+                    model_norm=model_norm(model),
+                    noise_norm=noise_norm,
+                    avg_param_norm=average_param_mag(model),
+                    param_noise_std=noise_multiplier*max_dist/splits)
       print(f"Epoch {epoch} done")
   return model
