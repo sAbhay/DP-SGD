@@ -14,14 +14,13 @@
 # limitations under the License.
 
 """Util functions to adjust the standard deviation."""
-import chex
-import numpy as jnp
+import numpy as np
 
 
 def divide_std_over_sum(
-    target_std: chex.Numeric,
-    n: chex.Numeric,
-) -> chex.Numeric:
+    target_std,
+    n,
+):
   """Divide standard deviation over a sum of iid terms.
 
   Consider K random variables `X_1,  ..., X_K` iid with standard deviation
@@ -35,13 +34,13 @@ def divide_std_over_sum(
   Returns:
     standard deviation per step
   """
-  return target_std / jnp.sqrt(n)
+  return target_std / np.sqrt(n)
 
 
 def divide_std_over_avg(
-    target_std: chex.Numeric,
-    n: chex.Numeric,
-) -> chex.Numeric:
+    target_std,
+    n,
+):
   """Divide standard deviation over an average of iid terms.
 
   Consider K random variables `X_1,  ..., X_K` iid with standard deviation
@@ -55,4 +54,4 @@ def divide_std_over_avg(
   Returns:
     standard deviation per step
   """
-  return target_std * jnp.sqrt(n)
+  return target_std * np.sqrt(n)
