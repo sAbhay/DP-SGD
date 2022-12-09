@@ -67,8 +67,9 @@ def add_Gaussian_noise_model(model, std_scalar):
   sd = model.state_dict()
   noise_norm = 0.0
   for key in sd:
-    noise = (torch.randn(sd[key].size()) * std_scalar).long()
+    noise = (torch.randn(sd[key].size()) * std_scalar)
+    print(noise)
     noise_norm += tensor_euclidean_norm(noise)
-    sd[key] += noise.cuda()
+    sd[key] += noise.long().cuda()
   model.load_state_dict(sd)
   return model, noise_norm

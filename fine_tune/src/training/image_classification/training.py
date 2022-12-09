@@ -1,10 +1,11 @@
 import torch
 import copy
-import math
 
 from .util import add_models, mult_model, add_Gaussian_noise_model, model_norm, average_param_mag
 from .project_gradient_descent import project_model_dist_constraint, model_dist, interpolate_model
 from .evaluation import total_loss, accuracy
+
+from src.accounting.accountant import Accountant
 
 
 MODELS_PER_GPU = 4
@@ -49,6 +50,7 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps, model_ref=
 
 
 def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, max_steps, valset=None, max_dist=None, noise_multiplier=1):
+  # accountant = Accountant(clipping_norm=max_dist, std_relative=noise_multiplier, epsilon=1, delta=1e-5, num_samples=splits, )
   for epoch in range(epochs):
     partitions = torch.utils.data.random_split(trainset, [len(trainset)//splits]*splits, generator=torch.Generator().manual_seed(42))
     # model = model.cpu()
