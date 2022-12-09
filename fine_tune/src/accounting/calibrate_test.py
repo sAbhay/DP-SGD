@@ -16,7 +16,7 @@
 """Tests for calibration of DP hyper-parameters using the RDP accountant."""
 
 from absl.testing import absltest
-from jax_privacy.src.accounting import calibrate
+from src.accounting import calibrate
 import numpy as np
 
 

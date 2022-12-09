@@ -6,13 +6,13 @@ from .util import add_models, mult_model, add_Gaussian_noise_model, model_norm, 
 from .project_gradient_descent import project_model_dist_constraint, model_dist, interpolate_model
 from .evaluation import total_loss, accuracy
 
-# from src.accounting.accountant import Accountant
+from src.accounting.accountant import Accountant
 
 
 MODELS_PER_GPU = 4
 
 
-def write_scalars(writer, n_iter, train_loss, val_loss, train_acc, val_acc, avg_submodel_dist, model_norm, noise_norm, avg_param_norm, param_noise_std):
+def write_scalars(writer, n_iter, train_loss, val_loss, train_acc, val_acc, avg_submodel_dist, model_norm, noise_norm, avg_param_norm, param_noise_std, dp_epsilon):
   writer.add_scalar('Loss/train', train_loss, n_iter)
   writer.add_scalar('Loss/test', val_loss, n_iter)
   writer.add_scalar('Accuracy/train', train_acc, n_iter)
@@ -22,6 +22,7 @@ def write_scalars(writer, n_iter, train_loss, val_loss, train_acc, val_acc, avg_
   writer.add_scalar('Total_norm/noise', noise_norm, n_iter)
   writer.add_scalar('Avg_norm/param', avg_param_norm, n_iter)
   writer.add_scalar('Avg_norm/noise_std', param_noise_std, n_iter)
+  writer.add_scalar('DP/epsilon', dp_epsilon, n_iter)
 
 
 
@@ -66,7 +67,8 @@ def sub_train_loop(trainloader, model, loss_fn, optimizer, max_steps, model_ref=
 
 def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, max_steps, valset=None, max_dist=None, noise_multiplier=1):
   writer = SummaryWriter()
-  # accountant = Accountant(clipping_norm=max_dist, std_relative=noise_multiplier, epsilon=1, delta=1e-5, num_samples=splits, )
+  accountant = Accountant(clipping_norm=max_dist, std_relative=noise_multiplier, epsilon=1, delta=1e-5,
+                          num_samples=splits, batching={'batch_size_init': splits, 'scale_schedule': None})
   for epoch in range(epochs):
     partitions = torch.utils.data.random_split(trainset, [len(trainset)//splits]*splits, generator=torch.Generator().manual_seed(42))
     # model = model.cpu()
@@ -109,6 +111,7 @@ def train(trainset, model, loss_fn, optimizer_fn, epochs, splits, batch_size, ma
                     model_norm=model_norm(model),
                     noise_norm=noise_norm,
                     avg_param_norm=average_param_mag(model),
-                    param_noise_std=noise_multiplier*max_dist/splits)
+                    param_noise_std=noise_multiplier*max_dist/splits,
+                    dp_epsilon=accountant.compute_current_epsilon(epoch))
       print(f"Epoch {epoch} done")
   return model

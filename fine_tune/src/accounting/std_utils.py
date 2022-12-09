@@ -15,7 +15,7 @@
 
 """Util functions to adjust the standard deviation."""
 import chex
-import jax.numpy as jnp
+import numpy as jnp
 
 
 def divide_std_over_sum(
